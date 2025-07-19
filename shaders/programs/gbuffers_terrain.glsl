@@ -1,0 +1,141 @@
+#include "/lib/common.glsl"
+
+#define GBUFFERS_TERRAIN
+
+#ifdef FSH
+
+// VSH Data //
+in vec4 color;
+in vec3 normal;
+in vec2 texCoord, lmCoord;
+flat in int mat;
+
+// Uniforms //
+uniform int isEyeInWater;
+uniform int frameCounter;
+
+uniform float viewWidth, viewHeight;
+uniform float nightVision, blindFactor;
+
+#ifdef OVERWORLD
+uniform float wetness;
+uniform float shadowFade;
+uniform float timeAngle, timeBrightness;
+#endif
+
+uniform vec3 cameraPosition;
+
+uniform sampler2D texture, noisetex;
+
+uniform mat4 gbufferProjectionInverse;
+uniform mat4 gbufferModelView;
+uniform mat4 gbufferModelViewInverse;
+uniform mat4 shadowProjection;
+uniform mat4 shadowModelView;
+
+// Global Variables //
+#if defined OVERWORLD
+const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
+float fractTimeAngle = fract(timeAngle - 0.25);
+float ang = (fractTimeAngle + (cos(fractTimeAngle * 3.14159265358979) * -0.5 + 0.5 - fractTimeAngle) / 3.0) * 6.28318530717959;
+vec3 sunVec = normalize((gbufferModelView * vec4(vec3(-sin(ang), cos(ang) * sunRotationData) * 2000.0, 1.0)).xyz);
+#elif defined END
+const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
+vec3 sunVec = normalize((gbufferModelView * vec4(1.0, sunRotationData * 2000.0, 1.0)).xyz);
+#else
+vec3 sunVec = vec3(0.0);
+#endif
+
+vec3 upVec = normalize(gbufferModelView[1].xyz);
+vec3 eastVec = normalize(gbufferModelView[0].xyz);
+
+#ifdef OVERWORLD
+float sunVisibility = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
+float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
+vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
+#endif
+
+// Includes //
+#include "/lib/util/bayerDithering.glsl"
+#include "/lib/util/transformMacros.glsl"
+#include "/lib/util/ToNDC.glsl"
+#include "/lib/util/ToWorld.glsl"
+#include "/lib/util/ToShadow.glsl"
+#include "/lib/color/lightColor.glsl"
+#include "/lib/lighting/shadows.glsl"
+#include "/lib/lighting/gbuffersLighting.glsl"
+
+#ifdef GENERATED_EMISSION
+#include "/lib/pbr/generatedPBR.glsl"
+#endif
+
+// Main //
+void main() {
+    vec4 albedo = texture2D(texture, texCoord) * color;
+	if (mat >= 30000) discard;
+    vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
+    vec3 newNormal = normal;
+    vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
+    vec3 viewPos = ToNDC(screenPos);
+    vec3 worldPos = ToWorld(viewPos);
+
+	float leaves = float(mat == 10314);
+	float foliage2 = float(mat == 10317);
+	float foliage = float(mat >= 10304 && mat <= 10319 || mat >= 35 && mat <= 40) * (1.0 - leaves) * (1.0 - foliage2);
+	float other = float(mat == 20312);
+	float subsurface = foliage + leaves * 0.5 + other * 0.4 + foliage2 * 0.3;
+    float emission = 0.0, smoothness = 0.0, metalness = 0.0;
+    
+	if (foliage > 0.5) {
+		newNormal = normalize(upVec);
+	}
+
+	float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
+	float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
+	float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
+
+	#ifdef GENERATED_EMISSION
+	generateIPBR(albedo, worldPos, viewPos, lightmap, emission, smoothness, metalness, subsurface);
+	#endif
+
+    vec3 shadow = vec3(0.0);
+    gbuffersLighting(albedo, screenPos, viewPos, worldPos, shadow, lightmap, NoU, NoL, NoE, subsurface, emission);
+
+    /* DRAWBUFFERS:0 */
+    gl_FragData[0] = albedo;
+}
+
+#endif
+
+
+//**//**//**//**//**//**//**//**//**//**//**//**//**//**//
+
+
+#ifdef VSH
+
+// VSH Data //
+out vec4 color;
+out vec3 normal;
+out vec2 texCoord, lmCoord;
+flat out int mat;
+
+// Attributes //
+attribute vec4 mc_Entity;
+
+// Main //
+void main() {
+	texCoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+    
+	lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
+	
+    color = gl_Color;
+
+    normal = normalize(gl_NormalMatrix * gl_Normal);
+
+    mat = int(mc_Entity.x + 0.5);
+
+	gl_Position = ftransform();
+}
+
+#endif
