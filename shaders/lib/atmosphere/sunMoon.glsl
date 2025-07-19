@@ -9,8 +9,9 @@ void drawSunMoon(inout vec3 color, in vec3 worldPos, in vec3 nViewPos, in float 
               moon = float(moon > 0.0) * 4.0 * moonVisibility;
         float glare = pow32(VoS * sunVisibility + VoM * moonVisibility) * 0.25;
 
+        // Moon phases and texture
         if (moon > 0.0) {
-            if (moonPhase > 0) { // Moon phases, uses the same method as Complementary v4
+            if (moonPhase > 0) {
                 float phaseFactor = int(moonPhase != 4) * (1.0 - int(4 < moonPhase) * 2.0) * 0.00175;
 
                 const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
