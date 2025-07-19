@@ -10,7 +10,7 @@ vec3 getAtmosphere(vec3 viewPos) {
      float skyDensity = exp((-0.75 + timeBrightness * 0.15) * abs(VoURaw));
      float baseScatteringHeight = pow6(1.0 - VoUClamped + 0.04);
 
-     vec3 scattering = mix(vec3(0.7, 2.1, 0.2), vec3(1.8, 0.8, 0.0), pow2(1.0 - VoUClamped));
+     vec3 scattering = mix(mix(vec3(1.2, 2.6, 0.1), lightColSqrt, sunVisibility * VoSClamped), vec3(1.9, 0.8, 0.0), pow2(1.0 - VoUClamped));
           scattering *= pow4(1.0 - abs(VoURaw));
           scattering *= 0.4 * timeBrightnessSqrt + 0.6 * exp(VoSRaw * 0.5);
 
@@ -24,12 +24,6 @@ vec3 getAtmosphere(vec3 viewPos) {
 
      //Fade atmosphere to dark gray
      atmosphere = mix(caveMinLightCol, atmosphere, caveFactor);
-
-     #if MC_VERSION >= 11900
-     atmosphere *= 1.0 - darknessFactor;
-     #endif
-
-     atmosphere *= 1.0 - blindFactor;
 
      return atmosphere;
 }

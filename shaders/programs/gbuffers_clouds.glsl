@@ -18,6 +18,10 @@ uniform float wetness;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
+uniform float blindFactor, nightVision;
+#if MC_VERSION >= 11900
+uniform float darknessFactor;
+#endif
 
 uniform vec3 cameraPosition, skyColor;
 
@@ -88,6 +92,11 @@ void main() {
 	float vanillaFog = 1.0 - smoothstep(0.5, vanillaFogEnd, worldDistance);
 
 	albedo.a *= color.a * vanillaFog;
+	#endif
+
+	albedo *= 1.0 - blindFactor;
+	#if MC_VERSION >= 11900
+	albedo *= 1.0 - darknessFactor;
 	#endif
 	
     /* DRAWBUFFERS:0 */

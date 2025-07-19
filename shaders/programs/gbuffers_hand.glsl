@@ -14,7 +14,10 @@ uniform int isEyeInWater;
 uniform int frameCounter;
 
 uniform float viewWidth, viewHeight;
-uniform float nightVision, blindFactor;
+uniform float blindFactor, nightVision;
+#if MC_VERSION >= 11900
+uniform float darknessFactor;
+#endif
 
 #ifdef OVERWORLD
 uniform float wetness;

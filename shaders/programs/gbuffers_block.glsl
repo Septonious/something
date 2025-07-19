@@ -1,6 +1,6 @@
 #include "/lib/common.glsl"
 
-#define GBUFFERS_ENTITIES
+#define GBUFFERS_BLOCK
 
 #ifdef FSH
 
@@ -120,5 +120,3 @@ void main() {
 
 	gl_Position = ftransform();
 }
-
-#endif

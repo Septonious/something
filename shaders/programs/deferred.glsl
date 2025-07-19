@@ -8,10 +8,14 @@ in vec2 texCoord;
 // Uniforms //
 uniform int isEyeInWater;
 
-uniform float blindFactor, darknessFactor, nightVision;
-
 #ifdef OVERWORLD
+uniform int moonPhase;
 uniform float timeAngle, timeBrightness, wetness;
+#endif
+
+uniform float blindFactor, nightVision;
+#if MC_VERSION >= 11900
+uniform float darknessFactor;
 #endif
 
 uniform float frameTimeCounter;
@@ -23,6 +27,7 @@ uniform vec3 cameraPosition;
 
 uniform sampler2D colortex0;
 uniform sampler2D depthtex0;
+uniform sampler2D noisetex;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
@@ -63,6 +68,7 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #ifdef OVERWORLD
 #include "/lib/color/lightColor.glsl"
 #include "/lib/atmosphere/sky.glsl"
+#include "/lib/atmosphere/sunMoon.glsl"
 
 #ifdef STARS
 #include "/lib/atmosphere/stars.glsl"
@@ -96,10 +102,23 @@ void main() {
     if (z0 == 1.0) {
         color = atmosphereColor * (1.0 + Bayer8(gl_FragCoord.xy) / 32.0 - 0.25);
 
-		float nebulaFactor = 0.0;
+		float occlusion = 0.0;
 
-		#ifdef STARS
-		drawStars(color, worldPos, sunVec, VoU, VoS, caveFactor, nebulaFactor, 0.6);
+		#ifdef OVERWORLD
+		drawSunMoon(color, worldPos, nViewPos, VoU, VoS, VoM, caveFactor, occlusion);
+		#endif
+
+		if (VoU > 0.0) {
+			float nebulaFactor = 0.0;
+
+			#ifdef STARS
+			drawStars(color, worldPos, sunVec, VoU, VoS, caveFactor, nebulaFactor, occlusion, 0.6);
+			#endif
+		}
+
+		color *= 1.0 - blindFactor;
+		#if MC_VERSION >= 11900
+		color *= 1.0 - darknessFactor;
 		#endif
     }
 

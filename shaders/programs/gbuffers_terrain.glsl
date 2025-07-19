@@ -15,7 +15,10 @@ uniform int isEyeInWater;
 uniform int frameCounter;
 
 uniform float viewWidth, viewHeight;
-uniform float nightVision, blindFactor;
+uniform float blindFactor, nightVision;
+#if MC_VERSION >= 11900
+uniform float darknessFactor;
+#endif
 
 #ifdef OVERWORLD
 uniform float wetness;
@@ -72,7 +75,7 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 // Main //
 void main() {
     vec4 albedo = texture2D(texture, texCoord) * color;
-	if (mat >= 30000) discard;
+
     vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
     vec3 newNormal = normal;
     vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);

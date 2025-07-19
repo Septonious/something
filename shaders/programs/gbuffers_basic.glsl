@@ -1,13 +1,12 @@
 #include "/lib/common.glsl"
 
-#define GBUFFERS_ENTITIES
-
+#define GBUFFERS_BASIC
 #ifdef FSH
 
 // VSH Data //
 in vec4 color;
 in vec3 normal;
-in vec2 texCoord, lmCoord;
+in vec2 lmCoord;
 
 // Uniforms //
 uniform int isEyeInWater;
@@ -27,7 +26,7 @@ uniform float timeAngle, timeBrightness;
 
 uniform vec3 cameraPosition;
 
-uniform sampler2D texture, noisetex;
+uniform sampler2D noisetex;
 
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelView;
@@ -69,7 +68,7 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 
 // Main //
 void main() {
-    vec4 albedo = texture2D(texture, texCoord) * color;
+    vec4 albedo = color;
 
     vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
     vec3 newNormal = normal;
@@ -102,15 +101,13 @@ void main() {
 // VSH Data //
 out vec4 color;
 out vec3 normal;
-out vec2 texCoord, lmCoord;
+out vec2 lmCoord;
 
 // Attributes //
 attribute vec4 mc_Entity;
 
 // Main //
 void main() {
-	texCoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
-    
 	lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
 	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
 	
@@ -120,5 +117,3 @@ void main() {
 
 	gl_Position = ftransform();
 }
-
-#endif
