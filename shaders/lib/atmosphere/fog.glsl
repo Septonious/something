@@ -24,7 +24,7 @@ vec3 densefogCol[2] = vec3[2](
 
 void getDenseFog(inout vec3 color, float lViewPos) {
 	float fog = lViewPos * (0.15 + float(isEyeInWater == 3) * 0.5);
-		  fog = 1.0 - exp(-2.0 * pow2(fog));
+		  fog = 1.0 - exp(-2.0 * fog * fog);
 
 	color = mix(color, densefogCol[isEyeInWater - 2], fog);
 }
@@ -40,8 +40,7 @@ void getNormalFog(inout vec3 color, in vec3 viewPos, in vec3 worldPos, in vec3 a
 
 	//Overworld Fog
 	#ifdef OVERWORLD
-    float fogDistanceFactor = (FOG_DISTANCE * 0.75 + caveFactor * 0.25);
-          fogDistanceFactor = max(fogDistanceFactor, 50.0);
+    float fogDistanceFactor = 50.0 + FOG_DISTANCE * (0.75 + caveFactor * 0.25);
 	float fogDistance = max(256.0 / farPlane, 2.0) * (100.0 / fogDistanceFactor);
 	float fogVariableHeight = FOG_HEIGHT - 40.0;
 		  fogVariableHeight += texture2D(noisetex, (worldPos.xz + cameraPosition.xz + frameCounter * 0.04) * 0.00006).b * 40.0;
