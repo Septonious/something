@@ -15,7 +15,7 @@ vec3 getAtmosphere(vec3 viewPos) {
           scattering *= pow4(1.0 - abs(VoURaw));
           scattering *= 0.4 * timeBrightnessSqrt + 0.6 * exp(VoSRaw * 0.5);
 
-     vec3 daySky = mix(normalize(pow(skyColor, vec3(1.5)) + 0.00001), vec3(0.62, 0.69, 1.00), 0.5 - timeBrightness * 0.25);
+     vec3 daySky = mix(normalize(pow(skyColor * fogColor, vec3(1.5)) + 0.00001), vec3(0.62, 0.69, 1.00), 0.5 - timeBrightness * 0.25);
           daySky += scattering * (0.75 - timeBrightness * 0.75) * (1.0 - wetness);
           daySky = mix(daySky, lightColSqrt, baseScatteringHeight * (0.4 - timeBrightness * 0.1));
      vec3 nightSky = lightNight * 0.75;

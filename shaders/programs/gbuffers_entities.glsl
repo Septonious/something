@@ -73,7 +73,7 @@ void main() {
 	vec4 albedo = texture2D(texture, texCoord);
 	if (albedo.a < 0.00001) discard;
 	albedo *= color;
-	albedo.rgb = mix(albedo.rgb, entityColor.rgb * entityColor.rgb * 4.0, entityColor.a);
+	albedo.rgb = mix(albedo.rgb, entityColor.rgb * entityColor.rgb * 2.0, entityColor.a);
 
     vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
     vec3 newNormal = normal;

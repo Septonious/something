@@ -7,11 +7,16 @@ in vec2 texCoord;
 
 // Uniforms //
 uniform int isEyeInWater;
+uniform int frameCounter;
 
 #ifdef OVERWORLD
 uniform int moonPhase;
 uniform float timeAngle, timeBrightness, wetness;
+
+uniform float isLushCaves, isDesert;
 #endif
+
+uniform float far, near;
 
 uniform float blindFactor, nightVision;
 #if MC_VERSION >= 11900
@@ -22,7 +27,7 @@ uniform float frameTimeCounter;
 
 uniform ivec2 eyeBrightnessSmooth;
 
-uniform vec3 skyColor;
+uniform vec3 skyColor, fogColor;
 uniform vec3 cameraPosition;
 
 uniform sampler2D colortex0;
@@ -75,6 +80,8 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #endif
 #endif
 
+#include "/lib/atmosphere/fog.glsl"
+
 // Main //
 void main() {
     vec3 color = texture2D(colortex0, texCoord).rgb;
@@ -100,7 +107,7 @@ void main() {
 	#endif
 
     if (z0 == 1.0) {
-        color = atmosphereColor * (1.0 + Bayer8(gl_FragCoord.xy) / 32.0 - 0.25);
+        color = atmosphereColor * (1.0 + Bayer8(gl_FragCoord.xy) / 64.0);
 
 		float occlusion = 0.0;
 
@@ -120,7 +127,9 @@ void main() {
 		#if MC_VERSION >= 11900
 		color *= 1.0 - darknessFactor;
 		#endif
-    }
+    } else {
+		Fog(color, viewPos, worldPos, atmosphereColor);
+	}
 
     /* DRAWBUFFERS:04 */
     gl_FragData[0].rgb = color;

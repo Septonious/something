@@ -71,6 +71,8 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 void main() {
     vec4 albedo = texture2D(texture, texCoord) * color;
 
+    if (albedo.r < 0.29 && albedo.g < 0.45 && albedo.b > 0.75) discard; //Water splash particles
+
     vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
     vec3 newNormal = normal;
     vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
