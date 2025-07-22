@@ -26,9 +26,15 @@ uniform float timeAngle, timeBrightness;
 #endif
 
 uniform vec3 cameraPosition;
+uniform vec4 lightningBoltPosition;
 uniform vec4 entityColor;
 
 uniform sampler2D texture, noisetex;
+
+#ifdef VX_SUPPORT
+uniform sampler3D floodfillSampler, floodfillSamplerCopy;
+uniform usampler3D voxelSampler;
+#endif
 
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelView;
@@ -53,8 +59,8 @@ vec3 upVec = normalize(gbufferModelView[1].xyz);
 vec3 eastVec = normalize(gbufferModelView[0].xyz);
 
 #ifdef OVERWORLD
-float sunVisibility = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
-float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
+float sunVisibility = clamp((dot( sunVec, upVec) + 0.25) * 2.0, 0.0, 1.0);
+float moonVisibility = clamp((dot(-sunVec, upVec) + 0.25) * 2.0, 0.0, 1.0);
 vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
 #endif
 
@@ -65,6 +71,14 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/util/ToWorld.glsl"
 #include "/lib/util/ToShadow.glsl"
 #include "/lib/color/lightColor.glsl"
+#include "/lib/pbr/ggx.glsl"
+
+#ifdef VX_SUPPORT
+#include "/lib/vx/blocklightColor.glsl"
+#include "/lib/vx/voxelization.glsl"
+#endif
+
+#include "/lib/lighting/lightning.glsl"
 #include "/lib/lighting/shadows.glsl"
 #include "/lib/lighting/gbuffersLighting.glsl"
 
@@ -73,7 +87,7 @@ void main() {
 	vec4 albedo = texture2D(texture, texCoord);
 	if (albedo.a < 0.00001) discard;
 	albedo *= color;
-	albedo.rgb = mix(albedo.rgb, entityColor.rgb * entityColor.rgb * 4.0, entityColor.a);
+	albedo.rgb = mix(albedo.rgb, entityColor.rgb * entityColor.rgb * 2.0, entityColor.a);
 
     vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
     vec3 newNormal = normal;
@@ -89,7 +103,7 @@ void main() {
 	float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
 
     vec3 shadow = vec3(0.0);
-    gbuffersLighting(albedo, screenPos, viewPos, worldPos, shadow, lightmap, NoU, NoL, NoE, subsurface, emission);
+    gbuffersLighting(albedo, screenPos, viewPos, worldPos, shadow, lightmap, NoU, NoL, NoE, subsurface, emission, 0.0, 0.0);
 
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = albedo;

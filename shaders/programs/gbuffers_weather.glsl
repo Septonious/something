@@ -9,11 +9,13 @@
 in vec2 texCoord, lmCoord;
 
 //Uniforms//
+uniform float rainStrength;
+
 uniform sampler2D texture;
 
 //Program//
 void main() {
-	vec4 albedo = texture2D(texture, texCoord);
+	vec4 albedo = texture2D(texture, texCoord) * rainStrength;
 	if (albedo.a < 0.01) discard;
 
 	albedo.a *= 0.3 * length(albedo.rgb * 0.3);

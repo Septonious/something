@@ -27,8 +27,14 @@ uniform float timeAngle, timeBrightness;
 #endif
 
 uniform vec3 cameraPosition;
+uniform vec4 lightningBoltPosition;
 
 uniform sampler2D texture, noisetex;
+
+#ifdef VX_SUPPORT
+uniform sampler3D floodfillSampler, floodfillSamplerCopy;
+uniform usampler3D voxelSampler;
+#endif
 
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelView;
@@ -53,8 +59,8 @@ vec3 upVec = normalize(gbufferModelView[1].xyz);
 vec3 eastVec = normalize(gbufferModelView[0].xyz);
 
 #ifdef OVERWORLD
-float sunVisibility = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
-float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
+float sunVisibility = clamp((dot( sunVec, upVec) + 0.25) * 2.0, 0.0, 1.0);
+float moonVisibility = clamp((dot(-sunVec, upVec) + 0.25) * 2.0, 0.0, 1.0);
 vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
 #endif
 
@@ -65,6 +71,14 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/util/ToWorld.glsl"
 #include "/lib/util/ToShadow.glsl"
 #include "/lib/color/lightColor.glsl"
+#include "/lib/pbr/ggx.glsl"
+
+#ifdef VX_SUPPORT
+#include "/lib/vx/blocklightColor.glsl"
+#include "/lib/vx/voxelization.glsl"
+#endif
+
+#include "/lib/lighting/lightning.glsl"
 #include "/lib/lighting/shadows.glsl"
 #include "/lib/lighting/gbuffersLighting.glsl"
 
@@ -83,11 +97,10 @@ void main() {
     vec3 worldPos = ToWorld(viewPos);
 
 	float leaves = float(mat == 10314);
-	float foliage2 = float(mat == 10317);
-	float foliage = float(mat >= 10304 && mat <= 10319 || mat >= 35 && mat <= 40) * (1.0 - leaves) * (1.0 - foliage2);
-	float other = float(mat == 20312);
-	float subsurface = foliage + leaves * 0.5 + other * 0.4 + foliage2 * 0.3;
-    float emission = 0.0, smoothness = 0.0, metalness = 0.0;
+	float saplings = float(mat == 10317);
+	float foliage = float(mat >= 10304 && mat <= 10319 || mat >= 10035 && mat <= 10040) * (1.0 - leaves) * (1.0 - saplings);
+	float subsurface = leaves + foliage * 0.6 + saplings * 0.4;
+    float emission = 0.0, smoothness = 0.0, metalness = 0.0, parallaxShadow = 0.0;
     
 	if (foliage > 0.5) {
 		newNormal = normalize(upVec);
@@ -102,7 +115,7 @@ void main() {
 	#endif
 
     vec3 shadow = vec3(0.0);
-    gbuffersLighting(albedo, screenPos, viewPos, worldPos, shadow, lightmap, NoU, NoL, NoE, subsurface, emission);
+    gbuffersLighting(albedo, screenPos, viewPos, worldPos, shadow, lightmap, NoU, NoL, NoE, subsurface, emission, smoothness, parallaxShadow);
 
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = albedo;

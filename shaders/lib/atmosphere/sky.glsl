@@ -11,7 +11,7 @@ vec3 getAtmosphere(vec3 viewPos) {
      float baseScatteringHeight = pow6(1.0 - VoUClamped + 0.04);
 
      //Fake light scattering
-     vec3 scattering = mix(mix(vec3(1.2, 2.6, 0.1), lightColSqrt, sunVisibility * VoSClamped), vec3(1.9, 0.8, 0.0), pow2(1.0 - VoUClamped));
+     vec3 scattering = mix(mix(vec3(1.6, 2.6, 0.1), lightColSqrt, sunVisibility * VoSClamped), vec3(1.9, 0.8, 0.0), pow2(1.0 - VoUClamped));
           scattering *= pow4(1.0 - abs(VoURaw));
           scattering *= 0.4 * timeBrightnessSqrt + 0.6 * exp(VoSRaw * 0.5);
 
