@@ -31,6 +31,11 @@ uniform vec4 lightningBoltPosition;
 
 uniform sampler2D texture, noisetex;
 
+#ifdef VX_SUPPORT
+uniform sampler3D floodfillSampler, floodfillSamplerCopy;
+uniform usampler3D voxelSampler;
+#endif
+
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
@@ -67,6 +72,12 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/util/ToShadow.glsl"
 #include "/lib/color/lightColor.glsl"
 #include "/lib/pbr/ggx.glsl"
+
+#ifdef VX_SUPPORT
+#include "/lib/vx/blocklightColor.glsl"
+#include "/lib/vx/voxelization.glsl"
+#endif
+
 #include "/lib/lighting/lightning.glsl"
 #include "/lib/lighting/shadows.glsl"
 #include "/lib/lighting/gbuffersLighting.glsl"

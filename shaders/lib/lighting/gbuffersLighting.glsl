@@ -24,6 +24,38 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
          blockLighting *= 1.0 - pow4(lightmap.y) * 0.75;
     #endif
 
+    //Floodfill Lighting. Works only on Iris
+    #if !defined GBUFFERS_BASIC && !defined GBUFFERS_WATER && !defined GBUFFERS_TEXTURED && !defined DH_TERRAIN && !defined DH_WATER && defined VX_SUPPORT
+    vec3 voxelPos = worldToVoxel(worldPos);
+
+    float floodfillFade = maxOf(abs(worldPos) / (voxelVolumeSize * 0.5));
+          floodfillFade = clamp(floodfillFade, 0.0, 1.0);
+
+    vec3 voxelLighting = vec3(0.0);
+
+    if (isInsideVoxelVolume(voxelPos) && emission == 0.0) {
+        vec3 voxelSamplePos = voxelPos + worldNormal;
+             voxelSamplePos /= voxelVolumeSize;
+             voxelSamplePos = clamp(voxelSamplePos, 0.0, 1.0);
+
+        vec3 lightVolume = vec3(0.0);
+        if ((frameCounter & 1) == 0) {
+            lightVolume = texture3D(floodfillSamplerCopy, voxelSamplePos).rgb;
+        } else {
+            lightVolume = texture3D(floodfillSampler, voxelSamplePos).rgb;
+        }
+        voxelLighting = pow(lightVolume, vec3(1.0 / FLOODFILL_RADIUS));
+
+        #ifdef GBUFFERS_ENTITIES
+        voxelLighting += pow16(lightmap.x) * blockLightCol;
+        #endif
+
+        float mixFactor = 1.0 - floodfillFade * floodfillFade;
+
+        blockLighting = mix(blockLighting, voxelLighting * FLOODFILL_BRIGHTNESS, mixFactor * 0.95);
+    }
+    #endif
+
     //Shadow Calculations
     //Some code made by Emin and gri573
     float shadowLightingFade = maxOf(abs(worldPos) / (vec3(shadowDistance, shadowDistance + 64.0, shadowDistance)));
@@ -107,7 +139,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     vec3 specularHighlight = vec3(0.0);
 
     #if (defined GBUFFERS_TERRAIN || defined GBUFFERS_ENTITIES || defined GBUFFERS_BLOCK) && !defined NETHER
-    if (emission < 0.01) {
+    if (emission < 0.01 && lightmap.y > 0.0) {
         vec3 baseReflectance = vec3(0.1);
 
         float smoothnessF = 0.2 + lAlbedo * 0.2 + NoL * 0.2;
