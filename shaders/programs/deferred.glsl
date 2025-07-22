@@ -18,6 +18,8 @@ uniform float isLushCaves, isDesert;
 #if MC_VERSION >= 12104
 uniform float isPaleGarden;
 #endif
+
+uniform vec3 skyColor;
 #endif
 
 uniform float far, near;
@@ -31,7 +33,6 @@ uniform float frameTimeCounter;
 
 uniform ivec2 eyeBrightnessSmooth;
 
-uniform vec3 skyColor, fogColor;
 uniform vec3 cameraPosition;
 
 uniform sampler2D colortex0;

@@ -13,6 +13,7 @@ in vec2 texCoord, lmCoord;
 uniform int isEyeInWater;
 uniform int frameCounter;
 
+uniform float far, near;
 uniform float viewWidth, viewHeight;
 uniform float blindFactor, nightVision;
 #if MC_VERSION >= 11900
@@ -23,7 +24,17 @@ uniform float darknessFactor;
 uniform float wetness;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
+
+uniform float isLushCaves, isDesert;
+
+#if MC_VERSION >= 12104
+uniform float isPaleGarden;
 #endif
+
+uniform vec3 skyColor;
+#endif
+
+uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
 
@@ -52,6 +63,8 @@ vec3 upVec = normalize(gbufferModelView[1].xyz);
 vec3 eastVec = normalize(gbufferModelView[0].xyz);
 
 #ifdef OVERWORLD
+float eBS = eyeBrightnessSmooth.y / 240.0;
+float caveFactor = mix(clamp((cameraPosition.y - 56.0) / 16.0, float(sign(isEyeInWater)), 1.0), 1.0, eBS);
 float sunVisibility = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
@@ -66,6 +79,12 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/color/lightColor.glsl"
 #include "/lib/lighting/shadows.glsl"
 #include "/lib/lighting/gbuffersLighting.glsl"
+
+#ifdef OVERWORLD
+#include "/lib/atmosphere/sky.glsl"
+#endif
+
+#include "/lib/atmosphere/fog.glsl"
 
 // Main //
 void main() {
@@ -88,6 +107,17 @@ void main() {
 
     vec3 shadow = vec3(0.0);
     gbuffersLighting(albedo, screenPos, viewPos, worldPos, shadow, lightmap, NoU, NoL, NoE, subsurface, emission);
+
+    //Fog
+    #if defined OVERWORLD
+    vec3 atmosphereColor = getAtmosphere(viewPos);
+	#elif defined NETHER
+	vec3 atmosphereColor = netherColSqrt.rgb * 0.25;
+	#elif defined END
+	vec3 atmosphereColor = endLightCol * 0.15;
+	#endif
+
+    Fog(albedo.rgb, viewPos, worldPos, atmosphereColor);
 
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = albedo;
