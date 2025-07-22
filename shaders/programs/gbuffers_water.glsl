@@ -38,6 +38,7 @@ uniform vec3 skyColor;
 uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
+uniform vec4 lightningBoltPosition;
 
 uniform sampler2D texture, noisetex;
 uniform sampler2D gaux1;
@@ -68,8 +69,8 @@ vec3 eastVec = normalize(gbufferModelView[0].xyz);
 #ifdef OVERWORLD
 float eBS = eyeBrightnessSmooth.y / 240.0;
 float caveFactor = mix(clamp((cameraPosition.y - 56.0) / 16.0, float(sign(isEyeInWater)), 1.0), 1.0, eBS);
-float sunVisibility = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
-float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
+float sunVisibility = clamp((dot( sunVec, upVec) + 0.25) * 2.0, 0.0, 1.0);
+float moonVisibility = clamp((dot(-sunVec, upVec) + 0.25) * 2.0, 0.0, 1.0);
 vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
 #endif
 
@@ -81,6 +82,8 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/util/ToWorld.glsl"
 #include "/lib/util/ToShadow.glsl"
 #include "/lib/color/lightColor.glsl"
+#include "/lib/pbr/ggx.glsl"
+#include "/lib/lighting/lightning.glsl"
 #include "/lib/lighting/shadows.glsl"
 #include "/lib/lighting/gbuffersLighting.glsl"
 #include "/lib/pbr/simpleReflection.glsl"
@@ -111,13 +114,16 @@ void main() {
     vec3 worldPos = ToWorld(viewPos);
 
     float emission = pow8(lmCoord.x) + int(mat == 10031);
+	float ice = float(mat == 10000);
+	float water = float(mat == 10001);
+	float tintedGlass = float(mat >= 10201 && mat <= 10216);
 
 	float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
 	float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
 	float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
 
     vec3 shadow = vec3(0.0);
-    gbuffersLighting(albedo, screenPos, viewPos, worldPos, shadow, lightmap, NoU, NoL, NoE, 0.0, emission);
+    gbuffersLighting(albedo, screenPos, viewPos, worldPos, shadow, lightmap, NoU, NoL, NoE, 0.0, emission, 0.6, 0.0);
 
     #if defined OVERWORLD
     vec3 atmosphereColor = getAtmosphere(viewPos);
@@ -131,6 +137,17 @@ void main() {
 
     vec3 reflection = getReflection(viewPos, newNormal, albedo.rgb);
     albedo.rgb = mix(albedo.rgb, reflection.rgb, fresnel);
+
+	//Specular Highlights
+	#if !defined DISTANT_HORIZONS && !defined NETHER
+    float vanillaDiffuse = (0.25 * NoU + 0.75) + (0.667 - abs(NoE)) * (1.0 - abs(NoU)) * 0.15;
+          vanillaDiffuse *= vanillaDiffuse;
+
+	float smoothnessF = 0.55 + length(albedo.rgb) * 0.15 * float(ice > 0.5 || water > 0.5);
+
+	vec3 specularHighlight = getSpecularHighlight(newNormal, viewPos, smoothnessF, vec3(0.1), lightColSqrt * (2.0 - sunVisibility), shadow * vanillaDiffuse, color.a);
+	albedo.rgb += specularHighlight;
+	#endif
 
     //Fog
     Fog(albedo.rgb, viewPos, worldPos, atmosphereColor);

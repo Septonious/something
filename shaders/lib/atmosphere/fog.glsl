@@ -31,7 +31,7 @@ void getDenseFog(inout vec3 color, float lViewPos) {
 
 //Normal Fog
 #ifndef END
-void getNormalFog(inout vec3 color, in vec3 viewPos, in vec3 worldPos, in vec3 atmosphereColor, in float lViewPos, in float lWorldPos) {
+void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in vec3 worldPos, in float lViewPos, in float lWorldPos) {
     #if defined DISTANT_HORIZONS && (defined DEFERRED || defined DH_WATER || defined GBUFFERS_WATER)
     float farPlane = dhRenderDistance * 0.6;
     #else
@@ -42,10 +42,10 @@ void getNormalFog(inout vec3 color, in vec3 viewPos, in vec3 worldPos, in vec3 a
 	#ifdef OVERWORLD
     float fogDistanceFactor = 50.0 + FOG_DISTANCE * (0.75 + caveFactor * 0.25);
 	float fogDistance = max(256.0 / farPlane, 2.0) * (100.0 / fogDistanceFactor);
-	float fogVariableHeight = FOG_HEIGHT - 40.0;
+	float fogVariableHeight = FOG_HEIGHT - 40.0 + timeBrightness * 40.0;
 		  fogVariableHeight += texture2D(noisetex, (worldPos.xz + cameraPosition.xz + frameCounter * 0.04) * 0.00006).b * 40.0;
 	float fogAltitude = clamp(exp2(-max(worldPos.y + cameraPosition.y - fogVariableHeight, 0.0) / exp2(FOG_HEIGHT_FALLOFF)), 0.0, 1.0);
-	float fogDensity = FOG_DENSITY + isLushCaves * 0.15;
+	float fogDensity = FOG_DENSITY * (1.0 - timeBrightness * 0.5) + isLushCaves * 0.15;
 
 	#ifdef DISTANT_HORIZONS
 		  fogDensity *= 0.75;
@@ -60,9 +60,9 @@ void getNormalFog(inout vec3 color, in vec3 viewPos, in vec3 worldPos, in vec3 a
 
     vec3 nSkyColor = normalize(skyColor + 0.000001);
     float noSpecificBiome = 1.0 - min(isLushCaves + isDesert, 1.0);
-    vec3 fogCol = nSkyColor * vec3(0.85, 0.75, 0.3) * isLushCaves + nSkyColor * vec3(1.4, 1.3, 0.4) * isDesert;
+    vec3 fogCol = nSkyColor * (vec3(0.85, 0.75, 0.3) * isLushCaves + vec3(1.4, 1.3, 0.4) * isDesert);
          fogCol += mix(caveMinLightCol * nSkyColor,
-                   mix(nSkyColor, atmosphereColor, min(1.0, 1.5 - sunVisibility)),
+                   mix(nSkyColor, atmosphereColor, 1.0 - sunVisibility * 0.5),
                    caveFactor) * noSpecificBiome;
 
 	//Distant Fade
@@ -104,18 +104,6 @@ void getNormalFog(inout vec3 color, in vec3 viewPos, in vec3 worldPos, in vec3 a
 	vec3 fogCol = netherColSqrt.rgb * 0.25;
 	#endif
 
-    //Mixing Colors depending on depth
-	#if !defined NETHER && defined DEFERRED && !defined DISTANT_HORIZONS
-    float zMixer = float(texture2D(depthtex1, texCoord).r < 1.0);
-
-	#if MC_VERSION >= 12104
-		  zMixer = mix(zMixer, 1.0, isPaleGarden);
-	#endif
-	      zMixer = clamp(zMixer, 0.0, 1.0);
-
-	fog *= zMixer;
-	#endif
-
 	color = mix(color, fogCol, fog);
 }
 #endif
@@ -126,7 +114,7 @@ void Fog(inout vec3 color, in vec3 viewPos, in vec3 worldPos, in vec3 atmosphere
 
 	if (isEyeInWater < 1) {
 		#ifndef END
-        getNormalFog(color, viewPos, worldPos, atmosphereColor, lViewPos, lWorldPos);
+        getNormalFog(color, atmosphereColor, viewPos, worldPos, lViewPos, lWorldPos);
 		#endif
     } else if (1 < isEyeInWater) {
         getDenseFog(color, lViewPos);

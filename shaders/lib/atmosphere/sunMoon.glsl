@@ -24,7 +24,7 @@ void drawSunMoon(inout vec3 color, in vec3 worldPos, in vec3 nViewPos, in float 
 
             worldPos = normalize(worldPos);
             vec2 planeCoord = worldPos.xz / (worldPos.y + length(worldPos));
-            moon *= texture2D(noisetex, planeCoord * 1.5).r * 0.65 + 0.35;
+            moon *= texture2D(noisetex, planeCoord * 1.5).r * 0.6 + 0.4;
         }
 
         color += glare * lightColSqrt * visibility;
