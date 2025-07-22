@@ -115,7 +115,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     sceneLighting += nightVision * vec3(0.2, 0.3, 0.2);
 
     //Vanilla AO
-    float aoMixer = (1.0 - ao) * (1.0 - pow6(lightmap.x));
+    float aoMixer = (1.0 - ao) * (1.0 - blockLightMap) * (1.0 - float(emission > 0.0));
     albedo.rgb = mix(albedo.rgb, albedo.rgb * ao * ao, aoMixer);
 
     albedo.rgb = pow(albedo.rgb, vec3(2.2));

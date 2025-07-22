@@ -1,5 +1,5 @@
 void drawSunMoon(inout vec3 color, in vec3 worldPos, in vec3 nViewPos, in float VoU, in float VoS, in float VoM, in float caveFactor, inout float occlusion) {
-    float visibility = (1.0 - wetness * 0.6) * caveFactor;
+    float visibility = (1.0 - wetness * 0.8) * caveFactor;
           visibility *= 1.0 - occlusion;
           visibility *= VoU;
 
