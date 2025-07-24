@@ -47,8 +47,8 @@ vec3 sunVec = vec3(0.0);
 vec3 upVec = normalize(gbufferModelView[1].xyz);
 
 #ifdef OVERWORLD
-float sunVisibility = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
-float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
+float sunVisibility = clamp((dot( sunVec, upVec) + 0.15) * 3.0, 0.0, 1.0);
+float moonVisibility = clamp((dot(-sunVec, upVec) + 0.15) * 3.0, 0.0, 1.0);
 vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
 #endif
 
@@ -60,43 +60,47 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 
 //Program//
 void main() {
-	vec4 albedo = texture2D(texture, texCoord);
+	#ifdef VANILLA_CLOUDS
+		vec4 albedo = texture2D(texture, texCoord);
 
-	if (albedo.a > 0.0) {
-		albedo.a = CLOUD_OPACITY;
-		albedo.a *= albedo.a;
-	}
+		if (albedo.a > 0.0) {
+			albedo.a = VANILLA_CLOUD_OPACITY;
+			albedo.a *= albedo.a;
+		}
 
-	vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
-	vec3 viewPos = ToNDC(screenPos);
-	vec3 worldPos = ToWorld(viewPos);
-	vec3 nViewPos = normalize(viewPos);
+		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
+		vec3 viewPos = ToNDC(screenPos);
+		vec3 worldPos = ToWorld(viewPos);
+		vec3 nViewPos = normalize(viewPos);
 
-	float cloudHeightFactor = clamp(worldPos.y + cameraPosition.y - cloudHeight - 0.5, 0.0, 4.0) * 0.25;
-	albedo.rgb *= mix(ambientColSqrt * 0.65, lightColSqrt, cloudHeightFactor);
+		float cloudHeightFactor = clamp(worldPos.y + cameraPosition.y - cloudHeight - 0.5, 0.0, 4.0) * 0.25;
+		albedo.rgb *= mix(ambientColSqrt * 0.65, lightColSqrt, cloudHeightFactor);
 
-	float scattering = pow4(dot(normal, lightVec) * 0.5 + 0.5);
-		  scattering += pow7(dot(nViewPos, lightVec) * 0.5 + 0.5) * 0.5;
-	albedo.rgb *= 1.0 + scattering * shadowFade * (1.0 - wetness * 0.5);
+		float scattering = pow4(dot(normal, lightVec) * 0.5 + 0.5);
+			scattering += pow7(dot(nViewPos, lightVec) * 0.5 + 0.5) * 0.5;
+		albedo.rgb *= 1.0 + scattering * shadowFade * (1.0 - wetness * 0.5);
 
-	#if FOG_VANILLA_CLOUD > 0
-	#if FOG_VANILLA_CLOUD == 1
-	float vanillaFogEnd = 4.0;
-	#elif FOG_VANILLA_CLOUD == 2
-	float vanillaFogEnd = 2.0;
+		#if VANILLA_CLOUD_FOG > 0
+		#if VANILLA_CLOUD_FOG == 1
+		float vanillaFogEnd = 4.0;
+		#elif VANILLA_CLOUD_FOG == 2
+		float vanillaFogEnd = 2.0;
+		#else
+		float vanillaFogEnd = 1.0;
+		#endif
+
+		float worldDistance = length(worldPos.xz) / 256.0;
+		float vanillaFog = 1.0 - smoothstep(0.5, vanillaFogEnd, worldDistance);
+
+		albedo.a *= color.a * vanillaFog;
+		#endif
+
+		albedo *= 1.0 - blindFactor;
+		#if MC_VERSION >= 11900
+		albedo *= 1.0 - darknessFactor;
+		#endif
 	#else
-	float vanillaFogEnd = 1.0;
-	#endif
-
-	float worldDistance = length(worldPos.xz) / 256.0;
-	float vanillaFog = 1.0 - smoothstep(0.5, vanillaFogEnd, worldDistance);
-
-	albedo.a *= color.a * vanillaFog;
-	#endif
-
-	albedo *= 1.0 - blindFactor;
-	#if MC_VERSION >= 11900
-	albedo *= 1.0 - darknessFactor;
+		vec4 albedo = vec4(0.0);
 	#endif
 	
     /* DRAWBUFFERS:0 */

@@ -23,6 +23,11 @@ uniform sampler2D colortex1;
 uniform mat4 gbufferProjectionInverse;
 #endif
 
+// Pipeline Options //
+const bool colortex0MipmapEnabled = true;
+const bool colortex1MipmapEnabled = true;
+const bool colortex2Clear = false;
+
 // Includes //
 #include "/lib/util/bayerDithering.glsl"
 #include "/lib/post/tonemap.glsl"
@@ -35,6 +40,13 @@ uniform mat4 gbufferProjectionInverse;
 void main() {
 	vec3 color = texture2D(colortex0, texCoord).rgb;
 
+	vec3 temporalColor = vec3(0.0);
+	#ifdef TAA
+		 temporalColor = texture2D(colortex2, texCoord).gba;
+	#endif
+
+	float temporalData = 0.0;
+
 	#ifdef BLOOM
 	getBloom(color, texCoord);
 	#endif
@@ -43,8 +55,9 @@ void main() {
 	color = pow(color, vec3(1.0 / 2.2));
 	color += (Bayer8(gl_FragCoord.xy) - 0.25) / 128.0;
 
-	/* DRAWBUFFERS:1 */
+	/* DRAWBUFFERS:12 */
 	gl_FragData[0].rgb = color;
+	gl_FragData[1] = vec4(temporalData, temporalColor);
 }
 
 #endif

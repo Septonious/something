@@ -6,9 +6,9 @@ vec3 lightSun = mix(mix(mix(lightSunrise, lightMorning, timeBrightnessSqrt), mix
 vec3 ambientSun = mix(mix(mix(ambientSunrise, ambientMorning, timeBrightnessSqrt), mix(ambientEvening, ambientSunset, 1.0 - timeBrightnessSqrt), mefade), ambientDay, dfade);
 
 vec3 lightColRaw = mix(lightNight, lightSun, sunVisibility);
-vec3 lightColSqrt = mix(lightColRaw, dot(lightColRaw, vec3(0.448, 0.880, 0.171)) * weatherCol, wetness);
+vec3 lightColSqrt = mix(lightColRaw, dot(lightColRaw, vec3(0.448, 0.880, 0.171)) * weatherCol, wetness * 0.6);
 vec3 lightCol = lightColSqrt * lightColSqrt;
 
 vec3 ambientColRaw = mix(ambientNight, ambientSun, sunVisibility);
-vec3 ambientColSqrt = mix(ambientColRaw, dot(ambientColRaw, vec3(0.448, 0.880, 0.171)) * weatherCol, wetness);
+vec3 ambientColSqrt = mix(ambientColRaw, dot(ambientColRaw, vec3(0.448, 0.880, 0.171)) * weatherCol, wetness * 0.6);
 vec3 ambientCol = ambientColSqrt * ambientColSqrt;

@@ -40,12 +40,12 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
 
 	//Overworld Fog
 	#ifdef OVERWORLD
-    float fogDistanceFactor = 50.0 + FOG_DISTANCE * (0.75 + caveFactor * 0.25);
+    float fogDistanceFactor = 50.0 + FOG_DISTANCE * (0.75 + caveFactor * 0.25) - wetness * 25.0;
 	float fogDistance = max(256.0 / farPlane, 2.0) * (100.0 / fogDistanceFactor);
-	float fogVariableHeight = FOG_HEIGHT - 40.0 + timeBrightness * 40.0;
-		  fogVariableHeight += texture2D(noisetex, (worldPos.xz + cameraPosition.xz + frameCounter * 0.04) * 0.00006).b * 40.0;
+	float fogVariableHeight = FOG_HEIGHT - 20.0 + timeBrightness * 40.0 + wetness * 50.0;
+		  fogVariableHeight += texture2D(noisetex, (worldPos.xz + cameraPosition.xz + frameCounter * 0.01) * 0.0001).b * 20.0 * min(cameraPosition.y * 0.01, 1.0);
 	float fogAltitude = clamp(exp2(-max(worldPos.y + cameraPosition.y - fogVariableHeight, 0.0) / exp2(FOG_HEIGHT_FALLOFF)), 0.0, 1.0);
-	float fogDensity = FOG_DENSITY * (1.0 - timeBrightness * 0.5) + isLushCaves * 0.15;
+	float fogDensity = FOG_DENSITY * (1.0 - timeBrightness * 0.5 + wetness * 0.5) + isLushCaves * 0.15;
 
 	#ifdef DISTANT_HORIZONS
 		  fogDensity *= 0.75;
@@ -62,7 +62,7 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
     float noSpecificBiome = 1.0 - min(isLushCaves + isDesert, 1.0);
     vec3 fogCol = nSkyColor * (vec3(0.85, 0.75, 0.3) * isLushCaves + vec3(1.4, 1.3, 0.4) * isDesert);
          fogCol += mix(caveMinLightCol * nSkyColor,
-                   mix(nSkyColor, atmosphereColor, 1.0 - sunVisibility * 0.5),
+                   mix(nSkyColor, atmosphereColor, 1.0 - sunVisibility * (0.5 - wetness * 0.5)),
                    caveFactor) * noSpecificBiome;
 
 	//Distant Fade

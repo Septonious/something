@@ -59,8 +59,8 @@ vec3 upVec = normalize(gbufferModelView[1].xyz);
 vec3 eastVec = normalize(gbufferModelView[0].xyz);
 
 #ifdef OVERWORLD
-float sunVisibility = clamp((dot( sunVec, upVec) + 0.25) * 2.0, 0.0, 1.0);
-float moonVisibility = clamp((dot(-sunVec, upVec) + 0.25) * 2.0, 0.0, 1.0);
+float sunVisibility = clamp((dot( sunVec, upVec) + 0.15) * 3.0, 0.0, 1.0);
+float moonVisibility = clamp((dot(-sunVec, upVec) + 0.15) * 3.0, 0.0, 1.0);
 vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
 #endif
 
@@ -103,7 +103,8 @@ void main() {
     float emission = 0.0, smoothness = 0.0, metalness = 0.0, parallaxShadow = 0.0;
     
 	if (foliage > 0.5) {
-		newNormal = normalize(upVec);
+		float foliageNormalDistance = min(1.0, length(viewPos.xz) / shadowDistance);
+		newNormal = normalize(upVec) * (1.0 - foliageNormalDistance * 0.25);
 	}
 
 	float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
