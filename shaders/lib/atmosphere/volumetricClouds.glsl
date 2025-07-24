@@ -92,20 +92,15 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 		float planeDifference = maxDist - minDist;
 		vec3 startPos = cameraPosition + minDist * nWorldPos;
 
-		#ifdef DISTANT_HORIZONS
-		float rayLength = thickness * 8.0;
-			  rayLength /= nWorldPos.y * nWorldPos.y * 8.0 + 1.0;
-		#else
-		float rayLength = thickness * 4.0;
-			  rayLength /= nWorldPos.y * nWorldPos.y * 4.0 + 1.0;
-		#endif
+		float rayLength = thickness * 5.0;
+			  rayLength /= nWorldPos.y * nWorldPos.y * 5.0 + 1.0;
 
 		vec3 sampleStep = nWorldPos * rayLength;
-		int sampleCount = int(min(planeDifference / rayLength, 24) + 1);
+		int sampleCount = int(min(planeDifference / rayLength, 20) + 1);
 
         float fogDistance = 10.0 / max(abs(float(height) - 72.0), 56.0);
 
-		if (maxDist > 0 && maxDist < distance && sampleCount > 0) {
+		if (maxDist > 0 && sampleCount > 0) {
 			float cloud = 0.0;
 			float cloudAlpha = 0.0;
 			float cloudLighting = 0.0;
@@ -116,7 +111,7 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 			float VoL = dot(nViewPos, lightVec);
 			float halfVoL = mix(abs(VoL), VoL, shadowFade) * 0.5 + 0.5;
 			float halfVoLSqr = halfVoL * halfVoL;
-			float scattering = pow20(halfVoL) * 2.0 * shadowFade;
+			float scattering = pow20(halfVoL) * 2.0;
 			float noiseLightFactor = (2.0 - VoL * shadowFade) * density;
 
 			vec3 rayPos = startPos + sampleStep * dither;
@@ -135,8 +130,9 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 				#endif
 
                 vec3 worldPos = rayPos - cameraPosition;
+				float lWorldPos = length(worldPos.xz);
 
-                float rayDistance = length(worldPos.xz) * fogDistance;
+				if (lWorldPos > distance) break;
 
 				//Indoor leak prevention
 				if (eyeBrightnessSmooth.y < 220.0 && length(worldPos) < shadowDistance) {
@@ -154,7 +150,7 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 
 				cloudLighting = mix(cloudLighting, sampleLighting, noise * (1.0 - cloud * cloud));
 				cloud = mix(cloud, 1.0, noise);
-				noise *= pow6(smoothstep(mix(distance * 0.1, 300, wetness), 16.0, rayDistance));
+				noise *= pow6(smoothstep(mix(distance * 0.1, 300, wetness), 16.0, lWorldPos * fogDistance));
 				cloudAlpha = mix(cloudAlpha, 1.0, noise);
 
 				//gbuffers_water cloud discard check
@@ -164,10 +160,12 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 			}
 
 			//Final color calculations
+			float VoS = clamp(dot(nViewPos, sunVec), 0.0, 1.0);
+			cloudLighting = mix(pow8(1.0 - cloudLighting) * pow4(VoS), cloudLighting, shadowFade);
             float morningEveningFactor = 1.0 - 0.2 * sqrt(sunVisibility) * (1.0 - timeBrightnessSqrt);
 
-            vec3 cloudAmbientColor = mix(ambientCol, atmosphereColor * atmosphereColor, 0.4 + timeBrightness * 0.4) * 0.5;
-            vec3 cloudLightColor = mix(lightCol, normalize(skyColor + 0.0001) * 2.0, timeBrightness * (0.75 - wetness * 0.75)) * (1.0 + scattering);
+            vec3 cloudAmbientColor = mix(ambientCol, atmosphereColor * atmosphereColor, 0.4 + timeBrightness * 0.2) * 0.6;
+            vec3 cloudLightColor = mix(lightCol, normalize(skyColor + 0.0001) * 2.0, timeBrightness * (0.75 - wetness * 0.75)) * (1.0 + scattering * shadowFade);
 			vec3 cloudColor = mix(cloudAmbientColor, cloudLightColor, cloudLighting);
 
 			float opacity = clamp(mix(VC_OPACITY, 0.99, (max(0.0, cameraPosition.y) / height)), 0.0, 1.0 - wetness * 0.5);
