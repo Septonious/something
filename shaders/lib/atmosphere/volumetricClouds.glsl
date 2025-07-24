@@ -14,7 +14,7 @@ void getDynamicWeather(inout float speed, inout float amount, inout float freque
 	amount = mix(amount, 11.25, wetness) - dayAmountFactor;
 	thickness += dayFrequencyFactor - 0.75;
 	density += dayDensityFactor;
-	frequency *= dayFrequencyFactor;
+	//frequency *= dayFrequencyFactor;
     scale += dayScaleFactor;
 }
 
