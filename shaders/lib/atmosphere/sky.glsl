@@ -12,11 +12,11 @@ vec3 getAtmosphere(vec3 viewPos) {
 
      //Fake light scattering
      vec3 scattering = mix(mix(vec3(1.8, 2.4, 0.1), lightColSqrt, sunVisibility * VoSClamped), vec3(1.9, 0.8, 0.0), pow2(1.0 - VoUClamped));
-          scattering *= pow4(1.0 - abs(VoURaw));
+          scattering *= pow(1.0 - abs(VoURaw), 4.0 - VoSClamped);
           scattering *= 0.5 * timeBrightnessSqrt + 0.5 * exp(VoSRaw * 0.5);
 
      vec3 daySky = mix(normalize(pow(skyColor, vec3(1.5)) + 0.00001), vec3(0.5), 0.5 - timeBrightness * 0.25);
-          daySky += scattering * (0.6 - timeBrightness * 0.6) * (1.0 - wetness);
+          daySky += scattering * max(0.0, 0.6 - timeBrightness) * (1.0 - wetness);
           daySky = mix(daySky, lightColSqrt, baseScatteringHeight * mix(0.4 + VoSClamped * 0.6, 1.0, timeBrightnessSqrt) * (0.5 - timeBrightness * 0.25));
      vec3 nightSky = lightNight * 0.75;
      vec3 atmosphere = mix(nightSky, daySky, sunVisibility);

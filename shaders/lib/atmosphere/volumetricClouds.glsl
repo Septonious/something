@@ -92,32 +92,31 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 		float planeDifference = maxDist - minDist;
 		vec3 startPos = cameraPosition + minDist * nWorldPos;
 
-		float rayLength = thickness * 5.0;
-			  rayLength /= nWorldPos.y * nWorldPos.y * 5.0 + 1.0;
+		float rayLength = thickness * 4.0;
+			  rayLength /= nWorldPos.y * nWorldPos.y * 4.0 + 1.0;
 
 		vec3 sampleStep = nWorldPos * rayLength;
-		int sampleCount = int(min(planeDifference / rayLength, 20) + 1);
-
-        float fogDistance = 10.0 / max(abs(float(height) - 72.0), 56.0);
+		int sampleCount = min(int(planeDifference / rayLength + 1), 8 + VC_DISTANCE / 1000);
 
 		if (maxDist > 0 && sampleCount > 0) {
 			float cloud = 0.0;
 			float cloudAlpha = 0.0;
 			float cloudLighting = 0.0;
 
-			//Scattering variables
+			//Variables
 			vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
 			float VoU = dot(nViewPos, upVec);
 			float VoL = dot(nViewPos, lightVec);
 			float halfVoL = mix(abs(VoL), VoL, shadowFade) * 0.5 + 0.5;
 			float halfVoLSqr = halfVoL * halfVoL;
-			float scattering = pow20(halfVoL) * 2.0;
+			float scattering = pow20(halfVoL);
 			float noiseLightFactor = (2.0 - VoL * shadowFade) * density;
 
 			vec3 rayPos = startPos + sampleStep * dither;
 			
 			float maxDepth = currentDepth;
 			float sampleTotalLength = minDist + rayLength * dither;
+			float fogDistance = 10.0 / max(abs(float(height) - 72.0), 56.0);
 
 			vec2 wind = vec2(frameTimeCounter * speed * 0.005, sin(frameTimeCounter * speed * 0.1) * 0.01) * speed * 0.1;
 
@@ -161,11 +160,13 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 
 			//Final color calculations
 			float VoS = clamp(dot(nViewPos, sunVec), 0.0, 1.0);
-			cloudLighting = cloudLighting * shadowFade + pow8(1.0 - cloudLighting) * pow4(VoS) * (1.0 - shadowFade);
-            float morningEveningFactor = 1.0 - 0.2 * sqrt(sunVisibility) * (1.0 - timeBrightnessSqrt);
+			cloudLighting = cloudLighting * shadowFade + pow8(1.0 - cloudLighting) * pow6(VoS) * (1.0 - shadowFade) * 0.75;
 
-            vec3 cloudAmbientColor = mix(ambientCol, atmosphereColor * atmosphereColor, 0.4 + timeBrightness * 0.2) * 0.6;
-            vec3 cloudLightColor = mix(lightCol, normalize(skyColor + 0.0001) * 2.0, timeBrightness * (0.75 - wetness * 0.75)) * (1.0 + scattering * shadowFade);
+			vec3 nSkyColor = normalize(skyColor + 0.0001);
+            vec3 cloudAmbientColor = mix(atmosphereColor * atmosphereColor * 0.5, 
+									 mix(ambientCol, atmosphereColor * nSkyColor * 0.35, 0.35 + timeBrightness * 0.35),
+									 sunVisibility * (1.0 - wetness));
+            vec3 cloudLightColor = mix(lightCol, nSkyColor * 2.0, timeBrightness * (0.8 - wetness * 0.8)) * (1.0 + scattering * shadowFade);
 			vec3 cloudColor = mix(cloudAmbientColor, cloudLightColor, cloudLighting);
 
 			float opacity = clamp(mix(VC_OPACITY, 0.99, (max(0.0, cameraPosition.y) / height)), 0.0, 1.0 - wetness * 0.5);

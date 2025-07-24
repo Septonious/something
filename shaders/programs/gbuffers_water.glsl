@@ -6,14 +6,21 @@
 
 // VSH Data //
 in vec4 color;
-in vec3 normal;
+in vec3 normal, binormal, tangent;
 in vec2 texCoord, lmCoord;
+
+#if WATER_NORMALS > 0
+in vec3 viewVector;
+in float viewDistance;
+#endif
+
 flat in int mat;
 
 // Uniforms //
 uniform int isEyeInWater;
 uniform int frameCounter;
 
+uniform float frameTimeCounter;
 uniform float far, near;
 uniform float viewWidth, viewHeight;
 uniform float blindFactor, nightVision;
@@ -35,6 +42,8 @@ uniform float isPaleGarden;
 uniform vec3 skyColor;
 #endif
 
+uniform vec3 fogColor;
+
 uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
@@ -42,6 +51,10 @@ uniform vec4 lightningBoltPosition;
 
 uniform sampler2D texture, noisetex;
 uniform sampler2D gaux1;
+
+#ifdef WATER_REFLECTIONS
+uniform sampler2D depthtex1;
+#endif
 
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
@@ -86,13 +99,22 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/lighting/lightning.glsl"
 #include "/lib/lighting/shadows.glsl"
 #include "/lib/lighting/gbuffersLighting.glsl"
-#include "/lib/pbr/simpleReflection.glsl"
+#include "/lib/water/waterFog.glsl"
 
 #ifdef OVERWORLD
 #include "/lib/atmosphere/sky.glsl"
 #endif
 
 #include "/lib/atmosphere/fog.glsl"
+
+#if WATER_NORMALS > 0
+#include "/lib/water/waterNormals.glsl"
+#endif
+
+#ifdef WATER_REFLECTIONS
+#include "/lib/pbr/raytracer.glsl"
+#include "/lib/pbr/waterReflection.glsl"
+#endif
 
 // Main //
 void main() {
@@ -102,8 +124,10 @@ void main() {
 	albedo *= color;
 
 	if (mat == 10001) {
-		albedo.rgb = mix(color.rgb, waterColor.rgb, 0.5);
-		albedo.rgb *= albedoTexture.rgb * (1.0 + pow4(length(albedoTexture.rgb))) * WATER_I;
+		albedo.rgb = mix(color.rgb, waterColor.rgb, 0.5) * WATER_I;
+		#ifdef VANILLA_WATER
+		albedo.rgb *= albedoTexture.rgb * (1.0 + pow4(length(albedoTexture.rgb)));
+		#endif
 		albedo.a = WATER_A;
 	}
 
@@ -112,11 +136,24 @@ void main() {
     vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
     vec3 viewPos = ToNDC(screenPos);
     vec3 worldPos = ToWorld(viewPos);
+	vec3 nViewPos = normalize(viewPos);
+	vec2 refraction = vec2(0.0);
 
     float emission = pow8(lmCoord.x) + int(mat == 10031);
 	float ice = float(mat == 10000);
 	float water = float(mat == 10001);
 	float tintedGlass = float(mat >= 10201 && mat <= 10216);
+
+	//Water Normals
+	float fresnel = clamp(1.0 + dot(normalize(normal), nViewPos), 0.0, 1.0);
+
+	#if WATER_NORMALS > 0
+	if (water > 0.5) {
+		getWaterNormal(newNormal, worldPos, fresnel);
+	}
+	#endif
+
+	refraction = (newNormal.xy - normal.xy) * 0.5 + 0.5;
 
 	float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
 	float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
@@ -133,19 +170,44 @@ void main() {
 	vec3 atmosphereColor = endLightCol * 0.15;
 	#endif
 
-    float fresnel = clamp(pow4(1.0 + dot(newNormal, normalize(viewPos))), 0.0, 1.0);
+	//Water Light Absorption & Scattering
+	if (water > 0.5) {
+		#ifdef WATER_FOG
+		float oDepth = texture2D(depthtex1, screenPos.xy).r;
+		vec3 oScreenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), oDepth);
+		vec3 oViewPos = ToNDC(oScreenPos);
 
-    vec3 reflection = getReflection(viewPos, newNormal, albedo.rgb);
-    albedo.rgb = mix(albedo.rgb, reflection.rgb, fresnel);
+		#ifdef OVERWORLD
+		vec4 waterFog = getWaterFog(viewPos.xyz - oViewPos, 1.0 + sunVisibility);
+		#else
+		vec4 waterFog = getWaterFog(viewPos.xyz - oViewPos, 1.5);
+		#endif
+			 waterFog.a *= max(lightmap.y, 0.2);
+			 waterFog.a = min(waterFog.a, 0.75);
+
+		albedo.rgb = mix(sqrt(albedo.rgb), sqrt(waterFog.rgb), waterFog.a);
+		albedo.rgb *= albedo.rgb * (1.0 - pow(waterFog.a, 1.5) * 0.95);
+		albedo.a = clamp(albedo.a * (0.5 + waterFog.a * 2.5), 0.1, 0.9);
+		#endif
+	}
+
+	//Reflections
+	#ifdef WATER_REFLECTIONS
+	if (water > 0.5 || tintedGlass > 0.5) {
+		fresnel = pow3(fresnel);
+		getReflection(albedo, worldPos, viewPos, nViewPos, newNormal, fresnel * 0.85 + 0.15, lightmap.y);
+		albedo.a = mix(albedo.a, 1.0, fresnel);
+	}
+	#endif
 
 	//Specular Highlights
 	#if !defined DISTANT_HORIZONS && !defined NETHER
     float vanillaDiffuse = (0.25 * NoU + 0.75) + (0.667 - abs(NoE)) * (1.0 - abs(NoU)) * 0.15;
           vanillaDiffuse *= vanillaDiffuse;
 
-	float smoothnessF = 0.55 + length(albedo.rgb) * 0.15 * float(ice > 0.5 || water > 0.5);
+	float smoothnessF = 0.6 + length(albedo.rgb) * 0.2 * float(ice > 0.5 || water > 0.5);
 
-	vec3 specularHighlight = getSpecularHighlight(newNormal, viewPos, smoothnessF, vec3(0.1), lightColSqrt * (2.0 - sunVisibility), shadow * vanillaDiffuse, color.a);
+	vec3 specularHighlight = getSpecularHighlight(newNormal, viewPos, smoothnessF, vec3(0.02), lightColSqrt, shadow * vanillaDiffuse, color.a);
 	albedo.rgb += specularHighlight;
 	#endif
 
@@ -166,11 +228,18 @@ void main() {
 
 // VSH Data //
 out vec4 color;
-out vec3 normal;
+out vec3 normal, binormal, tangent;
 out vec2 texCoord, lmCoord;
+
+#if WATER_NORMALS > 0
+out vec3 viewVector;
+out float viewDistance;
+#endif
+
 flat out int mat;
 
-// Attributes //
+//Attributes//
+attribute vec4 at_tangent;
 attribute vec4 mc_Entity;
 
 // Main //
@@ -182,7 +251,19 @@ void main() {
 	
     color = gl_Color;
 
-    normal = normalize(gl_NormalMatrix * gl_Normal);
+	//Normal, Binormal and Tangent
+	normal = normalize(gl_NormalMatrix * gl_Normal);
+	binormal = normalize(gl_NormalMatrix * cross(at_tangent.xyz, gl_Normal.xyz) * at_tangent.w);
+	tangent = normalize(gl_NormalMatrix * at_tangent.xyz);
+
+	#if WATER_NORMALS > 0
+	mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
+						  tangent.y, binormal.y, normal.y,
+						  tangent.z, binormal.z, normal.z);
+
+	viewVector = tbnMatrix * (gl_ModelViewMatrix * gl_Vertex).xyz;
+	viewDistance = length(gl_ModelViewMatrix * gl_Vertex);
+	#endif
 
     mat = int(mc_Entity.x + 0.5);
 
