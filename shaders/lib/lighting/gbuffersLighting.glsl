@@ -68,8 +68,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     if (subsurface > 0.0) {
         sss = pow8(VoL) * shadowFade * (1.0 - wetness * 0.5);
-        NoL += subsurface * shadowLightingFade;
-        NoL = mix(NoL, 1.0, sss * subsurface);
+        NoL += subsurface * shadowLightingFade * (1.0 + sss) * 0.5;
     }
 
     //Scene Lighting
@@ -121,7 +120,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     #endif
 
     #ifdef OVERWORLD
-    float rainFactor = 1.0 - wetness * 0.75;
+    float rainFactor = 1.0 - wetness * 0.5;
 
     vec3 sceneLighting = mix(ambientCol * lightmap.y, lightCol, shadow * rainFactor * shadowFade);
          sceneLighting *= 1.0 + sss * shadow;
@@ -142,7 +141,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     if (emission < 0.01 && lightmap.y > 0.0) {
         vec3 baseReflectance = vec3(0.1);
 
-        float smoothnessF = 0.2 + lAlbedo * 0.2 + NoL * 0.2;
+        float smoothnessF = lAlbedo * 0.25 + NoL * 0.35;
         #if defined DH_TERRAIN && defined END
               smoothnessF += 0.15;
         #endif
@@ -167,7 +166,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     sceneLighting += nightVision * vec3(0.2, 0.3, 0.2);
 
     //Vanilla AO
-    float aoMixer = (1.0 - ao) * (1.0 - blockLightMap) * (1.0 - float(emission > 0.0));
+    float aoMixer = (1.0 - ao) * (1.0 - blockLightMap) * (1.0 - float(emission > 0.0)) * (1.0 - subsurface);
     albedo.rgb = mix(albedo.rgb, albedo.rgb * ao * ao, aoMixer);
 
     albedo.rgb = pow(albedo.rgb, vec3(2.2));

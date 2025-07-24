@@ -48,7 +48,7 @@ vec3 computeShadow(vec3 shadowPos, float offset, float subsurface, float skyLigh
     float shadow0 = 0.0;
     vec3 shadowCol = vec3(0.0);    
 
-    float dither = texture2D(noisetex, gl_FragCoord.xy / 256.0).b * TAU;
+    float dither = texture2D(noisetex, gl_FragCoord.xy / 512.0).b * TAU;
     #ifdef TAA
          dither = fract(dither + 1.61803398875 * mod(float(frameCounter), 3600.0));
     #endif

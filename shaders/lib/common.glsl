@@ -24,8 +24,23 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define FOG_HEIGHT_FALLOFF 5.00 //[4.00 4.50 5.00 5.50 6.00 6.50 7.00 7.50 8.00 8.50 9.00 9.50 10.00]
 
 // Vanilla Clouds //
-#define FOG_VANILLA_CLOUD 1 //[0 1 2 3]
-#define CLOUD_OPACITY 0.7 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+//#define VANILLA_CLOUDS
+#define VANILLA_CLOUD_FOG 1 //[0 1 2 3]
+#define VANILLA_CLOUD_OPACITY 0.7 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+
+// Volumetric Clouds //
+#define VOLUMETRIC_CLOUDS
+#define VC_FREQUENCY 0.6 //[0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5]
+#define VC_DENSITY 10.0 //[4.0 6.0 8.0 10.0 12.0 14.0 16.0]
+#define VC_AMOUNT 11.00 //[12.00 11.75 11.50 11.25 11.00 10.75 10.50 10.25 10.00]
+#define VC_HEIGHT 190.0 //[50.0 60.0 70.0 80.0 90.0 100.0 110.0 120.0 130.0 140.0 150.0 160.0 170.0 180.0 190.0 200.0 210.0 220.0 230.0 240.0 250.0 260.0 270.0 280.0 290.0 300.0]
+#define VC_THICKNESS 14.0 //[8.0 10.0 12.0 14.0 16.0 18.0 20.0]
+#define VC_DETAIL 0.8 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define VC_SPEED 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.50 3.00 3.50 4.00]
+#define VC_OPACITY 0.9 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define VC_DISTANCE 5000.0 //[2000.0 2500.0 3000.0 3500.0 4000.0 4500.0 5000.0 5500.0 6000.0 6500.0 7000.0 7500.0 8000.0 8500.0 9000.0 9500.0 10000.0]
+#define VC_ATTENUATION 3.0 //[2.0 2.5 3.0 3.5 4.0 4.5 5.0 5.5 6.0]
+#define VC_SCALE 6.0 //[5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0]
 
 // Stars //
 #define STARS
@@ -43,6 +58,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define MOTION_BLUR_STRENGTH 0.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 
 // Antialiasing //
+#define TAA
 #define FXAA
 #define FXAA_SUBPIXEL 0.75 //[0.00 0.25 0.50 0.75 1.00]
 #define FXAA_EDGE_SENSITIVITY 1 //[0 1 2]

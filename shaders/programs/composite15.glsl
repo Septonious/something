@@ -10,15 +10,16 @@ in vec2 texCoord;
 // Uniforms //
 uniform int frameCounter;
 
-#ifdef FXAA
+#if defined FXAA || defined TAA
 uniform float viewWidth, viewHeight;
 uniform float aspectRatio;
 #endif
 
 uniform sampler2D depthtex1;
 uniform sampler2D colortex1;
+uniform sampler2D colortex2;
 
-#ifdef MOTION_BLUR
+#if defined MOTION_BLUR || defined TAA
 uniform vec3 cameraPosition, previousCameraPosition;
 
 uniform mat4 gbufferPreviousProjection;
@@ -40,11 +41,17 @@ const bool colortex1MipmapEnabled = true;
 #include "/lib/antialiasing/fxaa.glsl"
 #endif
 
+#ifdef TAA
+#include "/lib/util/reprojection.glsl"
+#include "/lib/antialiasing/taa.glsl"
+#endif
+
+
 // Main //
 void main() {
 	vec2 newTexCoord = texCoord;
 
-	#ifdef MOTION_BLUR
+	#if defined MOTION_BLUR || defined TAA
 	float z1 = texture2D(depthtex1, newTexCoord).r;
 	#endif
 
@@ -57,8 +64,14 @@ void main() {
 		 color = getMotionBlur(color, z1);
 	#endif
 
-    /* DRAWBUFFERS:1 */
-	gl_FragData[0].rgb = color;
+	vec4 previousColor = vec4(texture2D(colortex2, newTexCoord).r, 0.0, 0.0, 0.0);
+	#ifdef TAA
+	     previousColor = TemporalAA(color, previousColor.r, z1);
+	#endif
+
+    /* DRAWBUFFERS:12 */
+	gl_FragData[0] = vec4(color, 1.0);
+	gl_FragData[1] = vec4(previousColor);
 }
 
 #endif

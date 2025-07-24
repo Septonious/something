@@ -12,7 +12,7 @@ uniform float viewWidth, viewHeight;
 
 // Pipeline Options //
 const bool shadowHardwareFiltering = false;
-const int noiseTextureResolution = 256;
+const int noiseTextureResolution = 512;
 const float shadowDistanceRenderMul = 1.0;
 const float wetnessHalflife = 128.0;
 

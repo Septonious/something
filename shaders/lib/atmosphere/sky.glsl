@@ -11,13 +11,13 @@ vec3 getAtmosphere(vec3 viewPos) {
      float baseScatteringHeight = pow6(1.0 - VoUClamped + 0.04);
 
      //Fake light scattering
-     vec3 scattering = mix(mix(vec3(1.6, 2.6, 0.1), lightColSqrt, sunVisibility * VoSClamped), vec3(1.9, 0.8, 0.0), pow2(1.0 - VoUClamped));
+     vec3 scattering = mix(mix(vec3(1.8, 2.4, 0.1), lightColSqrt, sunVisibility * VoSClamped), vec3(1.9, 0.8, 0.0), pow2(1.0 - VoUClamped));
           scattering *= pow4(1.0 - abs(VoURaw));
-          scattering *= 0.4 * timeBrightnessSqrt + 0.6 * exp(VoSRaw * 0.5);
+          scattering *= 0.5 * timeBrightnessSqrt + 0.5 * exp(VoSRaw * 0.5);
 
-     vec3 daySky = mix(normalize(pow(skyColor, vec3(1.5)) + 0.00001), vec3(0.62, 0.69, 1.00), 0.5 - timeBrightness * 0.25);
-          daySky += scattering * (0.75 - timeBrightness * 0.75) * (1.0 - wetness);
-          daySky = mix(daySky, lightColSqrt, baseScatteringHeight * (0.4 - timeBrightness * 0.1));
+     vec3 daySky = mix(normalize(pow(skyColor, vec3(1.5)) + 0.00001), vec3(0.56, 0.54, 0.82), 0.5 - timeBrightness * 0.25);
+          daySky += scattering * (0.6 - timeBrightness * 0.6) * (1.0 - wetness);
+          daySky = mix(daySky, lightColSqrt, baseScatteringHeight * mix(0.4 + VoSClamped * 0.6, 1.0, timeBrightnessSqrt) * (0.5 - timeBrightness * 0.25));
      vec3 nightSky = lightNight * 0.75;
      vec3 atmosphere = mix(nightSky, daySky, sunVisibility);
           atmosphere *= 1.0 - wetness * 0.4;

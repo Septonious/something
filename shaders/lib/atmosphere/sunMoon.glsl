@@ -30,6 +30,6 @@ void drawSunMoon(inout vec3 color, in vec3 worldPos, in vec3 nViewPos, in float 
         color += glare * lightColSqrt * visibility;
         color += lightColSqrt * sun * visibility;
         color += lightNight * moon * visibility;
-        occlusion = float(sun + moon > 0.0);
+        occlusion += float(sun + moon > 0.0);
     }
 }

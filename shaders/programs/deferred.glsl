@@ -10,7 +10,15 @@ uniform int isEyeInWater;
 uniform int frameCounter;
 
 #ifdef OVERWORLD
+uniform int worldDay;
 uniform int moonPhase;
+
+#ifdef VOLUMETRIC_CLOUDS
+uniform int worldTime;
+
+uniform float shadowFade;
+#endif
+
 uniform float timeAngle, timeBrightness, wetness;
 
 uniform float isLushCaves, isDesert;
@@ -34,10 +42,19 @@ uniform float frameTimeCounter;
 uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
+#ifdef VOLUMETRIC_CLOUDS
+uniform vec4 lightningBoltPosition;
+#endif
 
 uniform sampler2D colortex0;
 uniform sampler2D depthtex0;
 uniform sampler2D noisetex;
+
+#if defined VOLUMETRIC_CLOUDS || defined END_CLOUDY_FOG
+uniform sampler2D shadowtex1;
+
+uniform mat4 shadowModelView, shadowProjection;
+#endif
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
@@ -65,8 +82,8 @@ vec3 eastVec = normalize(gbufferModelView[0].xyz);
 #ifdef OVERWORLD
 float eBS = eyeBrightnessSmooth.y / 240.0;
 float caveFactor = mix(clamp((cameraPosition.y - 56.0) / 16.0, float(sign(isEyeInWater)), 1.0), 1.0, eBS);
-float sunVisibility = clamp((dot( sunVec, upVec) + 0.25) * 2.0, 0.0, 1.0);
-float moonVisibility = clamp((dot(-sunVec, upVec) + 0.25) * 2.0, 0.0, 1.0);
+float sunVisibility = clamp((dot( sunVec, upVec) + 0.15) * 3.0, 0.0, 1.0);
+float moonVisibility = clamp((dot(-sunVec, upVec) + 0.15) * 3.0, 0.0, 1.0);
 vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
 #endif
 
@@ -79,6 +96,13 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/color/lightColor.glsl"
 #include "/lib/atmosphere/sky.glsl"
 #include "/lib/atmosphere/sunMoon.glsl"
+
+#ifdef VOLUMETRIC_CLOUDS
+#include "/lib/atmosphere/spaceConversion.glsl"
+#include "/lib/util/ToShadow.glsl"
+#include "/lib/lighting/lightning.glsl"
+#include "/lib/atmosphere/volumetricClouds.glsl"
+#endif
 
 #ifdef STARS
 #include "/lib/atmosphere/stars.glsl"
@@ -111,10 +135,32 @@ void main() {
 	float VoM = clamp(dot(nViewPos, -sunVec), 0.0, 1.0);
 	#endif
 
+    //Volumetric Clouds
+	vec4 vc = vec4(0.0);
+
+	#ifdef DISTANT_HORIZONS
+	float cloudDepth = 2.0 * dhFarPlane;
+	#else
+	float cloudDepth = 2.0 * far;
+	#endif
+
+	#if defined VOLUMETRIC_CLOUDS || defined END_CLOUDY_FOG
+	float blueNoiseDither = texture2D(noisetex, gl_FragCoord.xy / 512.0).b;
+
+	#ifdef TAA
+	blueNoiseDither = fract(blueNoiseDither + 1.61803398875 * mod(float(frameCounter), 3600.0));
+	#endif
+	#endif
+	
+	#ifdef VOLUMETRIC_CLOUDS
+	computeVolumetricClouds(vc, atmosphereColor, z0, blueNoiseDither, cloudDepth);
+	#endif
+
+	//Sky
     if (z0 == 1.0) {
         color = atmosphereColor * (1.0 + Bayer8(gl_FragCoord.xy) / 64.0);
 
-		float occlusion = 0.0;
+		float occlusion = vc.a;
 
 		#ifdef OVERWORLD
 		drawSunMoon(color, worldPos, nViewPos, VoU, VoS, VoM, caveFactor, occlusion);
@@ -135,6 +181,19 @@ void main() {
     } else {
 		Fog(color, viewPos, worldPos, atmosphereColor);
 	}
+
+	//Volumetric Clouds
+	#if defined VOLUMETRIC_CLOUDS || defined END_CLOUDY_FOG
+	vc.rgb = pow(vc.rgb, vec3(1.0 / 2.2));
+
+	#ifdef DISTANT_HORIZONS
+	cloudDepth /= (2.0 * dhFarPlane);
+	#else
+	cloudDepth /= (2.0 * far);
+	#endif
+
+	color = mix(color, vc.rgb, vc.a);
+	#endif
 
     /* DRAWBUFFERS:04 */
     gl_FragData[0].rgb = color;

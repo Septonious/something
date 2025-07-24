@@ -52,8 +52,8 @@ vec3 upVec = normalize(gbufferModelView[1].xyz);
 vec3 eastVec = normalize(gbufferModelView[0].xyz);
 
 #ifdef OVERWORLD
-float sunVisibility = clamp((dot( sunVec, upVec) + 0.25) * 2.0, 0.0, 1.0);
-float moonVisibility = clamp((dot(-sunVec, upVec) + 0.25) * 2.0, 0.0, 1.0);
+float sunVisibility = clamp((dot( sunVec, upVec) + 0.15) * 3.0, 0.0, 1.0);
+float moonVisibility = clamp((dot(-sunVec, upVec) + 0.15) * 3.0, 0.0, 1.0);
 vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
 #endif
 
@@ -78,15 +78,12 @@ void main() {
     vec3 viewPos = ToNDC(screenPos);
     vec3 worldPos = ToWorld(viewPos);
 
-	float subsurface = 0.0;
-    float emission = 0.0;
-
 	float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
 	float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
 	float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
 
     vec3 shadow = vec3(0.0);
-    gbuffersLighting(albedo, screenPos, viewPos, worldPos, shadow, lightmap, NoU, NoL, NoE, subsurface, emission, 0.0, 0.0);
+    gbuffersLighting(albedo, screenPos, viewPos, worldPos, shadow, lightmap, NoU, NoL, NoE, 0.0, 0.0, 0.0, 0.0);
 
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = albedo;
