@@ -20,7 +20,7 @@ vec3 getAtmosphere(vec3 viewPos) {
           daySky = mix(daySky, lightColSqrt, baseScatteringHeight * mix(0.4 + VoSClamped * 0.6, 1.0, timeBrightnessSqrt) * (0.5 - timeBrightness * 0.25));
      vec3 nightSky = lightNight * 0.75;
      vec3 atmosphere = mix(nightSky, daySky, sunVisibility);
-          atmosphere *= 1.0 - wetness * 0.4;
+          atmosphere *= 1.0 - wetness * 0.125;
           atmosphere *= skyDensity;
 
      //Fade atmosphere to dark gray underground
