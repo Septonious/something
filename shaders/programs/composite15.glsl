@@ -46,7 +46,6 @@ const bool colortex1MipmapEnabled = true;
 #include "/lib/antialiasing/taa.glsl"
 #endif
 
-
 // Main //
 void main() {
 	vec2 newTexCoord = texCoord;

@@ -177,17 +177,12 @@ void main() {
 		vec3 oScreenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), oDepth);
 		vec3 oViewPos = ToNDC(oScreenPos);
 
-		#ifdef OVERWORLD
-		vec4 waterFog = getWaterFog(viewPos.xyz - oViewPos, 1.0 + sunVisibility);
-		#else
-		vec4 waterFog = getWaterFog(viewPos.xyz - oViewPos, 1.5);
-		#endif
+		vec4 waterFog = getWaterFog(viewPos - oViewPos);
 			 waterFog.a *= max(lightmap.y, 0.2);
-			 waterFog.a = min(waterFog.a, 0.75);
 
 		albedo.rgb = mix(sqrt(albedo.rgb), sqrt(waterFog.rgb), waterFog.a);
-		albedo.rgb *= albedo.rgb * (1.0 - pow(waterFog.a, 1.5) * 0.95);
-		albedo.a = clamp(albedo.a * (0.5 + waterFog.a * 2.5), 0.1, 0.9);
+		albedo.rgb *= albedo.rgb;
+		albedo.a = clamp(albedo.a * (0.5 + waterFog.a * 2.0), 0.05, 0.95);
 		#endif
 	}
 
@@ -207,15 +202,17 @@ void main() {
 
 	float smoothnessF = 0.6 + length(albedo.rgb) * 0.2 * float(ice > 0.5 || water > 0.5);
 
-	vec3 specularHighlight = getSpecularHighlight(newNormal, viewPos, smoothnessF, vec3(0.02), lightColSqrt, shadow * vanillaDiffuse, color.a);
+	vec3 specularHighlight = getSpecularHighlight(newNormal, viewPos, smoothnessF, vec3(0.25), lightColSqrt, shadow * vanillaDiffuse, color.a);
 	albedo.rgb += specularHighlight;
 	#endif
 
     //Fog
     Fog(albedo.rgb, viewPos, worldPos, atmosphereColor);
 
-    /* DRAWBUFFERS:0 */
-    gl_FragData[0] = albedo;
+	/* DRAWBUFFERS:013 */
+	gl_FragData[0] = albedo;
+	gl_FragData[1] = albedo;
+	gl_FragData[2] = vec4(refraction, 0.0135 * float(albedo.a > 0.0 && albedo.a < 0.95), 1.0);
 }
 
 #endif

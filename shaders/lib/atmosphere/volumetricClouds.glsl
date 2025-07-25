@@ -5,29 +5,32 @@ float texture2DShadow(sampler2D shadowtex, vec3 shadowPos) {
 }
 
 void getDynamicWeather(inout float speed, inout float amount, inout float frequency, inout float thickness, inout float density, inout float detail, inout float height, inout float scale) {
-	int worldDayInterpolated = int((worldDay * 24000 + worldTime) / 24000);
-	float dayAmountFactor = abs(worldDayInterpolated % 7 / 2 - 0.5) * 0.5;
-	float dayDensityFactor = abs(worldDayInterpolated % 9 / 4 - worldDayInterpolated % 2);
-	float dayFrequencyFactor = 1.0 + abs(worldDayInterpolated % 6 / 4 - worldDayInterpolated % 2) * 0.4;
-    int dayScaleFactor = int(abs(worldDayInterpolated % 8 - worldDayInterpolated % 3) * 0.5);
+	#ifdef VC_DYNAMIC_WEATHER
+	int day = int((worldDay * 24000 + worldTime) / 24000);
+	float dayAmountFactor = abs(day % 7 / 2 - 0.5) * 0.5;
+	float dayDensityFactor = abs(day % 9 / 4 - day % 2);
+	float dayFrequencyFactor = 1.0 + abs(day % 6 / 4 - day % 2) * 0.4;
+    float dayScaleFactor = (day % 5 - day % 8 + day % 3) * 0.5;
+	float dayHeightFactor = day % 5 + day % 18 + day % 27 - day % 33 - 10;
+	#endif
 
-	amount = mix(amount, 11.25, wetness) - dayAmountFactor;
+	amount = mix(amount, 10.50, wetness);
+
+	#ifdef VC_DYNAMIC_WEATHER
+	amount -= dayAmountFactor;
 	thickness += dayFrequencyFactor - 0.75;
 	density += dayDensityFactor;
-	//frequency *= dayFrequencyFactor;
     scale += dayScaleFactor;
+	height += dayHeightFactor;
+	#endif
 }
 
 void getCloudSample(vec2 rayPos, vec2 wind, float attenuation, float amount, float frequency, float thickness, float density, float detail, inout float noise) {
-	rayPos *= 0.0025 * frequency;
+	rayPos *= 0.0035 * frequency;
 
-	float deformNoise = clamp(texture2D(noisetex, rayPos.xy * 0.125 + wind * 0.25).r * 2.0, 0.0, 1.0);
-	float noiseSample = texture2D(noisetex, rayPos.xy + wind * 0.5).g;
-	float noiseBase = (1.0 - noiseSample) * 0.35 + 0.25 + wetness * 0.1;
-
-	amount *= 0.75 + deformNoise * 0.3;
-	density *= 2.0 - pow3(deformNoise);
-	detail *= 0.75 + deformNoise * 0.25;
+	float worleyNoise = (1.0 - texture2D(noisetex, rayPos.xy + wind * 0.5).g) * 0.4 + 0.25;
+	float perlinNoise = texture2D(noisetex, rayPos.xy + wind * 0.5).r;
+	float noiseBase = perlinNoise * 0.6 + worleyNoise * 0.4;
 
 	float detailZ = floor(attenuation * thickness) * 0.05;
 	float noiseDetailA = texture2D(noisetex, rayPos - wind + detailZ).b;
@@ -37,7 +40,7 @@ void getCloudSample(vec2 rayPos, vec2 wind, float attenuation, float amount, flo
 	float noiseCoverage = abs(attenuation - 0.125) * (attenuation > 0.125 ? 1.1 : 8.0);
 		  noiseCoverage *= noiseCoverage * (VC_ATTENUATION + wetness * 1.5);
 	
-	noise = mix(noiseBase, noiseDetail, detail * mix(0.05, 0.025, min(cameraPosition.y * 0.0025, 1.0)) * int(noiseBase > 0.0)) * 22.0 - noiseCoverage;
+	noise = mix(noiseBase, noiseDetail, detail * 0.05) * 22.0 - noiseCoverage;
 	noise = max(noise - amount, 0.0) * (density * 0.25);
 	noise /= sqrt(noise * noise + 0.25);
 }
