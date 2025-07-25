@@ -139,9 +139,9 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     #if (defined GBUFFERS_TERRAIN || defined GBUFFERS_ENTITIES || defined GBUFFERS_BLOCK) && !defined NETHER
     if (emission < 0.01 && lightmap.y > 0.0) {
-        vec3 baseReflectance = vec3(0.1);
+        vec3 baseReflectance = vec3(0.25);
 
-        float smoothnessF = lAlbedo * 0.25 + NoL * 0.35;
+        float smoothnessF = 0.3 + lAlbedo * 0.15 + NoL * 0.2 + subsurface * 0.1;
         #if defined DH_TERRAIN && defined END
               smoothnessF += 0.15;
         #endif
@@ -153,7 +153,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
         specularHighlight = getSpecularHighlight(normal, viewPos, smoothnessF, baseReflectance, endLightCol * 0.25, shadow * vanillaDiffuse, color.a);
         #endif
 
-        specularHighlight = clamp(specularHighlight * 4.0, vec3(0.0), vec3(8.0));
+        specularHighlight = clamp(specularHighlight * 2.0, vec3(0.0), vec3(8.0));
     }
     #endif
 
