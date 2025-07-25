@@ -88,7 +88,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define WATER_CAUSTICS
 #define WATER_CAUSTICS_STRENGTH 2.50 //[1.00 1.50 2.00 2.50 3.00 3.50 4.00 4.50 5.00 5.50 6.00]
 #define WATER_FOG
-#define WATER_FOG_EXPONENT -6.00 //[-1.00 -1.50 -2.00 -2.50 -3.00 -3.50 -4.00 -4.50 -5.00 -5.50 -6.00 -6.50 -7.00 -7.50 -8.00]
+#define WATER_FOG_EXPONENT -8.00 //[-1.00 -1.50 -2.00 -2.50 -3.00 -3.50 -4.00 -4.50 -5.00 -5.50 -6.00 -6.50 -7.00 -7.50 -8.00 -8.50 -9.00 -9.50 -10.00]
 #define REFRACTION
 #define REFRACTION_STRENGTH 0.6 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
