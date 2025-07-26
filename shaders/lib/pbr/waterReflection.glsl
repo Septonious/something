@@ -7,7 +7,7 @@ void getReflection(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, in vec3
 	#endif
 
 	#if WATER_NORMALS > 0
-	vec4 reflectPos = rayTrace(depthtex1, viewPos, normal, dither, fresnel, border, 6, 10, 0.1, 2.0);
+	vec4 reflectPos = rayTrace(depthtex1, viewPos, normal, dither, fresnel, border, 6, 6, 0.1, 2.0);
 	#else
 	vec4 reflectPos = rayTrace(depthtex1, viewPos, normal, dither, fresnel, border, 6, 30, 0.1, 2.0);
 	#endif

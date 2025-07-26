@@ -197,7 +197,7 @@ void main() {
 
     /* DRAWBUFFERS:04 */
     gl_FragData[0].rgb = color;
-	gl_FragData[1] = vec4(pow(color.rgb, vec3(0.125)) * 0.5, 1.0);
+	gl_FragData[1].rgb = pow(color.rgb, vec3(0.125)) * 0.5;
 }
 
 #endif

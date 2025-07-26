@@ -32,7 +32,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define VOLUMETRIC_CLOUDS
 #define VC_DYNAMIC_WEATHER
 #define VC_FREQUENCY 0.6 //[0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5]
-#define VC_DENSITY 10.0 //[4.0 6.0 8.0 10.0 12.0 14.0 16.0]
+#define VC_DENSITY 12.0 //[4.0 6.0 8.0 10.0 12.0 14.0 16.0]
 #define VC_AMOUNT 11.25 //[12.00 11.75 11.50 11.25 11.00 10.75 10.50 10.25 10.00]
 #define VC_HEIGHT 250.0 //[50.0 60.0 70.0 80.0 90.0 100.0 110.0 120.0 130.0 140.0 150.0 160.0 170.0 180.0 190.0 200.0 210.0 220.0 230.0 240.0 250.0 260.0 270.0 280.0 290.0 300.0]
 #define VC_THICKNESS 14.0 //[8.0 10.0 12.0 14.0 16.0 18.0 20.0]
@@ -60,7 +60,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 
 // Antialiasing //
 #define TAA
-#define FXAA
+//#define FXAA
 #define FXAA_SUBPIXEL 0.75 //[0.00 0.25 0.50 0.75 1.00]
 #define FXAA_EDGE_SENSITIVITY 1 //[0 1 2]
 
