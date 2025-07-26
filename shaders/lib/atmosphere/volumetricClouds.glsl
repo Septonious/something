@@ -99,7 +99,7 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 			  rayLength /= nWorldPos.y * nWorldPos.y * 4.0 + 1.0;
 
 		vec3 sampleStep = nWorldPos * rayLength;
-		int sampleCount = min(int(planeDifference / rayLength + 1), 8 + VC_DISTANCE / 1000);
+		int sampleCount = min(int(planeDifference / rayLength + 1), 6 + VC_DISTANCE / 1000);
 
 		if (maxDist > 0 && sampleCount > 0) {
 			float cloud = 0.0;
@@ -137,7 +137,7 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 				if (lWorldPos > distance) break;
 
 				//Indoor leak prevention
-				if (eyeBrightnessSmooth.y < 220.0 && length(worldPos) < shadowDistance) {
+				if (eyeBrightnessSmooth.y < 210.0 && cameraPosition.y > height - 50.0 && lWorldPos < shadowDistance) {
 					if (texture2DShadow(shadowtex1, ToShadow(worldPos)) <= 0.0) break;
 				}
 

@@ -100,7 +100,7 @@ vec4 TemporalAA(inout vec3 color, float tempData, float z1) {
 		prvCoord.x > 0.0 && prvCoord.x < 1.0 &&
 		prvCoord.y > 0.0 && prvCoord.y < 1.0
 	);
-	blendFactor *= exp(-length(velocity)) * 0.4 + 0.5;
+	blendFactor *= exp(-length(velocity)) * 0.5 + 0.3;
 	
 	color = mix(color, tempColor, blendFactor);
 
