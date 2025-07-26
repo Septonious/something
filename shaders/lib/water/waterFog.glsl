@@ -8,16 +8,20 @@ vec4 getWaterFog(vec3 viewPos) {
 	waterFogColor = mix(waterFogColor, weatherCol.rgb * 0.25, wetness * 0.25);
 
 	if (isEyeInWater == 1) {
-		waterFogColor *= 0.1;
-		vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
+		waterFogColor *= 0.05;
 
-		float VoL = dot(normalize(viewPos), lightVec);
-		float glare = clamp(VoL * 0.5 + 0.5, 0.0, 1.0) * shadowFade; 
-			  glare = 0.03 / (1.0 - 0.97 * glare) - 0.03;
-		waterFogColor *= 0.5 + (0.5 + glare * 16.0 * timeBrightness) * eBS;
+		if (eBS > 0.0) {
+			vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
+
+			float VoL = dot(normalize(viewPos), lightVec);
+			float glare = clamp(VoL * 0.5 + 0.5, 0.0, 1.0) * shadowFade; 
+				glare = 0.03 / (1.0 - 0.97 * glare) - 0.03;
+			waterFogColor *= 0.5 + (0.5 + glare * 16.0 * timeBrightness) * eBS;
+		}
 	}
 
 	waterFogColor *= 0.5 + timeBrightness * 0.5;
+	waterFogColor *= 0.4 + eBS * 0.6;
 	#endif
 
 	//waterFogColor *= 1.0 - pow(fog, 0.33) * 0.75;
