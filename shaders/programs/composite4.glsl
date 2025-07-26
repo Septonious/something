@@ -115,7 +115,6 @@ void main() {
 			vec2 newCoord = clamp(texCoord + distort.xy, 0.0, 1.0);
 
 			float distortMask = texture2D(colortex3, newCoord).b;
-				  distortMask = float(distortMask > 0.0134 && distortMask < 0.0136);
 
 			if (distortMask == 1.0 && z0 > 0.56) {
 				z0 = texture2D(depthtex0, newCoord).r;
