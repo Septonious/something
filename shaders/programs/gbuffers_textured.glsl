@@ -35,7 +35,6 @@ uniform vec3 skyColor;
 #endif
 
 uniform ivec2 eyeBrightnessSmooth;
-
 uniform vec3 cameraPosition;
 uniform vec4 lightningBoltPosition;
 

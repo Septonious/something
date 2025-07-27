@@ -45,6 +45,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
             lightVolume = texture3D(floodfillSampler, voxelSamplePos).rgb;
         }
         voxelLighting = pow(lightVolume, vec3(1.0 / FLOODFILL_RADIUS));
+        voxelLighting *= sqrt(length(max(vec3(0.0), voxelLighting - vec3(0.02)))) * 2.0;
 
         #ifdef GBUFFERS_ENTITIES
         voxelLighting += pow16(lightmap.x) * blockLightCol;
@@ -58,9 +59,13 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     //Shadow Calculations
     //Some code made by Emin and gri573
-    float shadowLightingFade = maxOf(abs(worldPos) / (vec3(shadowDistance, shadowDistance + 64.0, shadowDistance)));
-          shadowLightingFade = clamp(shadowLightingFade, 0.0, 1.0);
-          shadowLightingFade = 1.0 - pow3(shadowLightingFade);
+    float shadowVisibility = maxOf(abs(worldPos) / (vec3(shadowDistance, shadowDistance + 64.0, shadowDistance)));
+          shadowVisibility = clamp(shadowVisibility, 0.0, 1.0);
+          shadowVisibility = 1.0 - pow3(shadowVisibility);
+
+          #ifdef OVERWORLD
+          shadowVisibility *= caveFactor;
+          #endif
 
     //Subsurface scattering
     float VoL = clamp(dot(normalize(viewPos), lightVec), 0.0, 1.0);
@@ -68,12 +73,12 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     if (subsurface > 0.0) {
         sss = pow8(VoL) * shadowFade * (1.0 - wetness * 0.5);
-        NoL += subsurface * shadowLightingFade * (1.0 + sss) * 0.5;
+        NoL += subsurface * shadowVisibility * (1.0 + sss) * 0.5;
     }
 
     //Scene Lighting
     #ifndef NETHER
-    if (NoL > 0.0001 && shadowLightingFade > 0.0) {
+    if (NoL > 0.0001 && shadowVisibility > 0.0) {
         float lightmapS = lightmap.y * lightmap.y * (3.0 - 2.0 * lightmap.y);
 
         vec3 worldPosM = worldPos;
@@ -116,7 +121,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     vec3 realShadow = shadow;
     vec3 fakeShadow = getFakeShadow(lightmap.y);
 
-    shadow = mix(fakeShadow, shadow, vec3(shadowLightingFade)) * clamp(NoL * 1.01 - 0.01, 0.0, 1.0);
+    shadow = mix(fakeShadow, shadow, vec3(shadowVisibility)) * clamp(NoL * 1.01 - 0.01, 0.0, 1.0);
     #endif
 
     #ifdef OVERWORLD
@@ -138,7 +143,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     vec3 specularHighlight = vec3(0.0);
 
     #if (defined GBUFFERS_TERRAIN || defined GBUFFERS_ENTITIES || defined GBUFFERS_BLOCK) && !defined NETHER
-    if (emission < 0.01 && lightmap.y > 0.0) {
+    if (emission < 0.01 && length(shadow) > 0.01) {
         vec3 baseReflectance = vec3(0.25);
 
         float smoothnessF = 0.3 + lAlbedo * 0.15 + NoL * 0.2 + subsurface * 0.1;

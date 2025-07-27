@@ -25,6 +25,7 @@ uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 #endif
 
+uniform ivec2 eyeBrightnessSmooth;
 uniform vec3 cameraPosition;
 uniform vec4 lightningBoltPosition;
 uniform vec4 entityColor;
@@ -59,6 +60,8 @@ vec3 upVec = normalize(gbufferModelView[1].xyz);
 vec3 eastVec = normalize(gbufferModelView[0].xyz);
 
 #ifdef OVERWORLD
+float eBS = eyeBrightnessSmooth.y / 240.0;
+float caveFactor = mix(clamp((cameraPosition.y - 56.0) / 16.0, float(sign(isEyeInWater)), 1.0), 1.0, eBS);
 float sunVisibility = clamp((dot( sunVec, upVec) + 0.15) * 3.0, 0.0, 1.0);
 float moonVisibility = clamp((dot(-sunVec, upVec) + 0.15) * 3.0, 0.0, 1.0);
 vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
@@ -122,8 +125,21 @@ out vec4 color;
 out vec3 normal;
 out vec2 texCoord, lmCoord;
 
+// Uniforms //
+#ifdef TAA
+uniform float viewWidth, viewHeight;
+#endif
+
+uniform mat4 gbufferModelView;
+uniform mat4 gbufferModelViewInverse;
+
 // Attributes //
 attribute vec4 mc_Entity;
+
+// Includes //
+#ifdef TAA
+#include "/lib/antialiasing/jitter.glsl"
+#endif
 
 // Main //
 void main() {
@@ -136,7 +152,15 @@ void main() {
 
     normal = normalize(gl_NormalMatrix * gl_Normal);
 
-	gl_Position = ftransform();
+	//Position
+	vec4 position = gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;
+
+	gl_Position = gl_ProjectionMatrix * gbufferModelView * position;
+
+	//TAA jittering
+    #ifdef TAA
+	gl_Position.xy = TAAJitter(gl_Position.xy, gl_Position.w);
+    #endif
 }
 
 #endif

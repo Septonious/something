@@ -58,21 +58,28 @@ vec3 computeShadow(vec3 shadowPos, float offset, float subsurface, float skyLigh
 	mat2 ditherMatrix = mat2(cosTheta, -sinTheta, sinTheta, cosTheta);
 
     #ifdef VPS
-    if (subsurface < 0.1 && vpsFade > 0.0) findBlockerDistance(shadowPos, ditherMatrix, offset, skyLightMap, vpsFade);
+    if (subsurface < 0.1 && vpsFade > 0.0 && skyLightMap > 0.05) findBlockerDistance(shadowPos, ditherMatrix, offset, skyLightMap, vpsFade);
     #endif
 
     for (int i = 0; i < 8; i++) {
         vec2 shadowOffset = ditherMatrix * offset * shadowOffsets8[i];
         shadow0 += texture2DShadow(shadowtex0, vec3(shadowPos.st + shadowOffset, shadowPos.z));
-
-        #ifdef SHADOW_COLOR
-        vec3 shadowColSample = texture2D(shadowcolor0, shadowPos.st + shadowOffset).rgb *
-                        texture2DShadow(shadowtex1, vec3(shadowPos.st + shadowOffset, shadowPos.z));
-        shadowCol += shadowColSample;
-        #endif
     }
     shadow0 *= 0.125;
-    shadowCol *= 0.125;
+
+    #ifdef SHADOW_COLOR
+    if (wetness < 0.5) {
+        for (int i = 0; i < 4; i++) {
+            vec2 shadowOffset = ditherMatrix * offset * 2.0 * shadowOffsets4[i];
+
+            vec3 shadowColSample = texture2D(shadowcolor0, shadowPos.st + shadowOffset).rgb *
+                            texture2DShadow(shadowtex1, vec3(shadowPos.st + shadowOffset, shadowPos.z));
+            shadowCol += shadowColSample;
+        }
+    }
+    shadowCol *= 0.25 - wetness * 0.25;
+    #endif
+   
     shadow0 *= mix(shadow0, 1.0, subsurface);
     shadowCol *= shadowCol;
 

@@ -6,6 +6,7 @@ const float shadowDistance = 192.0; //[96.0 128.0 192.0 256.0 384.0 512.0 768.0 
 const float sunPathRotation = -40.0; //[-85.0 -80.0 -75.0 -70.0 -65.0 -60.0 -55.0 -50.0 -45.0 -40.0 -35.0 -30.0 -25.0 -20.0 -15.0 -10.0 -5.0 0.0 5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0 55.0 60.0 65.0 70.0 75.0 80.0 85.0]
 const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define SHADOW_COLOR
+//#define SHADOW_ENTITIES
 #define VPS
 #define VPS_BLUR_STRENGTH 0.55 //[0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80]
 
@@ -43,6 +44,9 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define VC_ATTENUATION 1.50 //[1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00]
 #define VC_SCALE 8.0 //[5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0]
 
+// Sky //
+#define ROUND_SUN_MOON
+
 // Stars //
 #define STARS
 #define STAR_BRIGHTNESS 0.75 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
@@ -66,8 +70,8 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 
 // Floodfill //
 #define VOXEL_VOLUME_SIZE 192 //[128 192 256 384 512]
-#define FLOODFILL_BRIGHTNESS 1.00 //[1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
-#define FLOODFILL_RADIUS 1.5 //[0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7]
+#define FLOODFILL_BRIGHTNESS 1.50 //[1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+#define FLOODFILL_RADIUS 1.6 //[0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7]
 
 // Tonemap //
 #define TONEMAP_CONTRAST 2.8 //[1.0 1.2 1.4 1.6 1.8 2.0 2.2 2.4 2.6 2.8 3.0 3.2 3.4 3.6 3.8 4.0]
@@ -333,10 +337,25 @@ vec3 pow7(vec3 x) {return x*x*x*x*x*x*x;}
 vec3 pow8(vec3 x) {return x*x*x*x*x*x*x*x;}
 
 //**//**//**//**//**// I N T E R N A L S //**//**//**//**//**//
+#ifndef OVERWORLD
+#undef ROUND_SUN_MOON
+#endif
+
+#ifndef NETHER
+#endif
+
+#ifndef END
+#endif
+
 #ifndef GBUFFERS_TERRAIN
 #undef VPS
 #endif
 
-#if defined IS_IRIS && !defined MC_OS_MAC
+#ifndef VOLUMETRIC_CLOUDS
+#undef VC_DYNAMIC_WEATHER
+#undef VC_SHADOWS
+#endif
+
+#if defined IS_IRIS && !defined MC_OS_MAC && MC_VERSION >= 11900
 #define VX_SUPPORT
 #endif

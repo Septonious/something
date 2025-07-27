@@ -55,7 +55,7 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 
 	visibility *= 1.0 - blindFactor;
 
-	if (0 < visibility) {
+	if (visibility > 0.0) {
 		//Positions
 		vec3 viewPos = ToView(vec3(texCoord, z0));
 		vec3 nViewPos = normalize(viewPos);

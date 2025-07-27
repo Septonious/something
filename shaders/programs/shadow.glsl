@@ -37,6 +37,7 @@ void main() {
     vec4 albedo = texture2D(tex, texCoord) * color;
 
 	float tintedGlass = float(mat >= 10201 && mat <= 10216);
+	float skyLightMap = lmCoord.y;
 
 	if (albedo.a < 0.01) discard;
 
@@ -46,7 +47,7 @@ void main() {
 	albedo.rgb *= 1.0 - pow32(albedo.a);
 
 	#ifdef WATER_CAUSTICS
-	if (mat == 10001){
+	if (mat == 10001 && lmCoord.y >= 0.99){
 		float caustics = getWaterCaustics(worldPos + cameraPosition);
         albedo.rgb = mix(vec3(1.0), pow(waterColorSqrt, vec3(0.75)), 0.25 + 0.75 * caustics);
 		albedo.rgb *= 0.5 + caustics * WATER_CAUSTICS_STRENGTH;
@@ -98,6 +99,9 @@ attribute vec4 mc_Entity;
 void main() {
 	texCoord = gl_MultiTexCoord0.xy;
 
+	lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
+	
 	mat = int(mc_Entity.x);
 	
     // Voxelization //

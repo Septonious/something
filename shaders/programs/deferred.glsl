@@ -95,7 +95,10 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #ifdef OVERWORLD
 #include "/lib/color/lightColor.glsl"
 #include "/lib/atmosphere/sky.glsl"
+
+#ifdef ROUND_SUN_MOON
 #include "/lib/atmosphere/sunMoon.glsl"
+#endif
 
 #ifdef VOLUMETRIC_CLOUDS
 #include "/lib/atmosphere/spaceConversion.glsl"
@@ -162,7 +165,7 @@ void main() {
 
 		float occlusion = vc.a;
 
-		#ifdef OVERWORLD
+		#ifdef ROUND_SUN_MOON
 		drawSunMoon(color, worldPos, nViewPos, VoU, VoS, VoM, caveFactor, occlusion);
 		#endif
 

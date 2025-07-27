@@ -45,16 +45,12 @@ uniform vec3 skyColor;
 uniform vec3 fogColor;
 
 uniform ivec2 eyeBrightnessSmooth;
-
 uniform vec3 cameraPosition;
 uniform vec4 lightningBoltPosition;
 
 uniform sampler2D texture, noisetex;
 uniform sampler2D gaux1;
-
-#ifdef WATER_REFLECTIONS
 uniform sampler2D depthtex1;
-#endif
 
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
@@ -234,9 +230,22 @@ out float viewDistance;
 
 flat out int mat;
 
-//Attributes//
+// Uniforms //
+#ifdef TAA
+uniform float viewWidth, viewHeight;
+#endif
+
+uniform mat4 gbufferModelView;
+uniform mat4 gbufferModelViewInverse;
+
+// Attributes //
 attribute vec4 at_tangent;
 attribute vec4 mc_Entity;
+
+// Includes //
+#ifdef TAA
+#include "/lib/antialiasing/jitter.glsl"
+#endif
 
 // Main //
 void main() {
@@ -263,7 +272,15 @@ void main() {
 
     mat = int(mc_Entity.x + 0.5);
 
-	gl_Position = ftransform();
+	//Position
+	vec4 position = gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;
+
+	gl_Position = gl_ProjectionMatrix * gbufferModelView * position;
+
+	//TAA jittering
+    #ifdef TAA
+	gl_Position.xy = TAAJitter(gl_Position.xy, gl_Position.w);
+    #endif
 }
 
 #endif
