@@ -25,8 +25,6 @@ uniform float wetness;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 
-uniform float isLushCaves, isDesert;
-
 #if MC_VERSION >= 12104
 uniform float isPaleGarden;
 #endif

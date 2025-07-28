@@ -1,3 +1,5 @@
+uniform float isLushCaves, isDesert;
+
 float timeBrightnessSqrt = sqrt(timeBrightness);
 float mefade = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
 float dfade = 1.0 - pow(1.0 - timeBrightness, 1.5);
@@ -12,3 +14,6 @@ vec3 lightCol = lightColSqrt * lightColSqrt;
 vec3 ambientColRaw = mix(ambientNight, ambientSun, sunVisibility);
 vec3 ambientColSqrt = mix(ambientColRaw, dot(ambientColRaw, vec3(0.448, 0.880, 0.171)) * weatherCol, wetness * 0.75);
 vec3 ambientCol = ambientColSqrt * ambientColSqrt;
+
+vec3 biomeColor = vec3(0.425, 0.375, 0.150) * isLushCaves + vec3(1.105, 0.705, 0.515) * (1.0 + timeBrightness * 0.5) * isDesert;
+float isSpecificBiome = isLushCaves + isDesert;
