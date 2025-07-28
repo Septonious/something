@@ -15,6 +15,14 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define EMISSIVE_ORES
 #define EMISSIVE_FLOWERS
 #define EMISSION_STRENGTH 7.0 //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
+#define EMISSIVE_ARMOR_TRIMS
+#define GENERATED_NORMALS
+#define GENERATED_SPECULAR
+#define RAIN_PUDDLES
+#define RAIN_PUDDLES_STRENGTH 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
+#define NORMAL_STRENGTH 3.0 //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
+#define NORMAL_RESOLUTION 128.0 //[64.0 96.0 128.0 160.0 192.0]
+#define NORMAL_THRESHOLD 0.15 //[0.05 0.10 0.15 0.20 0.25]
 #define TEXTURED_FIRE_LAVA
 
 // Waving Blocks //
