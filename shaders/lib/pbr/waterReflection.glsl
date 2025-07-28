@@ -27,8 +27,8 @@ void getReflection(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, in vec3
 	vec3 falloff = endLightCol * 0.15;
 	#endif
 
-	if (reflection.a < 1.0) {
-		if (skyLightMap > 0.0 && isEyeInWater == 0) {
+	if (reflection.a < 1.0 && isEyeInWater == 0) {
+		if (skyLightMap > 0.0) {
 			#ifdef OVERWORLD
 			vec3 viewPosRef = reflect(normalize(viewPos), normal);
 			vec3 worldPosRef = reflect(normalize(worldPos), normal);
@@ -46,5 +46,5 @@ void getReflection(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, in vec3
 
 	vec3 finalReflection = max(mix(falloff, reflection.rgb, reflection.a), vec3(0.0));
 
-	albedo.rgb = mix(albedo.rgb, finalReflection, fresnel);
+	albedo.rgb = mix(albedo.rgb, finalReflection, fresnel * (1.0 - float(isEyeInWater == 0) * 0.5));
 }

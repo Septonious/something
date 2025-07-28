@@ -28,7 +28,7 @@ void drawStars(inout vec3 color, in vec3 worldPos, in vec3 sunVec, in float VoU,
 
 		#ifdef OVERWORLD
 		if (moonVisibility > 0.0) {
-			color *= 1.0 + texture2D(noisetex, planeCoord * 0.25).r * VoU * moonVisibility;
+			color *= 1.0 + texture2D(noisetex, planeCoord * 0.25).r * VoU * pow4(moonVisibility);
 		}
 		color += stars * lightNight;
 		#else

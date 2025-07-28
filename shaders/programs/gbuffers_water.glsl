@@ -167,7 +167,7 @@ void main() {
 	#endif
 
 	//Water Light Absorption & Scattering
-	if (water > 0.5) {
+	if (water > 0.5 && isEyeInWater == 0) {
 		#ifdef WATER_FOG
 		float oDepth = texture2D(depthtex1, screenPos.xy).r;
 		vec3 oScreenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), oDepth);
