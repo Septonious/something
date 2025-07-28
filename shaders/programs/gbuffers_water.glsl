@@ -159,7 +159,7 @@ void main() {
     gbuffersLighting(albedo, screenPos, viewPos, worldPos, shadow, lightmap, NoU, NoL, NoE, 0.0, emission, 0.6, 0.0);
 
     #if defined OVERWORLD
-    vec3 atmosphereColor = getAtmosphere(viewPos);
+    vec3 atmosphereColor = getAtmosphere(viewPos, worldPos);
 	#elif defined NETHER
 	vec3 atmosphereColor = netherColSqrt.rgb * 0.25;
 	#elif defined END

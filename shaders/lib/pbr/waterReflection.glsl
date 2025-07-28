@@ -30,8 +30,9 @@ void getReflection(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, in vec3
 	if (reflection.a < 1.0) {
 		if (skyLightMap > 0.0 && isEyeInWater == 0) {
 			#ifdef OVERWORLD
-			vec3 skyRefPos = reflect(normalize(viewPos), normal);
-			vec3 reflectedAtmosphere = getAtmosphere(skyRefPos);
+			vec3 viewPosRef = reflect(normalize(viewPos), normal);
+			vec3 worldPosRef = reflect(normalize(worldPos), normal);
+			vec3 reflectedAtmosphere = getAtmosphere(viewPosRef, worldPosRef);
 			falloff = mix(falloff, reflectedAtmosphere, skyLightMap);
 			#endif
 		}

@@ -1,5 +1,5 @@
 #ifdef GBUFFERS_TERRAIN
-void generateIPBR(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, inout vec2 lightmap, inout float emission, inout float smoothness2, inout float metalness, inout float subsurface) {
+void generateIPBR(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, inout vec2 lightmap, in float NoU, inout float emission, inout float smoothness2, inout float metalness, inout float subsurface) {
     int material = max(mat - 10000, 0);
     int material2 = max(mat - 20000, 0);
     float lAlbedo = clamp(length(albedo.rgb), 0.0, 1.0);
@@ -54,6 +54,11 @@ void generateIPBR(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, inout ve
 
     #ifdef EMISSIVE_ORES
     #include "/lib/pbr/blocks/ores.glsl"
+    #endif
+
+    #ifdef TEXTURED_FIRE_LAVA
+    #include "/lib/pbr/blocks/fire.glsl"
+    #include "/lib/pbr/blocks/lava.glsl"
     #endif
 
     #ifdef GENERATED_EMISSION

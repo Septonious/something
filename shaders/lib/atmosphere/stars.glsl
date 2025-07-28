@@ -4,7 +4,7 @@ float getNoise(vec2 pos) {
 
 void drawStars(inout vec3 color, in vec3 worldPos, in vec3 sunVec, in float VoU, in float VoS, in float caveFactor, in float nebulaFactor, in float occlusion, in float size) {
 	#ifdef OVERWORLD
-	float visibility = (1.0 - sunVisibility) * (1.0 - wetness) * pow(VoU, 0.5) * caveFactor;
+	float visibility = moonVisibility * (1.0 - wetness) * pow(VoU, 0.5) * caveFactor;
 	#else
 	float visibility = 0.4 - nebulaFactor * 0.2;
 	#endif
@@ -27,6 +27,9 @@ void drawStars(inout vec3 color, in vec3 worldPos, in vec3 sunVec, in float VoU,
 			  stars *= stars * visibility;
 
 		#ifdef OVERWORLD
+		if (moonVisibility > 0.0) {
+			color *= 1.0 + texture2D(noisetex, planeCoord * 0.25).r * VoU * moonVisibility;
+		}
 		color += stars * lightNight;
 		#else
 		color += stars * endLightColSqrt * 0.5;

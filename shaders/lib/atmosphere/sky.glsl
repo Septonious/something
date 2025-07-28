@@ -1,4 +1,4 @@
-vec3 getAtmosphere(vec3 viewPos) {
+vec3 getAtmosphere(vec3 viewPos, vec3 worldPos) {
      vec3 nViewPos = normalize(viewPos);
 
      float VoSRaw = dot(nViewPos, sunVec);

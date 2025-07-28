@@ -111,7 +111,7 @@ void main() {
 
     //Fog
     #if defined OVERWORLD
-    vec3 atmosphereColor = getAtmosphere(viewPos);
+    vec3 atmosphereColor = getAtmosphere(viewPos, worldPos);
 	#elif defined NETHER
 	vec3 atmosphereColor = netherColSqrt.rgb * 0.25;
 	#elif defined END

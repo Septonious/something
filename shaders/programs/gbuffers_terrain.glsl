@@ -14,6 +14,7 @@ flat in int mat;
 uniform int isEyeInWater;
 uniform int frameCounter;
 
+uniform float frameTimeCounter;
 uniform float viewWidth, viewHeight;
 uniform float blindFactor, nightVision;
 #if MC_VERSION >= 11900
@@ -115,7 +116,7 @@ void main() {
 	float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
 
 	#ifdef GENERATED_EMISSION
-	generateIPBR(albedo, worldPos, viewPos, lightmap, emission, smoothness, metalness, subsurface);
+	generateIPBR(albedo, worldPos, viewPos, lightmap, NoU, emission, smoothness, metalness, subsurface);
 	#endif
 
     vec3 shadow = vec3(0.0);
@@ -144,15 +145,29 @@ flat out int mat;
 uniform float viewWidth, viewHeight;
 #endif
 
+#if defined WAVING_LEAVES || defined WAVING_PLANTS
+uniform float frameTimeCounter;
+
+uniform vec3 cameraPosition;
+#endif
+
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 
 // Attributes //
 attribute vec4 mc_Entity;
 
+#if defined WAVING_PLANTS || defined WAVING_LEAVES
+attribute vec4 mc_midTexCoord;
+#endif
+
 // Includes //
 #ifdef TAA
 #include "/lib/antialiasing/jitter.glsl"
+#endif
+
+#if defined WAVING_LEAVES || defined WAVING_PLANTS
+#include "/lib/pbr/waving.glsl"
 #endif
 
 // Main //
@@ -170,6 +185,11 @@ void main() {
 
 	//Position
 	vec4 position = gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;
+
+	#if defined WAVING_PLANTS || defined WAVING_LEAVES
+	float istopv = gl_MultiTexCoord0.t < mc_midTexCoord.t ? 1.0 : 0.0;
+	position.xyz = getWavingBlocks(position.xyz, istopv, lmCoord.y);
+	#endif
 
 	gl_Position = gl_ProjectionMatrix * gbufferModelView * position;
 
