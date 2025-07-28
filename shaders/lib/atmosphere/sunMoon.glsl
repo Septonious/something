@@ -6,7 +6,7 @@ void drawSunMoon(inout vec3 color, in vec3 worldPos, in vec3 nViewPos, in float 
     if (visibility > 0.0) {
         float sun = max(pow32(pow32(VoS)) - 0.4, 0.0) * (64.0 - timeBrightness * 48.0) * sunVisibility;
         float moon = max(pow32(pow32(VoM)) - 0.4, 0.0);
-              moon = float(moon > 0.0) * 4.0 * moonVisibility;
+              moon = float(moon > 0.0) * 2.0 * moonVisibility;
         float glare = pow32(VoS * sunVisibility + VoM * moonVisibility) * 0.25;
 
         // Moon phases and texture
