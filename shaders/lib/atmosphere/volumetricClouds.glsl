@@ -167,9 +167,9 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 
 			vec3 nSkyColor = normalize(skyColor + 0.0001) * mix(vec3(1.0), biomeColor, sunVisibility * isSpecificBiome);
             vec3 cloudAmbientColor = mix(atmosphereColor * atmosphereColor * 0.5, 
-									 mix(ambientCol, atmosphereColor * nSkyColor * 0.35, 0.45 + timeBrightness * 0.25),
+									 mix(ambientCol, atmosphereColor * nSkyColor * 0.35, 0.2 + timeBrightnessSqrt * 0.4),
 									 sunVisibility * (1.0 - wetness));
-            vec3 cloudLightColor = mix(lightCol, nSkyColor * 2.0, sunVisibility * (0.8 - wetness * 0.8) * (0.5 + timeBrightness * 0.5)) * (1.0 + scattering * shadowFade);
+            vec3 cloudLightColor = mix(lightCol, nSkyColor * 2.0, sunVisibility * (0.8 - wetness * 0.8) * (0.1 + timeBrightnessSqrt * 0.5)) * (1.0 + scattering * shadowFade);
 			vec3 cloudColor = mix(cloudAmbientColor, cloudLightColor, cloudLighting);
 
 			float opacity = clamp(mix(VC_OPACITY, 0.99, (max(0.0, cameraPosition.y) / height)), 0.0, 1.0 - wetness * 0.5);

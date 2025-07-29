@@ -30,19 +30,19 @@ vec3 getBlocklightColor(in int id) {
 
 	#ifdef EMISSIVE_ORES
     //Emerald Ore
-    if (id == 22) color = normalize(vec3(0.05, 1.00, 0.15)) * 0.15;
+    if (id == 22) color = normalize(vec3(0.05, 1.00, 0.15)) * 0.25;
     //Diamond Ore
-    if (id == 23) color = normalize(vec3(0.10, 0.40, 1.00)) * 0.15;
+    if (id == 23) color = normalize(vec3(0.10, 0.40, 1.00)) * 0.25;
     //Copper Ore
-    if (id == 24) color = normalize(vec3(0.60, 0.70, 0.30)) * 0.15;
+    if (id == 24) color = normalize(vec3(0.60, 0.70, 0.30)) * 0.25;
     //Lapis Ore
-    if (id == 25) color = normalize(vec3(0.00, 0.10, 1.20)) * 0.15;
+    if (id == 25) color = normalize(vec3(0.00, 0.10, 1.20)) * 0.25;
     //Gold Ore
-    if (id == 26) color = normalize(vec3(1.00, 0.75, 0.10)) * 0.15;
+    if (id == 26) color = normalize(vec3(1.00, 0.75, 0.10)) * 0.25;
     //Iron Ore
-    if (id == 27) color = normalize(vec3(0.70, 0.40, 0.30)) * 0.15;
+    if (id == 27) color = normalize(vec3(0.70, 0.40, 0.30)) * 0.25;
     //Redstone Ore
-    if (id == 28) color = normalize(vec3(1.00, 0.05, 0.00)) * 0.15;
+    if (id == 28) color = normalize(vec3(1.00, 0.05, 0.00)) * 0.25;
 	#endif
 
     //Lit Redstone Ore
