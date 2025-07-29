@@ -17,8 +17,8 @@ vec3 getAtmosphere(vec3 viewPos, vec3 worldPos) {
 
      vec3 nSkyColor = normalize(skyColor + 0.000001) * mix(vec3(1.0), biomeColor, isSpecificBiome);
      vec3 daySky = mix(nSkyColor, vec3(0.6, 0.5, 0.5), 0.5 - timeBrightnessSqrt * 0.5);
-          daySky += scattering * max(0.0, 0.5 - timeBrightness) * (1.0 - wetness);
-          daySky = mix(daySky, lightColSqrt, baseScatteringHeight * mix(0.4 + VoSClamped * 0.6, 1.0, timeBrightnessSqrt) * (0.5 - timeBrightness * 0.3));
+          daySky += scattering * max(0.0, 0.5 - timeBrightnessSqrt) * (1.0 - wetness);
+          daySky = mix(daySky, lightColSqrt, baseScatteringHeight * mix(0.4 + VoSClamped * 0.6, 1.0, timeBrightnessSqrt) * (0.5 - timeBrightnessSqrt * 0.3));
      vec3 nightSky = lightNight * 0.75;
      vec3 atmosphere = mix(nightSky, daySky, sunVisibility);
           atmosphere *= 1.0 - wetness * 0.125;

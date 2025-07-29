@@ -1,6 +1,6 @@
-#include "/lib/common.glsl"
-
 #define GBUFFERS_HAND
+
+#include "/lib/common.glsl"
 
 #ifdef FSH
 

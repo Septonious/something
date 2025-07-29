@@ -1,6 +1,7 @@
+#define GBUFFERS_BASIC
+
 #include "/lib/common.glsl"
 
-#define GBUFFERS_BASIC
 #ifdef FSH
 
 // VSH Data //

@@ -46,5 +46,5 @@ void getReflection(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, in vec3
 
 	vec3 finalReflection = max(mix(falloff, reflection.rgb, reflection.a), vec3(0.0));
 
-	albedo.rgb = mix(albedo.rgb, finalReflection, fresnel * (1.0 - float(isEyeInWater == 0) * 0.5));
+	albedo.rgb = mix(albedo.rgb, finalReflection, fresnel);
 }

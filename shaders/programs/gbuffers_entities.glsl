@@ -1,6 +1,6 @@
-#include "/lib/common.glsl"
-
 #define GBUFFERS_ENTITIES
+
+#include "/lib/common.glsl"
 
 #ifdef FSH
 
