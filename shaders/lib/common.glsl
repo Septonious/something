@@ -69,6 +69,11 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define FLOODFILL_BRIGHTNESS 1.00 //[1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 #define FLOODFILL_RADIUS 1.5 //[0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7]
 
+// Global Illumination //
+#define GI
+#define GI_SAMPLES 4 //[4 5 6 7 8 9 10 11 12 13 14 15 16]
+#define GI_RADIUS 16.0 //[16.0 24.0 32.0 48.0 64.0 80.0 96.0 112.0 128.0]
+
 // Tonemap //
 #define TONEMAP_CONTRAST 2.8 //[1.0 1.2 1.4 1.6 1.8 2.0 2.2 2.4 2.6 2.8 3.0 3.2 3.4 3.6 3.8 4.0]
 #define TONEMAP_BRIGHTNESS 3.8 //[2.0 2.1 2.2 2.3 2.4 2.5 2.6 2.7 2.8 2.9 3.0 3.1 3.2 3.3 3.4 3.5 3.6 3.7 3.8 3.9 4.0 4.1 4.2 4.3 4.4 4.5 4.6 4.7 4.8 4.9 5.0]
