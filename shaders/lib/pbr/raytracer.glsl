@@ -17,7 +17,7 @@ vec4 Raytrace(sampler2D depthtex, vec3 viewPos, vec3 normal, float dither, out f
 	vec3 pos = vec3(0.0);
 	float dist = 0.0;
 
-	vec3 start = viewPos + normal * (0.075 + length(viewPos) * 0.05);
+	vec3 start = viewPos + normal * (0.075 + min(0.5, length(viewPos) * 0.125));
 
     vec3 rayIncrement = stepSize * reflect(normalize(viewPos), normalize(normal));
     viewPos += rayIncrement;

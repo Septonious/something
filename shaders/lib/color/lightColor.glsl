@@ -15,5 +15,5 @@ vec3 ambientColRaw = mix(ambientNight, ambientSun, sunVisibility);
 vec3 ambientColSqrt = mix(ambientColRaw, dot(ambientColRaw, vec3(0.448, 0.880, 0.171)) * weatherCol, wetness * 0.75);
 vec3 ambientCol = ambientColSqrt * ambientColSqrt;
 
-vec3 biomeColor = vec3(0.425, 0.375, 0.150) * isLushCaves + vec3(1.105, 0.705, 0.515) * (1.0 + timeBrightness * 0.5) * isDesert + vec3(0.725, 1.285, 0.585) * isSwamp + vec3(1.115, 0.745, 0.975) * isMushroom;
+vec3 biomeColor = vec3(0.425, 0.375, 0.150) * isLushCaves + vec3(1.105, 0.705, 0.515) * (1.0 + timeBrightness * 0.5) * isDesert + vec3(0.925, 1.285, 0.785) * isSwamp + vec3(1.115, 0.745, 0.975) * isMushroom;
 float isSpecificBiome = isLushCaves + isDesert + isSwamp + isMushroom;

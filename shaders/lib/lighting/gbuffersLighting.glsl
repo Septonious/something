@@ -144,7 +144,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     #if (defined GBUFFERS_TERRAIN || defined GBUFFERS_ENTITIES || defined GBUFFERS_BLOCK) && !defined NETHER
     if (emission < 0.01 && length(shadow) > 0.01) {
-        vec3 baseReflectance = vec3(0.15);
+        vec3 baseReflectance = vec3(0.25);
 
         float smoothnessF = 0.25 * sunVisibility + lAlbedo * 0.15 + NoL * 0.2 + subsurface * 0.1;
         #if defined DH_TERRAIN && defined END
