@@ -12,6 +12,8 @@ flat in int mat;
 
 // Uniforms //
 #ifdef WATER_CAUSTICS
+uniform int isEyeInWater; 
+
 uniform float frameTimeCounter;
 
 uniform ivec2 eyeBrightnessSmooth;
@@ -49,8 +51,8 @@ void main() {
 	#ifdef WATER_CAUSTICS
 	if (mat == 10001 && lmCoord.y >= 0.99){
 		float caustics = getWaterCaustics(worldPos + cameraPosition);
-        albedo.rgb = mix(vec3(1.0), pow(waterColorSqrt, vec3(0.75)), 0.25 + 0.75 * caustics);
-		albedo.rgb *= 0.75 + caustics * WATER_CAUSTICS_STRENGTH;
+        albedo.rgb = mix(vec3(1.0), waterColorSqrt, 0.5 + 0.5 * caustics);
+		albedo.rgb *= caustics * WATER_CAUSTICS_STRENGTH;
 	}
 	#endif
 
