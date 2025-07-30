@@ -60,6 +60,7 @@ uniform mat4 gbufferProjectionInverse;
 
 // Pipeline Options //
 const bool colortex4Clear = false;
+const bool colortex5Clear = false;
 
 // Global Variables //
 #if defined OVERWORLD
@@ -196,9 +197,10 @@ void main() {
 	color = mix(color, vc.rgb, vc.a);
 	#endif
 
-    /* DRAWBUFFERS:04 */
+    /* DRAWBUFFERS:045 */
     gl_FragData[0].rgb = color;
 	gl_FragData[1].rgb = pow(color.rgb, vec3(0.125)) * 0.5;
+	gl_FragData[2].r = cloudDepth;
 }
 
 #endif

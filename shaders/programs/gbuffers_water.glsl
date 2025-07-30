@@ -47,8 +47,12 @@ uniform vec3 cameraPosition;
 uniform vec4 lightningBoltPosition;
 
 uniform sampler2D texture, noisetex;
-uniform sampler2D gaux1;
 uniform sampler2D depthtex1;
+uniform sampler2D gaux1;
+
+#ifdef VOLUMETRIC_CLOUDS
+uniform sampler2D gaux2;
+#endif
 
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
@@ -138,6 +142,22 @@ void main() {
 	float water = float(mat == 10001);
 	float tintedGlass = float(mat >= 10201 && mat <= 10216);
 
+	//Volumetric Clouds Blending
+	float cloudBlendOpacity = 1.0;
+
+	#ifdef VOLUMETRIC_CLOUDS
+	#ifndef DISTANT_HORIZONS
+	float cloudDepth = texture2D(gaux2, screenPos.xy).r * (far * 2.0);
+	#else
+	float cloudDepth = texture2D(gaux2, screenPos.xy).r * dhFarPlane;
+	#endif
+	cloudBlendOpacity = step(length(viewPos), cloudDepth);
+
+	if (cloudBlendOpacity == 0) {
+		discard;
+	}
+	#endif
+
 	//Water Normals
 	float fresnel = clamp(1.0 + dot(normalize(normal), nViewPos), 0.0, 1.0);
 
@@ -201,6 +221,7 @@ void main() {
 
     //Fog
     Fog(albedo.rgb, viewPos, worldPos, atmosphereColor);
+	albedo.a *= cloudBlendOpacity;
 
 	/* DRAWBUFFERS:013 */
 	gl_FragData[0] = albedo;

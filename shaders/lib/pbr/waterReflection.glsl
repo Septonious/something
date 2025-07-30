@@ -7,17 +7,21 @@ void getReflection(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, in vec3
 	#endif
 
 	#if WATER_NORMALS > 0
-	vec4 reflectPos = rayTrace(depthtex1, viewPos, normal, dither, fresnel, border, 6, 6, 0.1, 2.0);
+	vec4 reflectPos = Raytrace(depthtex1, viewPos, normal, dither, border, 6, 1.0, 0.1, 1.6, 10);
 	#else
-	vec4 reflectPos = rayTrace(depthtex1, viewPos, normal, dither, fresnel, border, 6, 30, 0.1, 2.0);
+	vec4 reflectPos = Raytrace(depthtex1, viewPos, normal, dither, border, 6, 1.0, 0.4, 1.4, 30);
 	#endif
 
-	border = clamp(13.333 * (1.0 - border), 0.0, 1.0);
+	border = clamp(2.0 * (1.0 - border), 0.0, 1.0);
 
-	vec4 reflection = texture2D(gaux1, reflectPos.xy);
-	     reflection.rgb = pow8(reflection.rgb) * 256.0;
-         reflection.rgb *= float(reflection.a > 0.0);
-		 reflection.a *= border;
+	float zThreshold = 1.0 + 1e-5;
+	vec4 reflection = vec4(0);
+	if (reflectPos.z < zThreshold) {
+		reflection = texture2D(gaux1, reflectPos.xy);
+		reflection.rgb = pow8(reflection.rgb) * 256.0;
+		reflection.rgb *= float(reflection.a > 0.0);
+		reflection.a *= border;
+	}
 
 	#ifdef OVERWORLD
 	vec3 falloff = albedo.rgb;

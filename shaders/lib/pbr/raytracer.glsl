@@ -10,39 +10,40 @@ float cdist(vec2 coord) {
 	return max(abs(coord.x - 0.5), abs(coord.y - 0.5)) * 1.85;
 }
 
-const float errMult = 2.2;
+const float errMult = 1.8;
 
-vec4 rayTrace(sampler2D depthtex, vec3 viewPos, vec3 normal, float dither, float fresnel, out float border, int refSamples, int samples, float refMult, float incMult) {
+vec4 Raytrace(sampler2D depthtex, vec3 viewPos, vec3 normal, float dither, out float border, 
+			  int refinementSteps, float stepSize, float refStepSize, float stepLength, int sampleCount) {
 	vec3 pos = vec3(0.0);
 	float dist = 0.0;
 
-	vec3 start = viewPos + normal * (0.075 + (1.0 - fresnel) * length(viewPos) * 0.125);
+	vec3 start = viewPos + normal * (0.075 + length(viewPos) * 0.05);
 
-    vec3 rayDir = 0.5 * reflect(normalize(viewPos), normalize(normal));
-	vec3 viewPosRT = viewPos + rayDir;
-	vec3 rayPos = rayDir;
-	vec3 rfragpos = vec3(0.0);
-	int refinementPasses = 0;
+    vec3 rayIncrement = stepSize * reflect(normalize(viewPos), normalize(normal));
+    viewPos += rayIncrement;
+	vec3 rayDir = rayIncrement;
 
-    for(int i = 0; i < samples; i++) {
-        pos = nvec3(gbufferProjection * vec4(viewPosRT, 1.0)) * 0.5 + 0.5;
+    int refinedSamples = 0;
+
+    for (int i = 0; i < sampleCount; i++) {
+        pos = nvec3(gbufferProjection * nvec4(viewPos)) * 0.5 + 0.5;
 		if (pos.x < -0.05 || pos.x > 1.05 || pos.y < -0.05 || pos.y > 1.05) break;
 
 		vec3 rfragpos = vec3(pos.xy, texture2D(depthtex,pos.xy).r);
-        rfragpos = nvec3(gbufferProjectionInverse * vec4(rfragpos * 2.0 - 1.0, 1.0));
+        rfragpos = nvec3(gbufferProjectionInverse * nvec4(rfragpos * 2.0 - 1.0));
 		dist = abs(dot(normalize(start - rfragpos), normal));
 
-        float err = length(viewPosRT - rfragpos);
-		float lVector = length(rayDir) * pow(length(rayPos), 0.1) * errMult;
-		if (err < lVector) {
-			refinementPasses++;
-			if (refinementPasses >= refSamples) break;
-			rayPos -= rayDir;
-			rayDir *= refMult;
+        float err = length(viewPos - rfragpos);
+		float rayLength = length(rayIncrement) * pow(length(rayDir), 0.1) * errMult;
+		if (err < rayLength) {
+			refinedSamples++;
+			if (refinedSamples >= refinementSteps) break;
+			rayDir -= rayIncrement;
+			rayIncrement *= refStepSize;
 		}
-        rayDir *= incMult;
-        rayPos += rayDir * (0.15 * dither + 0.85);
-		viewPosRT = start + rayPos;
+        rayIncrement *= stepLength;
+        rayDir += rayIncrement * (0.1 * dither + 0.9);
+		viewPos = start + rayDir;
     }
 
 	border = cdist(pos.st);
