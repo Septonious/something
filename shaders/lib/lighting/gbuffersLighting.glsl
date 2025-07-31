@@ -73,7 +73,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     if (subsurface > 0.0) {
         sss = pow8(VoL) * shadowFade * (1.0 - wetness * 0.5);
-        NoL += subsurface * shadowVisibility * (1.0 + sss) * 0.5;
+        NoL += subsurface * shadowVisibility * (1.0 + sss) * 0.25;
     }
 
     //Scene Lighting

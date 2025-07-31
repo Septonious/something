@@ -12,7 +12,7 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
     vec3 cloudyFog = vec3(0.0);
     vec3 lpvFog = vec3(0.0);
     float fireflies = 0.0;
-
+    float currentDepth = 0;
 	//Depths
 	float z0 = texture2D(depthtex0, texCoord).r;
 	float z1 = texture2D(depthtex1, texCoord).r;
@@ -23,6 +23,8 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
 	vec3 worldSunVec = mat3(gbufferModelViewInverse) * lightVec;
 	vec3 viewPos = ToView(vec3(texCoord.xy, z0));
 	vec3 nViewPos = normalize(viewPos);
+    vec3 worldPos = ToWorld(viewPos);
+    vec3 nWorldPos = normalize(worldPos);
     float lViewPos = length(viewPos);
 
 	float VoL = dot(nViewPos, lightVec);
@@ -32,6 +34,7 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
           VoLC *= min(1.0 + VoU, 1.0);
           VoLC = pow(VoLC, 1.25);
 
+    float water = texture2D(colortex3, texCoord).b;
     float totalVisibility = float(z0 > 0.56);
 
 	#if MC_VERSION >= 11900
@@ -49,15 +52,14 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
     #ifdef OVERWORLD
         sampleCount += int((1.0 - mefade) * 4);
     #endif
-    float maxDist = 96.0 + shadowDistance;
-    #if defined VC_SHADOWS && defined VL
-          maxDist += 128.0;
-    #endif
 
-    float minDist = (maxDist / sampleCount) * 0.75;
-    float maxCurrentDist = min(linearDepth1, maxDist);
-    float distanceMixer = 1.0 - clamp(lViewPos * 0.005, 0.0, 1.0);
+    float rayLength = shadowDistance / 12.0 / clamp(nWorldPos.y, 0.1, 1.0) * (1.0 / float(sampleCount));
 
+    vec3 rayIncrement = nWorldPos * rayLength;
+    vec3 rayPos = cameraPosition + rayIncrement * dither;
+    
+    float maxDepth = currentDepth;
+    float sampleTotalLength = rayLength * dither;
     //Volumetric Lighting Variables
     #ifdef VL
 	#ifdef OVERWORLD
@@ -67,7 +69,7 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
         float vlVisibility = mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY, timeBrightness), sunVisibilityM);
               vlVisibility *= mix(meVisRatio, VoLExt, min(timeBrightness + (1.0 - sunVisibilityM), 1.0));
             #if !defined VC_SHADOWS
-              vlVisibility *= max(pow3(1.0 - VoU), float(isEyeInWater == 1));
+              vlVisibility *= max(pow6(1.0 - VoUC), float(isEyeInWater == 1));
             #endif
               vlVisibility = mix(vlVisibility, VoLExt, float(isEyeInWater == 1));
               vlVisibility *= caveFactor * shadowFade;
@@ -91,17 +93,11 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
     vlVisibility *= max(min(1.0, length(viewPos) * 0.001), float(isEyeInWater == 1)) * VL_STRENGTH;
     #endif
 
-    if (z1 > z0) vlVisibility = 0.5 / sampleCount;
-
     //Ray Marching
-    for (int i = 0; i < sampleCount; i++) {
-        float currentDist = exp2(i + dither) * 4.0;
+    for (int i = 0; i < sampleCount; i++, rayPos += rayIncrement, sampleTotalLength += rayLength) {
+        if (lViewPos < sampleTotalLength && z0 < 1.0) break;
 
-        if (currentDist > maxCurrentDist || linearDepth1 < currentDist || (linearDepth0 < currentDist && translucent.rgb == vec3(0.0))) {
-            break;
-        }
-        
-        vec3 worldPos = ToWorld(ToView(vec3(texCoord, getLogarithmicDepth(currentDist))));
+        vec3 worldPos = rayPos - cameraPosition;
         float lWorldPos = length(worldPos);
         float lWorldPosXZ = length(worldPos.xz);
 
@@ -127,16 +123,10 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
                 #endif
             }
 
-            volumetricLighting = clamp(shadow1 * shadowCol + shadow0 * vlCol * float(isEyeInWater == 0), 0.0, 1.0);
-
+            volumetricLighting = clamp(shadow1 * shadowCol * shadowCol * 4.0 + shadow0 * vlCol * float(isEyeInWater == 0), 0.0, 1.0);
             volumetricLighting *= vlVisibility;
         }
         #endif
-
-        //Translucency Blending
-        if (linearDepth0 < currentDist) {
-            volumetricLighting *= translucent;
-        }
 
         //Accumulate samples
         result.rgb += volumetricLighting;

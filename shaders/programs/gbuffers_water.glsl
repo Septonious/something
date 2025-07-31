@@ -185,13 +185,15 @@ void main() {
 	#endif
 
 	//Water Light Absorption & Scattering
+	vec4 waterFog = vec4(0.0);
+
 	if (water > 0.5 && isEyeInWater == 0) {
 		#ifdef WATER_FOG
 		float oDepth = texture2D(depthtex1, screenPos.xy).r;
 		vec3 oScreenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), oDepth);
 		vec3 oViewPos = ToNDC(oScreenPos);
 
-		vec4 waterFog = getWaterFog(viewPos - oViewPos);
+		waterFog = getWaterFog(viewPos - oViewPos);
 
 		albedo.rgb = mix(sqrt(albedo.rgb), sqrt(waterFog.rgb), waterFog.a);
 		albedo.rgb *= albedo.rgb;
@@ -226,7 +228,7 @@ void main() {
 	/* DRAWBUFFERS:013 */
 	gl_FragData[0] = albedo;
 	gl_FragData[1] = albedo;
-	gl_FragData[2] = vec4(refraction, float(albedo.a > 0.0 && albedo.a < 0.95), 1.0);
+	gl_FragData[2] = vec4(refraction, float(albedo.a > 0.0 && albedo.a < 0.95) * 0.05 + waterFog.a * 0.5, 1.0);
 }
 
 #endif

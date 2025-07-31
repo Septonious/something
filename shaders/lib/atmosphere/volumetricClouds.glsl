@@ -61,11 +61,14 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 		vec3 nViewPos = normalize(viewPos);
 		vec3 nWorldPos = normalize(ToWorld(viewPos));
 
+		float lViewPos = length(viewPos);
+
 		#ifdef DISTANT_HORIZONS
 		float dhZ = texture2D(dhDepthTex0, texCoord).r;
 		vec4 dhScreenPos = vec4(texCoord, dhZ, 1.0);
 		vec4 dhViewPos = dhProjectionInverse * (dhScreenPos * 2.0 - 1.0);
 			 dhViewPos /= dhViewPos.w;
+		float lDhViewPos = length(dhViewPos.xyz);
 		#endif
 
 		//Cloud parameters
@@ -98,7 +101,7 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 		float rayLength = thickness * 4.0;
 			  rayLength /= nWorldPos.y * nWorldPos.y * 4.0 + 1.0;
 
-		vec3 sampleStep = nWorldPos * rayLength;
+		vec3 rayIncrement = nWorldPos * rayLength;
 		int sampleCount = min(int(planeDifference / rayLength + 1), 6 + VC_DISTANCE / 1000);
 
 		if (maxDist > 0 && sampleCount > 0) {
@@ -115,7 +118,7 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 			float scattering = pow20(halfVoL);
 			float noiseLightFactor = (2.0 - VoL * shadowFade) * density;
 
-			vec3 rayPos = startPos + sampleStep * dither;
+			vec3 rayPos = startPos + rayIncrement * dither;
 			
 			float maxDepth = currentDepth;
 			float sampleTotalLength = minDist + rayLength * dither;
@@ -124,11 +127,11 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 			vec2 wind = vec2(frameTimeCounter * speed * 0.005, sin(frameTimeCounter * speed * 0.1) * 0.01) * speed * 0.1;
 
 			//Ray marcher
-			for (int i = 0; i < sampleCount; i++, rayPos += sampleStep, sampleTotalLength += rayLength) {
-				if (cloudAlpha > 0.99 || (length(viewPos) < sampleTotalLength && z0 < 1.0)) break;
+			for (int i = 0; i < sampleCount; i++, rayPos += rayIncrement, sampleTotalLength += rayLength) {
+				if (cloudAlpha > 0.99 || (lViewPos < sampleTotalLength && z0 < 1.0)) break;
 
 				#ifdef DISTANT_HORIZONS
-				if ((length(dhViewPos.xyz) < sampleTotalLength && dhZ < 1.0)) break;
+				if ((lDhViewPos < sampleTotalLength && dhZ < 1.0)) break;
 				#endif
 
                 vec3 worldPos = rayPos - cameraPosition;

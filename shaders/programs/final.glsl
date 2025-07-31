@@ -18,7 +18,7 @@ const float wetnessHalflife = 128.0;
 
 /*
 const int colortex0Format = R11F_G11F_B10F; //Main scene
-const int colortex1Format = RGBA16; //Final scene rgb8
+const int colortex1Format = RGB16F; //Final scene rgb8
 const int colortex4Format = RGB8; //Reflections
 */
 

@@ -115,7 +115,7 @@ void main() {
 
 			float distortMask = texture2D(colortex3, newCoord).b;
 
-			if (distortMask == 1.0 && z0 > 0.56) {
+			if (distortMask > 0.0 && z0 > 0.56) {
 				z0 = texture2D(depthtex0, newCoord).r;
 				z1 = texture2D(depthtex1, newCoord).r;
 				color.rgb = texture2D(colortex0, newCoord).rgb;
