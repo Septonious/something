@@ -79,7 +79,7 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
 	#endif
 
     vlVisibility /= sampleCount;
-    vlVisibility *= min(lViewPos * 0.001 * (1.0 + timeBrightness * 6.0) * (7.0 - sunVisibility * 6.0), 1.0);
+    vlVisibility *= min(lViewPos * 0.001 * (1.0 + timeBrightness * 4.0) * (5.0 - sunVisibility * 4.0), 1.0);
     vlVisibility *= VL_STRENGTH;
     #endif
 

@@ -13,18 +13,19 @@ vec3 getAtmosphere(vec3 viewPos, vec3 worldPos) {
     float skyDensity = mix(nightSkyDensity, daySkyDensity, timeBrightnessSqrt);
 
     //Fake light scattering
-    VoUClamped = max(VoUClamped - (0.15 - VoSPositive * 0.15) * (1.0 - sunVisibility), 0.0);
-    float rayleighScatteringMixer = pow(VoUClamped, 0.35);
+    float VoUcm = max(VoUClamped + 0.15, 0.0);
+    float rayleighScatteringMixer = pow(VoUcm, 0.35);
     vec3 rayleighScattering = mix(vec3(8.8, 1.2, 0.0), vec3(4.0, 5.0, 1.0), rayleighScatteringMixer);
+    rayleighScattering *= rayleighScattering;
     rayleighScattering = mix(rayleighScattering, lightColSqrt * 2.0, VoUPositive * VoUPositive);
-    rayleighScattering *= pow(VoUClamped, 1.3 - VoSPositive * 0.4) * pow2(1.0 - VoUClamped);
-    rayleighScattering *= (0.6 - sunVisibility * 0.3) * exp(VoSPositive);
+    rayleighScattering *= pow(VoUcm, 1.3 - VoSPositive * 0.4) * pow3(1.0 - VoUcm);
+    rayleighScattering *= (0.25 - sunVisibility * 0.25) * exp(VoSPositive);
 
     float sunScattering = sunVisibility * pow(1.0 - VoUClamped, 5.0 - VoSClamped * 3.0) * (0.4 + VoSClamped * VoSClamped * 0.25);
           sunScattering *= 1.0 - timeBrightnessSqrt * 0.25;
 
     vec3 nSkyColor = normalize(skyColor + 0.000001) * mix(vec3(1.0), biomeColor, isSpecificBiome);
-    vec3 daySky = mix(nSkyColor, vec3(0.51, 0.45, 0.63), 0.5 - timeBrightnessSqrt * 0.5);
+    vec3 daySky = mix(nSkyColor, vec3(0.51, 0.45, 0.55), 0.6 - timeBrightnessSqrt * 0.6);
     daySky += rayleighScattering * (0.6 - timeBrightnessSqrt * 0.6) * (1.0 - wetness);
     daySky = mix(daySky, lightColSqrt, sunScattering);
 

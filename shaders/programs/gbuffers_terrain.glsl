@@ -108,7 +108,7 @@ void main() {
     
 	if (foliage > 0.5) {
 		float foliageNormalDistance = min(1.0, length(viewPos.xz) / shadowDistance);
-		newNormal = normalize(upVec) * (1.0 - foliageNormalDistance * 0.5 * timeBrightness);
+		newNormal = normalize(upVec) * (1.0 - foliageNormalDistance * 0.4 * timeBrightness);
 	}
 
 	float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
