@@ -124,6 +124,36 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     shadow = mix(fakeShadow, realShadow, vec3(shadowVisibility));
     #endif
 
+    //Cloud Shadows
+    float cloudShadow = 1.0;
+
+    #ifdef VC_SHADOWS
+    float speed = VC_SPEED;
+    float amount = VC_AMOUNT;
+    float frequency = VC_FREQUENCY;
+    float thickness = VC_THICKNESS;
+    float density = VC_DENSITY;
+    float height = VC_HEIGHT;
+    float scale = VC_SCALE;
+
+    getDynamicWeather(speed, amount, frequency, thickness, density, height, scale);
+
+    float cloudTop = height + thickness * scale;
+
+    if (worldPos.y + cameraPosition.y < cloudTop) {
+        vec2 wind = vec2(frameTimeCounter * speed * 0.005, sin(frameTimeCounter * speed * 0.1) * 0.01) * speed * 0.1;
+        vec3 worldSunVec = mat3(gbufferModelViewInverse) * lightVec;
+        vec3 cloudShadowPos = worldPos + cameraPosition + (worldSunVec / max(abs(worldSunVec.y), 0.0)) * max(cloudTop - worldPos.y - cameraPosition.y, 0.0);
+
+        float noise = 0.0;
+        getCloudShadow(cloudShadowPos.xz / scale, wind, amount, frequency, density, noise);
+
+        cloudShadow = noise * VC_OPACITY;
+    }
+    shadow *= cloudShadow;
+    #endif
+
+    //Main color mixing
     #ifdef OVERWORLD
     float rainFactor = 1.0 - wetness * 0.5;
 

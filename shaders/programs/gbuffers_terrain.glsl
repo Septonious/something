@@ -14,6 +14,10 @@ flat in int mat;
 uniform int isEyeInWater;
 uniform int frameCounter;
 
+#ifdef VC_SHADOWS
+uniform int worldDay, worldTime;
+#endif
+
 uniform float frameTimeCounter;
 uniform float viewWidth, viewHeight;
 uniform float blindFactor, nightVision;
@@ -84,6 +88,11 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 
 #include "/lib/lighting/lightning.glsl"
 #include "/lib/lighting/shadows.glsl"
+
+#ifdef VC_SHADOWS
+#include "/lib/lighting/cloudShadows.glsl"
+#endif
+
 #include "/lib/lighting/gbuffersLighting.glsl"
 
 #ifdef GENERATED_EMISSION

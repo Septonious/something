@@ -19,10 +19,10 @@ uniform sampler2D colortex0;
 // Global Variables //
 #ifdef VL
 const vec2 vlOffsets[4] = vec2[4](
-	vec2( 1.5,  0.5),
-	vec2(-0.5,  1.5),
-	vec2(-1.5, -0.5),
-	vec2( 0.5, -1.5)
+	vec2( 1.0,  0.0),
+	vec2(-0.0,  1.0),
+	vec2(-1.0, -0.0),
+	vec2( 0.0, -1.0)
 );
 #endif
 

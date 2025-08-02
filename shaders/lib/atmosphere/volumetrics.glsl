@@ -53,7 +53,26 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
 
     //Volumetric Lighting Variables
     #ifdef VL
+    float vlMaxDist = shadowDistance;
+
 	#ifdef OVERWORLD
+        #ifdef VC_SHADOWS
+		float speed = VC_SPEED;
+		float amount = VC_AMOUNT;
+		float frequency = VC_FREQUENCY;
+		float thickness = VC_THICKNESS;
+		float density = VC_DENSITY;
+		float height = VC_HEIGHT;
+        float scale = VC_SCALE;
+        float cloudTop = VC_HEIGHT + VC_THICKNESS * scale - 25.0;
+
+        getDynamicWeather(speed, amount, frequency, thickness, density, height, scale);
+
+        vec2 wind = vec2(frameTimeCounter * speed * 0.005, sin(frameTimeCounter * speed * 0.1) * 0.01) * speed * 0.1;
+
+        vlMaxDist += VC_DISTANCE * 0.5;
+        #endif
+
         float VoLm = pow(VoLClamped, 2.0 + sunVisibility);
         float vlVisibility = sunVisibility * (1.0 - VL_STRENGTH_RATIO) * (1.0 - timeBrightness) + VL_STRENGTH_RATIO * VoLm;
               vlVisibility *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY, timeBrightness), sunVisibility);
@@ -92,7 +111,7 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
 
        //VL calculations
        #ifdef VL
-       if (vlVisibility > 0.0) {
+       if (vlVisibility > 0.0 && lWorldPos < vlMaxDist) {
           vec3 shadowCol = vec3(0.0);
 
           float shadow0 = 1.0;
@@ -113,6 +132,19 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
           }
 
           volumetricLighting = clamp(shadow1 * shadowCol * shadowCol * 4.0 + shadow0 * vlCol * float(isEyeInWater == 0), 0.0, 1.0);
+
+            //Crepuscular rays
+            #ifdef VC_SHADOWS
+            if (rayPos.y < cloudTop) {
+                vec3 cloudShadowPos = rayPos + (worldSunVec / max(abs(worldSunVec.y), 0.0)) * max(cloudTop - rayPos.y, 0.0);
+
+                float noise = 0.0;
+                getCloudShadow(cloudShadowPos.xz / scale, wind, amount, frequency, density, noise);
+                volumetricLighting *= noise;
+            }
+            volumetricLighting *= 1.0 - min((rayPos.y - thickness) * (1.0 / cloudTop), 1.0);
+            #endif
+
           volumetricLighting *= vlVisibility;
        }
        #endif

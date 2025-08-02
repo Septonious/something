@@ -14,6 +14,10 @@ uniform sampler2D colortex0;
 uniform int frameCounter;
 uniform int isEyeInWater;
 
+#if defined VL && defined VC_SHADOWS
+uniform int worldDay, worldTime;
+#endif
+
 uniform float shadowFade;
 uniform float far, near;
 uniform float frameTimeCounter;
@@ -74,6 +78,11 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/util/ToShadow.glsl"
 #include "/lib/color/lightColor.glsl"
 #include "/lib/atmosphere/spaceConversion.glsl"
+
+#if defined VL && defined VC_SHADOWS
+#include "/lib/lighting/cloudShadows.glsl"
+#endif
+
 #include "/lib/atmosphere/volumetrics.glsl"
 #endif
 
