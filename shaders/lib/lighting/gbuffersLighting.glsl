@@ -146,19 +146,19 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     if (emission < 0.01 && length(shadow) > 0.01) {
         vec3 baseReflectance = vec3(0.25);
 
-        float smoothnessF = 0.25 + lAlbedo * 0.15 + NoL * 0.2;
+        float smoothnessF = 0.2 + lAlbedo * 0.15 + NoL * 0.2;
         #if defined DH_TERRAIN && defined END
               smoothnessF += 0.15;
         #endif
               smoothnessF = mix(smoothnessF, 0.95, smoothness);
 
         #ifdef OVERWORLD
-        specularHighlight = getSpecularHighlight(normal, viewPos, smoothnessF, baseReflectance, lightCol * 2.0, shadow * vanillaDiffuse, color.a);
+        specularHighlight = getSpecularHighlight(normal, viewPos, smoothnessF, baseReflectance, lightCol, shadow * vanillaDiffuse, color.a);
         #else
         specularHighlight = getSpecularHighlight(normal, viewPos, smoothnessF, baseReflectance, endLightCol * 0.25, shadow * vanillaDiffuse, color.a);
         #endif
 
-        specularHighlight = clamp(specularHighlight * 2.0, vec3(0.0), vec3(8.0));
+        specularHighlight = clamp(specularHighlight * 4.0, vec3(0.0), vec3(8.0));
     }
     #endif
 

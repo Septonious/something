@@ -34,7 +34,6 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
     float VoLClamped = clamp(VoL, 0.0, 1.0);
     float VoUClamped = clamp(VoU, 0.0, 1.0);
 
-    float water = texture2D(colortex3, texCoord).b;
     float totalVisibility = float(z0 > 0.56);
 
 	#if MC_VERSION >= 11900
@@ -55,7 +54,7 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
     //Volumetric Lighting Variables
     #ifdef VL
 	#ifdef OVERWORLD
-        float VoLm = pow(VoLClamped, 3.0 + sunVisibility * 2.0);
+        float VoLm = pow(VoLClamped, 2.0 + sunVisibility);
         float vlVisibility = sunVisibility * (1.0 - VL_STRENGTH_RATIO) * (1.0 - timeBrightness) + VL_STRENGTH_RATIO * VoLm;
               vlVisibility *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY, timeBrightness), sunVisibility);
           #if !defined VC_SHADOWS
