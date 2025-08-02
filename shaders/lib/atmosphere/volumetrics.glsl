@@ -75,7 +75,7 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
 
         float VoLm = pow(VoLClamped, 2.0 + sunVisibility);
         float vlVisibility = sunVisibility * (1.0 - VL_STRENGTH_RATIO) * (1.0 - timeBrightness) + VL_STRENGTH_RATIO * VoLm;
-              vlVisibility *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY, timeBrightness), sunVisibility);
+              vlVisibility *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY * (3.0 - eBS * 2.0), timeBrightness), sunVisibility);
           #if !defined VC_SHADOWS
             vlVisibility *= max(pow6(1.0 - VoUClamped * (1.0 - timeBrightness) * sunVisibility), float(isEyeInWater == 1));
           #endif

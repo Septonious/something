@@ -1,5 +1,5 @@
 else if (material >= 35 && material < 40) {
-	float emissionFactor = 0.15 * lAlbedo * (0.1 + (1.0 - clamp(length(viewPos) * 0.4, 0.0, 1.0)));
+	float emissionFactor = 0.225 * lAlbedo * (0.1 + (1.0 - clamp(length(viewPos) * 0.4, 0.0, 1.0)));
 	float noise = texture2D(noisetex, (worldPos.xz + cameraPosition.xz + frameCounter * 0.01) * 0.001).b;
 		  noise = 0.75 + clamp(noise - 0.4, 0.0, 1.0);
 	if (albedo.r + albedo.g + albedo.b < 2.9) {
@@ -18,7 +18,7 @@ else if (material >= 35 && material < 40) {
 		#endif
 	}
 } else if (material == 40) {
-	float emissionFactor = 0.15 * lAlbedo * (0.1 + (1.0 - clamp(length(viewPos) * 0.4, 0.0, 1.0)));
+	float emissionFactor = 0.225 * lAlbedo * (0.1 + (1.0 - clamp(length(viewPos) * 0.4, 0.0, 1.0)));
 	float noise = texture2D(noisetex, (worldPos.xz + cameraPosition.xz + frameCounter * 0.01) * 0.001).b;
 		  noise = 0.75 + clamp(noise - 0.4, 0.0, 1.0);
 	if (albedo.r + albedo.g + albedo.b < 2.9) {
@@ -30,7 +30,7 @@ else if (material >= 35 && material < 40) {
 		}
 	}
 } else if (material >= 74 && material <= 79) {
-	float emissionFactor = 0.15 * lAlbedo * (0.1 + (1.0 - clamp(length(viewPos) * 0.4, 0.0, 1.0)));
+	float emissionFactor = 0.225 * lAlbedo * (0.1 + (1.0 - clamp(length(viewPos) * 0.4, 0.0, 1.0)));
 	float noise = texture2D(noisetex, (worldPos.xz + cameraPosition.xz + frameCounter * 0.01) * 0.001).b;
 		  noise = 0.75 + clamp(noise - 0.4, 0.0, 1.0);
 	if (albedo.r + albedo.g + albedo.b < 2.9) {

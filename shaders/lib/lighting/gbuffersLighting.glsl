@@ -157,7 +157,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     #ifdef OVERWORLD
     float rainFactor = 1.0 - wetness * 0.5;
 
-    vec3 sceneLighting = mix(ambientCol * pow3(lightmap.y), lightCol * (0.15 + lightmap.y * 0.85), shadow * rainFactor * shadowFade);
+    vec3 sceneLighting = mix(ambientCol * (0.05 + lightmap.y * lightmap.y * 0.95), lightCol * (0.15 + lightmap.y * 0.85), shadow * rainFactor * shadowFade);
          sceneLighting *= 1.0 + sss * shadow;
     #elif defined END
     vec3 sceneLighting = mix(endAmbientCol, endLightCol, shadow) * 0.25;
@@ -194,7 +194,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     //Minimal Lighting
     #if defined OVERWORLD || defined END
-    sceneLighting += minLightCol * (1.0 - lightmap.y);
+    sceneLighting += minLightCol * (1.0 - lightmap.y) * (1.0 - eBS);
     #endif
 
     //Night vision

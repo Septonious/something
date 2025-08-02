@@ -3,7 +3,7 @@
 // Shadows //
 const int shadowMapResolution = 2048; //[512 1024 2048 3072 4096 8192]
 const float shadowDistance = 256.0; //[96.0 128.0 192.0 256.0 384.0 512.0 768.0 1024.0]
-const float sunPathRotation = -40.0; //[-85.0 -80.0 -75.0 -70.0 -65.0 -60.0 -55.0 -50.0 -45.0 -40.0 -35.0 -30.0 -25.0 -20.0 -15.0 -10.0 -5.0 0.0 5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0 55.0 60.0 65.0 70.0 75.0 80.0 85.0]
+const float sunPathRotation = 10.0; //[-85.0 -80.0 -75.0 -70.0 -65.0 -60.0 -55.0 -50.0 -45.0 -40.0 -35.0 -30.0 -25.0 -20.0 -15.0 -10.0 -5.0 0.0 5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0 55.0 60.0 65.0 70.0 75.0 80.0 85.0]
 const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define SHADOW_COLOR
 #define VPS
@@ -15,7 +15,13 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define EMISSIVE_FLOWERS
 #define EMISSION_STRENGTH 7.0 //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
 
-//Fog//
+// Waving Blocks //
+#define WAVING_PLANTS
+#define WAVING_LEAVES
+#define WAVING_AMPLITUDE 2.25 //[1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+#define WAVING_SPEED 1.1 //[0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5]
+
+// Fog //
 #define DISTANT_FADE
 #define DISTANT_FADE_STYLE 0 //[0 1]
 #define FOG_DISTANCE 100 //[50 55 60 65 70 75 80 85 90 95 100 110 120 130 140 150 160 170 180 190 200]
@@ -51,7 +57,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define VL_STRENGTH_RATIO 0.80 //[0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90]
 #define VL_NIGHT 0.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 #define VL_MORNING_EVENING 1.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
-#define VL_DAY 0.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+#define VL_DAY 0.75 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 
 // Sky //
 #define ROUND_SUN_MOON
