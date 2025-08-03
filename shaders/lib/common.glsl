@@ -3,17 +3,26 @@
 // Shadows //
 const int shadowMapResolution = 2048; //[512 1024 2048 3072 4096 8192]
 const float shadowDistance = 256.0; //[96.0 128.0 192.0 256.0 384.0 512.0 768.0 1024.0]
-const float sunPathRotation = 10.0; //[-85.0 -80.0 -75.0 -70.0 -65.0 -60.0 -55.0 -50.0 -45.0 -40.0 -35.0 -30.0 -25.0 -20.0 -15.0 -10.0 -5.0 0.0 5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0 55.0 60.0 65.0 70.0 75.0 80.0 85.0]
+const float sunPathRotation = -40.0; //[-85.0 -80.0 -75.0 -70.0 -65.0 -60.0 -55.0 -50.0 -45.0 -40.0 -35.0 -30.0 -25.0 -20.0 -15.0 -10.0 -5.0 0.0 5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0 55.0 60.0 65.0 70.0 75.0 80.0 85.0]
 const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define SHADOW_COLOR
 #define VPS
 #define VPS_BLUR_STRENGTH 0.55 //[0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80]
 
 // PBR //
+#define TEXTURED_FIRE_LAVA
 #define GENERATED_EMISSION
+#define EMISSION_STRENGTH 7.0 //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
 #define EMISSIVE_ORES
 #define EMISSIVE_FLOWERS
-#define EMISSION_STRENGTH 7.0 //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
+#define EMISSIVE_ARMOR_TRIMS
+#define GENERATED_NORMALS
+#define GENERATED_SPECULAR
+#define RAIN_PUDDLES
+#define RAIN_PUDDLES_STRENGTH 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
+#define NORMAL_STRENGTH 3.0 //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
+#define NORMAL_RESOLUTION 128.0 //[64.0 96.0 128.0 160.0 192.0]
+#define NORMAL_THRESHOLD 0.15 //[0.05 0.10 0.15 0.20 0.25]
 
 // Waving Blocks //
 #define WAVING_PLANTS
@@ -45,7 +54,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define VC_THICKNESS 14.0 //[8.0 10.0 12.0 14.0 16.0 18.0 20.0]
 #define VC_DETAIL 0.35 //[0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50]
 #define VC_SPEED 1.25 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.50 3.00 3.50 4.00]
-#define VC_OPACITY 0.7 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define VC_OPACITY 0.9 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 #define VC_DISTANCE 5000 //[2000 3000 4000 5000 6000 7000 8000 9000 10000]
 #define VC_ATTENUATION 1.50 //[1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00]
 #define VC_SCALE 8.0 //[5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0]

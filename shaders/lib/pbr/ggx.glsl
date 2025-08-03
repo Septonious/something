@@ -94,7 +94,7 @@ vec3 getSpecularHighlight(vec3 normal, vec3 viewPos, float smoothness, vec3 base
     smoothLighting *= smoothLighting;
     
     #ifdef OVERWORLD
-    vec3 specular = GGX(normal, normalize(viewPos), smoothness, baseReflectance, 0.075);
+    vec3 specular = GGX(normal, normalize(viewPos), smoothness, baseReflectance, 0.040);
          specular *= shadow * shadowFade * smoothLighting;
          specular *= 1.0 - wetness;
     #else

@@ -63,7 +63,7 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
 
 	//Distant Fade
 	#ifdef DISTANT_FADE
-	if (isEyeInWater < 0.5) {
+	if (isEyeInWater == 0) {
 		#if MC_VERSION >= 11800
 		const float fogOffset = 0.0;
 		#else
@@ -76,7 +76,7 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
 		float fogFactor = lViewPos;
 		#endif
 
-		float vanillaFog = 1.0 - (farPlane - (fogFactor + fogOffset)) * 8.0 / (4.0 * farPlane);
+		float vanillaFog = 1.0 - (farPlane - (fogFactor + fogOffset)) * 4.0 / (2.0 * farPlane);
 			  vanillaFog = clamp(vanillaFog * vanillaFog * vanillaFog, 0.0, 1.0) * caveFactor;
 	
 		if (0.0 < vanillaFog){

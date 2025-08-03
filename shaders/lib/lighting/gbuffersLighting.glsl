@@ -1,4 +1,4 @@
-void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in vec3 worldPos, inout vec3 shadow, in vec2 lightmap, 
+void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in vec3 worldPos, in vec3 newNormal, inout vec3 shadow, in vec2 lightmap, 
                       in float NoU, in float NoL, in float NoE,
                       in float subsurface, in float emission, in float smoothness, in float parallaxShadow) {
     //Variables
@@ -114,7 +114,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     float sss = 0.0;
 
     if (subsurface > 0.0) {
-        sss = pow8(VoL) * shadowFade * (1.0 - wetness * 0.5);
+        sss = pow16(VoL) * shadowFade * (1.0 - wetness * 0.5);
         NoL += subsurface * shadowVisibility * (1.0 + sss);
     }
 
@@ -153,7 +153,26 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     shadow *= cloudShadow;
     #endif
 
+    //Specular Highlight
+    vec3 specularHighlight = vec3(0.0);
+
+    #if (defined GBUFFERS_TERRAIN || defined GBUFFERS_ENTITIES || defined GBUFFERS_BLOCK) && !defined NETHER
+    if (emission < 0.01) {
+        vec3 baseReflectance = vec3(2.0 + NoL - smoothness * 1.5);
+
+        float smoothnessF = 0.15 + lAlbedo * 0.1;
+        #if defined DH_TERRAIN && defined END
+              smoothnessF += 0.15;
+        #endif
+              smoothnessF = mix(smoothnessF, 1.0, smoothness);
+
+        specularHighlight = GGX(newNormal, normalize(viewPos), smoothnessF, baseReflectance, 0.04) * shadowFade;
+    }
+    #endif
+
     //Main color mixing
+    lightCol *= 1.0 + specularHighlight * (1.0 - float(subsurface > 0));
+
     #ifdef OVERWORLD
     float rainFactor = 1.0 - wetness * 0.5;
 
@@ -169,29 +188,6 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     float lightning = min(lightningFlashEffect(worldPos, lightningBoltPosition.xyz, 256.0) * lightningBoltPosition.w * 4.0, 1.0);
     vec3 lightningFlash = vec3(lightning) * (clamp(dot(lightningBoltPosition.xyz, worldNormal), 0.0, 1.0) * 0.9 + 0.1) * lightmap.y;
 
-    //Specular Highlight
-    vec3 specularHighlight = vec3(0.0);
-
-    #if (defined GBUFFERS_TERRAIN || defined GBUFFERS_ENTITIES || defined GBUFFERS_BLOCK) && !defined NETHER
-    if (emission < 0.01 && length(shadow) > 0.01) {
-        vec3 baseReflectance = vec3(0.25);
-
-        float smoothnessF = 0.2 + lAlbedo * 0.15 + NoL * 0.2;
-        #if defined DH_TERRAIN && defined END
-              smoothnessF += 0.15;
-        #endif
-              smoothnessF = mix(smoothnessF, 0.95, smoothness);
-
-        #ifdef OVERWORLD
-        specularHighlight = getSpecularHighlight(normal, viewPos, smoothnessF, baseReflectance, lightCol, shadow * vanillaDiffuse, color.a);
-        #else
-        specularHighlight = getSpecularHighlight(normal, viewPos, smoothnessF, baseReflectance, endLightCol * 0.25, shadow * vanillaDiffuse, color.a);
-        #endif
-
-        specularHighlight = clamp(specularHighlight * 4.0, vec3(0.0), vec3(8.0));
-    }
-    #endif
-
     //Minimal Lighting
     #if defined OVERWORLD || defined END
     sceneLighting += minLightCol * (1.0 - lightmap.y) * (1.0 - eBS);
@@ -205,7 +201,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     albedo.rgb = mix(albedo.rgb, albedo.rgb * ao * ao, aoMixer);
 
     albedo.rgb = pow(albedo.rgb, vec3(2.2));
-    albedo.rgb *= sceneLighting + blockLighting + emission + specularHighlight + lightningFlash;
+    albedo.rgb *= sceneLighting + blockLighting + emission + lightningFlash;
     albedo.rgb *= vanillaDiffuse;
     albedo.rgb = pow(albedo.rgb, vec3(1.0 / 2.2));
 }
