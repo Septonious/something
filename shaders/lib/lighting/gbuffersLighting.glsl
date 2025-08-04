@@ -64,6 +64,15 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
           shadowVisibility *= caveFactor;
           #endif
 
+    //Subsurface scattering
+    float VoL = clamp(dot(normalize(viewPos), lightVec), 0.0, 1.0);
+    float sss = 0.0;
+
+    if (subsurface > 0.0) {
+        sss = pow16(VoL) * shadowFade * (1.0 - wetness * 0.5);
+        NoL += subsurface * shadowVisibility * (1.0 + sss);
+    }
+
     //Scene Lighting
     #ifndef NETHER
     if (NoL > 0.0001 && shadowVisibility > 0.0) {
@@ -109,15 +118,6 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     NoL = clamp(NoL * 1.01 - 0.01, 0.0, 1.0);
 
-    //Subsurface scattering
-    float VoL = clamp(dot(normalize(viewPos), lightVec), 0.0, 1.0);
-    float sss = 0.0;
-
-    if (subsurface > 0.0) {
-        sss = pow16(VoL) * shadowFade * (1.0 - wetness * 0.5);
-        NoL += subsurface * shadowVisibility * (1.0 + sss);
-    }
-
     vec3 realShadow = shadow * NoL;
     vec3 fakeShadow = getFakeShadow(lightmap.y) * originalNoL;
 
@@ -158,20 +158,17 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     #if (defined GBUFFERS_TERRAIN || defined GBUFFERS_ENTITIES || defined GBUFFERS_BLOCK) && !defined NETHER
     if (emission < 0.01) {
-        vec3 baseReflectance = vec3(2.0 + NoL - smoothness * 1.5);
+        vec3 baseReflectance = vec3(0.25 + float(smoothness < 0.05) * 9.0);
 
-        float smoothnessF = 0.15 + lAlbedo * 0.1;
-        #if defined DH_TERRAIN && defined END
-              smoothnessF += 0.15;
-        #endif
+        float smoothnessF = 0.3;
               smoothnessF = mix(smoothnessF, 1.0, smoothness);
 
-        specularHighlight = GGX(newNormal, normalize(viewPos), smoothnessF, baseReflectance, 0.04) * shadowFade;
+        specularHighlight = clamp(GGX(newNormal, normalize(viewPos), smoothnessF, baseReflectance, 0.04) * shadowFade, vec3(0.0), vec3(8.0));
     }
     #endif
 
     //Main color mixing
-    lightCol *= 1.0 + specularHighlight * (1.0 - float(subsurface > 0));
+    lightCol *= 1.0 + specularHighlight;
 
     #ifdef OVERWORLD
     float rainFactor = 1.0 - wetness * 0.5;
@@ -196,20 +193,12 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     //Night vision
     sceneLighting += nightVision * vec3(0.2, 0.3, 0.2);
 
-    //Global Illumination
-    vec3 gi = vec3(0.0);
-
-    #ifdef GI
-    gi = texture2D(gaux3, screenPos.xy).rgb;
-    gi = pow4(gi) * 32.0 * lightmap.y * sunVisibility * shadowFade;
-    #endif
-
     //Vanilla AO
-    float aoMixer = (1.0 - ao) * (1.0 - blockLightMap) * (1.0 - float(emission > 0.0)) * (1.0 - subsurface * 0.5) * (1.0 - originalNoL) * (1.0 - min(1.0, length(gi)));
+    float aoMixer = (1.0 - ao) * (1.0 - blockLightMap) * (1.0 - float(emission > 0.0)) * (1.0 - subsurface * 0.5) * (1.0 - originalNoL);
     albedo.rgb = mix(albedo.rgb, albedo.rgb * ao * ao, aoMixer);
 
     albedo.rgb = pow(albedo.rgb, vec3(2.2));
-    albedo.rgb *= sceneLighting + blockLighting + emission + lightningFlash + gi;
+    albedo.rgb *= sceneLighting + blockLighting + emission + lightningFlash;
     albedo.rgb *= vanillaDiffuse;
     albedo.rgb = pow(albedo.rgb, vec3(1.0 / 2.2));
 }

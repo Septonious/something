@@ -35,6 +35,11 @@ uniform vec3 skyColor, cameraPosition;
 
 uniform sampler2D colortex1;
 uniform sampler2D colortex3;
+
+#ifdef VOLUMETRIC_CLOUDS
+uniform sampler2D colortex5;
+#endif
+
 uniform sampler2D noisetex;
 uniform sampler2D shadowcolor0;
 uniform sampler2D shadowtex0, shadowtex1;
@@ -92,7 +97,7 @@ void main() {
 	vec3 color = texture2D(colortex0, texCoord).rgb;
 
 	#if defined VL
-	vec4 volumetrics = vec4(0.0);
+	vec3 volumetrics = vec3(0.0);
 
 	float blueNoiseDither = texture2D(noisetex, gl_FragCoord.xy / 512.0).b;
 	#ifdef TAA
@@ -101,13 +106,13 @@ void main() {
 
 	vec3 translucent = texture2D(colortex1, texCoord).rgb;
 
-	computeVolumetrics(volumetrics, translucent, blueNoiseDither);
+	computeVolumetricLight(volumetrics, translucent, blueNoiseDither);
 	#endif
 
 	#if defined VL
 		/* DRAWBUFFERS:01 */
 		gl_FragData[0].rgb = pow(color, vec3(2.2));
-		gl_FragData[1].rgb = pow(volumetrics.rgb / 256.0, vec3(0.125));
+		gl_FragData[1].rgb = pow(volumetrics / 256.0, vec3(0.125));
 	#else
 		/* DRAWBUFFERS:0 */
 		gl_FragData[0].rgb = pow(color, vec3(2.2));

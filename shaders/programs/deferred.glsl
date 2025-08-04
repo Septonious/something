@@ -123,6 +123,7 @@ void main() {
 
     #if defined OVERWORLD
     vec3 atmosphereColor = getAtmosphere(viewPos, worldPos);
+		 atmosphereColor *= 1.0 + Bayer8(gl_FragCoord.xy) / 64.0;
 	#elif defined NETHER
 	vec3 atmosphereColor = netherColSqrt.rgb * 0.25;
 	#elif defined END
@@ -160,7 +161,7 @@ void main() {
 
 	//Sky
     if (z0 == 1.0) {
-        color = atmosphereColor * (1.0 + Bayer8(gl_FragCoord.xy) / 64.0);
+        color = atmosphereColor;
 
 		float occlusion = vc.a;
 
@@ -180,9 +181,9 @@ void main() {
 		#if MC_VERSION >= 11900
 		color *= 1.0 - darknessFactor;
 		#endif
-    } else {
-		Fog(color, viewPos, worldPos, atmosphereColor);
-	}
+    }
+
+	Fog(color, viewPos, worldPos, atmosphereColor);
 
 	//Volumetric Clouds
 	#if defined VOLUMETRIC_CLOUDS || defined END_CLOUDY_FOG

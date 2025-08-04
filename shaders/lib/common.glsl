@@ -61,11 +61,11 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 
 // Volumetric Light //
 #define VL
-#define VL_STRENGTH 0.70 //[0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00]
-#define VL_SAMPLES 10 //[5 6 7 8 9 10 11 12 13 14 15 16]
+#define VL_STRENGTH 6.50 //[1.00 1.50 2.00 2.50 3.00 3.50 4.00 4.50 5.00 5.50 6.00 6.50 7.00 7.50 8.00]
+#define VL_SAMPLES 8 //[5 6 7 8 9 10 11 12 13 14 15 16]
 #define VL_STRENGTH_RATIO 0.80 //[0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90]
 #define VL_NIGHT 0.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
-#define VL_MORNING_EVENING 1.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+#define VL_MORNING_EVENING 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 #define VL_DAY 0.75 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 
 // Sky //
@@ -96,11 +96,6 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define VOXEL_VOLUME_SIZE 192 //[128 192 256 384 512]
 #define FLOODFILL_BRIGHTNESS 1.00 //[1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 #define FLOODFILL_RADIUS 1.5 //[0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7]
-
-// Global Illumination //
-#define GI
-#define GI_SAMPLES 4 //[4 5 6 7 8 9 10 11 12 13 14 15 16]
-#define GI_RADIUS 16.0 //[16.0 24.0 32.0 48.0 64.0 80.0 96.0 112.0 128.0]
 
 // Tonemap //
 #define TONEMAP_CONTRAST 3.2 //[1.0 1.2 1.4 1.6 1.8 2.0 2.2 2.4 2.6 2.8 3.0 3.2 3.4 3.6 3.8 4.0]
@@ -384,8 +379,4 @@ vec3 pow8(vec3 x) {return x*x*x*x*x*x*x*x;}
 
 #ifndef VOLUMETRIC_CLOUDS
 #undef VC_SHADOWS
-#endif
-
-#if !defined GBUFFERS_TERRAIN && !defined GBUFFERS_ENTITIES && !defined GBUFFERS_BLOCK && !defined COMPOSITE_11 && !defined COMPOSITE_12 && !defined SHADOW
-#undef GI
 #endif

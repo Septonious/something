@@ -7,7 +7,7 @@
 
 // VSH Data //
 in vec4 color;
-in vec3 worldPos, normal;
+in vec3 worldPos;
 in vec2 texCoord, lmCoord;
 flat in int mat;
 
@@ -59,13 +59,8 @@ void main() {
 
 	if (tintedGlass > 0.5 && albedo.a < 0.35) discard;
 	#endif
-	
-	#ifndef GI
+
 	gl_FragData[0] = albedo;
-	#else
-	gl_FragData[0] = albedo;
-    gl_FragData[1].rgb = normal * 0.5 + 0.5;
-	#endif
 }
 
 #endif
@@ -76,7 +71,7 @@ void main() {
 
 // VSH Data //
 out vec4 color;
-out vec3 worldPos, normal;
+out vec3 worldPos;
 out vec2 texCoord, lmCoord;
 flat out int mat;
 
@@ -84,11 +79,15 @@ flat out int mat;
 #ifdef VX_SUPPORT
 uniform int renderStage;
 
-uniform vec3 cameraPosition;
-
 #extension GL_ARB_shader_image_load_store : enable
 writeonly uniform uimage3D voxel_img;
 #endif
+
+#if defined WAVING_LEAVES || defined WAVING_PLANTS
+uniform float frameTimeCounter;
+#endif
+
+uniform vec3 cameraPosition;
 
 uniform mat4 shadowProjection, shadowProjectionInverse;
 uniform mat4 shadowModelView, shadowModelViewInverse;
@@ -101,6 +100,10 @@ attribute vec4 mc_Entity;
 // Includes //
 #ifdef VX_SUPPORT
 #include "/lib/vx/voxelization.glsl"
+#endif
+
+#if defined WAVING_LEAVES || defined WAVING_PLANTS
+#include "/lib/pbr/waving.glsl"
 #endif
 
 // Main //
@@ -117,13 +120,15 @@ void main() {
     if (gl_VertexID % 4 == 0) updateVoxelMap(int(max(mc_Entity.x - 10000, 0)));
 	#endif
 
-    //Normal
-    normal = normalize(gl_NormalMatrix * gl_Normal);
-
 	//Color & Position //
 	color = gl_Color;
 
 	vec4 position = shadowModelViewInverse * shadowProjectionInverse * ftransform();
+
+	#if defined WAVING_PLANTS || defined WAVING_LEAVES
+	float istopv = gl_MultiTexCoord0.t < mc_midTexCoord.t ? 1.0 : 0.0;
+	position.xyz = getWavingBlocks(position.xyz, istopv, lmCoord.y);
+	#endif
 
 	worldPos = position.xyz;
 

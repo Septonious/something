@@ -37,10 +37,6 @@ uniform vec4 entityColor;
 
 uniform sampler2D texture, noisetex;
 
-#ifdef GI
-uniform sampler2D gaux3;
-#endif
-
 #ifdef VX_SUPPORT
 uniform sampler3D floodfillSampler, floodfillSamplerCopy;
 uniform usampler3D voxelSampler;

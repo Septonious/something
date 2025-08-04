@@ -40,21 +40,22 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
 
 	//Overworld Fog
 	#ifdef OVERWORLD
-    float fogDistanceFactor = 50.0 * (0.5 + timeBrightness * 0.5) + FOG_DISTANCE * (0.75 + caveFactor * 0.25) - wetness * 25.0;
-	float fogDistance = max(256.0 / farPlane, 2.0) * (100.0 / fogDistanceFactor);
-	float fogAltitudeFactor = FOG_HEIGHT - 20.0 + timeBrightness * 40.0 + (wetness + moonVisibility) * 30.0;
-	float fogVariableAltitude = fogAltitudeFactor + texture2D(noisetex, (worldPos.xz + cameraPosition.xz + frameCounter * 0.01) * 0.0001).b * 20.0 * min(cameraPosition.y * 0.01, 1.0);
-	float fogAltitude = exp2(-max(worldPos.y + cameraPosition.y - fogVariableAltitude, 0.0) / exp2(FOG_HEIGHT_FALLOFF));
-		  fogAltitude = clamp(fogAltitude + (1.0 - min(1.0, cameraPosition.y / fogAltitudeFactor)), 0.0, 1.0);
-	float fogDensity = FOG_DENSITY * (1.0 - timeBrightness * 0.35 + wetness * 0.5);
-		  fogDensity += isLushCaves * 0.35 + isDesert * 0.25;
+    float DistanceFactor = 50.0 * (0.5 + timeBrightness * 0.5) + FOG_DISTANCE * (0.75 + caveFactor * 0.25) - wetness * 25.0;
+	float Distance = max(256.0 / farPlane, 2.0) * (100.0 / DistanceFactor);
+	float AltitudeFactor = FOG_HEIGHT - 30.0 + timeBrightness * 40.0 + (wetness + moonVisibility) * 30.0;
+	float noise = texture2D(noisetex, (worldPos.xz + cameraPosition.xz + frameCounter * 0.01) * 0.001).r;
+	float variableAltitude = AltitudeFactor + noise * noise * 60.0 * min(cameraPosition.y * 0.01, 1.0);
+	float altitude = exp2(-max(worldPos.y + cameraPosition.y - variableAltitude, 0.0) / exp2(FOG_HEIGHT_FALLOFF));
+		  altitude = clamp(altitude + (1.0 - min(1.0, cameraPosition.y / AltitudeFactor)), 0.0, 1.0);
+	float Density = FOG_DENSITY * (1.0 - timeBrightness * 0.35 + wetness * 0.5);
+		  Density += isLushCaves * 0.35 + isDesert * 0.25;
 
 	#if MC_VERSION >= 12104
-    fogDensity += isPaleGarden;
+    Density += isPaleGarden;
 	#endif
 
-    float fog = 1.0 - exp(-0.005 * lViewPos * fogDistance);
-		  fog = clamp(fog * fogDensity * fogAltitude, 0.0, 1.0);
+    float fog = 1.0 - exp(-0.005 * lViewPos * Distance);
+		  fog = clamp(fog * Density * altitude, 0.0, 1.0);
 
     vec3 nSkyColor = pow(normalize(skyColor + 0.000001), vec3(0.8)) * mix(vec3(1.0), biomeColor, sunVisibility * isSpecificBiome) * 0.8;
 	vec3 fogCol = mix(caveMinLightCol * nSkyColor,
@@ -76,7 +77,7 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
 		float fogFactor = lViewPos;
 		#endif
 
-		float vanillaFog = 1.0 - (farPlane - (fogFactor + fogOffset)) * 4.0 / (2.0 * farPlane);
+		float vanillaFog = 1.0 - (farPlane - (fogFactor + fogOffset)) * 8.0 / (4.0 * farPlane);
 			  vanillaFog = clamp(vanillaFog * vanillaFog * vanillaFog, 0.0, 1.0) * caveFactor;
 	
 		if (0.0 < vanillaFog){

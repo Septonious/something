@@ -6,13 +6,11 @@ float texture2DShadow(sampler2D shadowtex, vec3 shadowPos) {
 }
 #endif
 
-void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither) {
-    //Stuff which we're doing
-    vec3 volumetricLighting = vec3(0.0);
-    vec3 cloudyFog = vec3(0.0);
-    vec3 lpvFog = vec3(0.0);
-    float fireflies = 0.0;
-    float currentDepth = 0;
+float smoothstep1(float x) {
+    return x * x * (3.0 - 2.0 * x);
+}
+
+void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither) {
 	//Depths
 	float z0 = texture2D(depthtex0, texCoord).r;
 	float z1 = texture2D(depthtex1, texCoord).r;
@@ -20,12 +18,16 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
     float linearDepth1 = getLinearDepth2(z1);
 
 	//Positions & Common variables
+    #ifdef VC_SHADOWS
 	vec3 worldSunVec = mat3(gbufferModelViewInverse) * lightVec;
-	vec3 viewPos = ToView(vec3(texCoord.xy, z0));
+    #endif
+
+	vec3 viewPos = ToView(vec3(texCoord.xy, z1));
 	vec3 nViewPos = normalize(viewPos);
     vec3 worldPos = ToWorld(viewPos);
     vec3 nWorldPos = normalize(worldPos);
     float lViewPos = length(viewPos);
+    float viewFactor = 1.0 - 0.7 * pow2(dot(nViewPos.xy, nViewPos.xy));
 
     float VoL = dot(nViewPos, lightVec);
     float VoU = dot(nViewPos, upVec);
@@ -42,37 +44,8 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
 
 	totalVisibility *= 1.0 - blindFactor;
 
-    //Ray Marcher Parameters
-    int sampleCount = VL_SAMPLES;
-
-    float rayLength = distance(gbufferModelViewInverse[3].xyz, worldPos) / VL_SAMPLES;
-    float sampleTotalLength = rayLength * dither;
-
-    vec3 rayIncrement = nWorldPos * rayLength;
-    vec3 rayPos = cameraPosition + rayIncrement * dither;
-
     //Volumetric Lighting Variables
-    #ifdef VL
-    float vlMaxDist = shadowDistance;
-
 	#ifdef OVERWORLD
-        #ifdef VC_SHADOWS
-		float speed = VC_SPEED;
-		float amount = VC_AMOUNT;
-		float frequency = VC_FREQUENCY;
-		float thickness = VC_THICKNESS;
-		float density = VC_DENSITY;
-		float height = VC_HEIGHT;
-        float scale = VC_SCALE;
-        float cloudTop = VC_HEIGHT + VC_THICKNESS * scale - 25.0;
-
-        getDynamicWeather(speed, amount, frequency, thickness, density, height, scale);
-
-        vec2 wind = vec2(frameTimeCounter * speed * 0.005, sin(frameTimeCounter * speed * 0.1) * 0.01) * speed * 0.1;
-
-        vlMaxDist += VC_DISTANCE * 0.5;
-        #endif
-
         float VoLm = pow(VoLClamped, 2.0 + sunVisibility);
         float vlVisibility = sunVisibility * (1.0 - VL_STRENGTH_RATIO) * (1.0 - timeBrightness) + VL_STRENGTH_RATIO * VoLm;
               vlVisibility *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY * (3.0 - eBS * 2.0), timeBrightness), sunVisibility);
@@ -96,42 +69,75 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
        vec3 vlCol = endLightColSqrt;
 	#endif
 
-    vlVisibility /= sampleCount;
-    vlVisibility *= min(lViewPos * 0.001 * (1.0 + timeBrightness * 4.0) * (5.0 - sunVisibility * 4.0), 1.0);
     vlVisibility *= VL_STRENGTH;
-    #endif
 
-    //Ray Marching
-    for (int i = 0; i < sampleCount; i++, rayPos += rayIncrement, sampleTotalLength += rayLength) {
-       if (lViewPos < sampleTotalLength && z0 < 1.0) break;
+    if (totalVisibility * vlVisibility > 0.0) {
+        //Crepuscular rays parameters
+        #ifdef VC_SHADOWS
+		float speed = VC_SPEED;
+		float amount = VC_AMOUNT;
+		float frequency = VC_FREQUENCY;
+		float thickness = VC_THICKNESS;
+		float density = VC_DENSITY;
+		float height = VC_HEIGHT;
+        float scale = VC_SCALE;
+        float cloudTop = VC_HEIGHT + VC_THICKNESS * scale - 50.0;
 
-       vec3 worldPos = rayPos - cameraPosition;
-       float lWorldPos = length(worldPos);
-       float lWorldPosXZ = length(worldPos.xz);
+        getDynamicWeather(speed, amount, frequency, thickness, density, height, scale);
 
-       //VL calculations
-       #ifdef VL
-       if (vlVisibility > 0.0 && lWorldPos < vlMaxDist) {
-          vec3 shadowCol = vec3(0.0);
+        vec2 wind = vec2(frameTimeCounter * speed * 0.005, sin(frameTimeCounter * speed * 0.1) * 0.01) * speed * 0.1;
+        #endif
 
-          float shadow0 = 1.0;
-          float shadow1 = 0.0;
+        //Ray marcher parameters
+        int sampleCount = VL_SAMPLES;
 
-          if (length(worldPos.xz) <= shadowDistance) {
-             vec3 shadowPos = ToShadow(worldPos);
-             shadow0 = texture2DShadow(shadowtex0, shadowPos);
+        float maxDist = shadowDistance;
+        #ifdef VC_SHADOWS
+            maxDist += 128.0;
+        #endif
+            maxDist /= 1.0 + float(isEyeInWater == 1) * 3.0;
 
-             #ifdef SHADOW_COLOR
-             if (shadow0 < 1.0) {
-                shadow1 = texture2DShadow(shadowtex1, shadowPos);
-                if (shadow1 > 0.0) {
-                    shadowCol = texture2D(shadowcolor0, shadowPos.xy).rgb;
+        float rayLength = (maxDist / (sampleCount + 1.0)) * 0.5;
+
+        maxDist *= viewFactor;
+        rayLength *= viewFactor;
+
+        float maxCurrentDist = min(maxDist, linearDepth1);
+
+        //Ray marching
+        for (int i = 0; i < sampleCount; i++) {
+            float currentDist = (i + dither) * rayLength;
+
+            if (currentDist > maxCurrentDist) break;
+
+            vec3 worldPos = ToWorld(ToView(vec3(texCoord, getLogarithmicDepth(currentDist))));
+            float lWorldPos = length(worldPos);
+
+            if (lWorldPos > maxDist) break;
+
+            float currentSampleIntensity = (currentDist / maxDist) / sampleCount;
+
+            vec3 rayPos = worldPos + cameraPosition;
+
+            vec3 shadowCol = vec3(0.0);
+            float shadow0 = 1.0;
+            float shadow1 = 0.0;
+
+            if (lWorldPos <= shadowDistance) {
+                vec3 shadowPos = ToShadow(worldPos);
+                shadow0 = texture2DShadow(shadowtex0, shadowPos);
+
+                #ifdef SHADOW_COLOR
+                if (shadow0 < 1.0) {
+                    shadow1 = texture2DShadow(shadowtex1, shadowPos);
+                    if (shadow1 > 0.0) {
+                        shadowCol = texture2D(shadowcolor0, shadowPos.xy).rgb;
+                    }
                 }
-             }
-             #endif
-          }
+                #endif
+            }
 
-          volumetricLighting = clamp(shadow1 * shadowCol * shadowCol * 4.0 + shadow0 * vlCol * float(isEyeInWater == 0), 0.0, 1.0);
+            vec3 vlSample = clamp(shadow1 * shadowCol + shadow0 * vlCol * float(isEyeInWater == 0), 0.0, 1.0);
 
             //Crepuscular rays
             #ifdef VC_SHADOWS
@@ -140,17 +146,19 @@ void computeVolumetrics(inout vec4 result, in vec3 translucent, in float dither)
 
                 float noise = 0.0;
                 getCloudShadow(cloudShadowPos.xz / scale, wind, amount, frequency, density, noise);
-                volumetricLighting *= noise;
+                vlSample *= noise;
             }
-            volumetricLighting *= 1.0 - min((rayPos.y - thickness) * (1.0 / cloudTop), 1.0);
+            vlSample *= 1.0 - min((rayPos.y - thickness) * (1.0 / cloudTop), 1.0);
             #endif
 
-          volumetricLighting *= vlVisibility;
-       }
-       #endif
+            //Translucency Blending
+            if (linearDepth0 < currentDist) {
+                vlSample *= translucent;
+            }
 
-       //Accumulate samples
-       result.rgb += volumetricLighting;
+            //Accumulate samples
+            vl += vlSample * currentSampleIntensity;
+        }
+        vl *= vlVisibility * totalVisibility;
     }
-    result *= totalVisibility;
 }
