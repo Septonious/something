@@ -1,6 +1,7 @@
-#include "/lib/common.glsl"
-
 #define COMPOSITE_5
+
+// Settings //
+#include "/lib/common.glsl"
 
 #ifdef FSH
 

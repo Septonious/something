@@ -385,3 +385,7 @@ vec3 pow8(vec3 x) {return x*x*x*x*x*x*x*x;}
 #ifndef VOLUMETRIC_CLOUDS
 #undef VC_SHADOWS
 #endif
+
+#if !defined GBUFFERS_TERRAIN && !defined GBUFFERS_ENTITIES && !defined GBUFFERS_BLOCK && !defined COMPOSITE_11 && !defined COMPOSITE_12 && !defined SHADOW
+#undef GI
+#endif

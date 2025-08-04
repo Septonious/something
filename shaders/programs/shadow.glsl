@@ -1,12 +1,13 @@
-#include "/lib/common.glsl"
-
 #define SHADOW
+
+// Settings //
+#include "/lib/common.glsl"
 
 #ifdef FSH
 
 // VSH Data //
 in vec4 color;
-in vec3 worldPos;
+in vec3 worldPos, normal;
 in vec2 texCoord, lmCoord;
 flat in int mat;
 
@@ -59,7 +60,12 @@ void main() {
 	if (tintedGlass > 0.5 && albedo.a < 0.35) discard;
 	#endif
 	
+	#ifndef GI
 	gl_FragData[0] = albedo;
+	#else
+	gl_FragData[0] = albedo;
+    gl_FragData[1].rgb = normal * 0.5 + 0.5;
+	#endif
 }
 
 #endif
@@ -70,7 +76,7 @@ void main() {
 
 // VSH Data //
 out vec4 color;
-out vec3 worldPos;
+out vec3 worldPos, normal;
 out vec2 texCoord, lmCoord;
 flat out int mat;
 
@@ -110,6 +116,9 @@ void main() {
 	#ifdef VX_SUPPORT
     if (gl_VertexID % 4 == 0) updateVoxelMap(int(max(mc_Entity.x - 10000, 0)));
 	#endif
+
+    //Normal
+    normal = normalize(gl_NormalMatrix * gl_Normal);
 
 	//Color & Position //
 	color = gl_Color;

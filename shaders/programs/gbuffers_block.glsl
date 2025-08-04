@@ -36,6 +36,10 @@ uniform vec4 lightningBoltPosition;
 
 uniform sampler2D texture, noisetex;
 
+#ifdef GI
+uniform sampler2D gaux3;
+#endif
+
 #ifdef VX_SUPPORT
 uniform sampler3D floodfillSampler, floodfillSamplerCopy;
 uniform usampler3D voxelSampler;
@@ -72,6 +76,7 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #endif
 
 // Includes //
+#include "/lib/util/encode.glsl"
 #include "/lib/util/bayerDithering.glsl"
 #include "/lib/util/transformMacros.glsl"
 #include "/lib/util/ToNDC.glsl"
@@ -114,8 +119,9 @@ void main() {
     vec3 shadow = vec3(0.0);
     gbuffersLighting(albedo, screenPos, viewPos, worldPos, newNormal, shadow, lightmap, NoU, NoL, NoE, subsurface, emission, 0.0, 0.0);
 
-    /* DRAWBUFFERS:0 */
-    gl_FragData[0] = albedo;
+	/* DRAWBUFFERS:03 */
+	gl_FragData[0] = albedo;
+	gl_FragData[1] = vec4(encodeNormal(newNormal), 0.0, 1.0);
 }
 
 #endif

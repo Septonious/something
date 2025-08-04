@@ -1,6 +1,6 @@
 #define COMPOSITE_4
 
-//Settings//
+// Settings //
 #include "/lib/common.glsl"
 
 #ifdef FSH

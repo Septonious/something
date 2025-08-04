@@ -196,12 +196,20 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     //Night vision
     sceneLighting += nightVision * vec3(0.2, 0.3, 0.2);
 
+    //Global Illumination
+    vec3 gi = vec3(0.0);
+
+    #ifdef GI
+    gi = texture2D(gaux3, screenPos.xy).rgb;
+    gi = pow4(gi) * 32.0 * lightmap.y * sunVisibility * shadowFade;
+    #endif
+
     //Vanilla AO
-    float aoMixer = (1.0 - ao) * (1.0 - blockLightMap) * (1.0 - float(emission > 0.0)) * (1.0 - subsurface * 0.5) * (1.0 - originalNoL);
+    float aoMixer = (1.0 - ao) * (1.0 - blockLightMap) * (1.0 - float(emission > 0.0)) * (1.0 - subsurface * 0.5) * (1.0 - originalNoL) * (1.0 - min(1.0, length(gi)));
     albedo.rgb = mix(albedo.rgb, albedo.rgb * ao * ao, aoMixer);
 
     albedo.rgb = pow(albedo.rgb, vec3(2.2));
-    albedo.rgb *= sceneLighting + blockLighting + emission + lightningFlash;
+    albedo.rgb *= sceneLighting + blockLighting + emission + lightningFlash + gi;
     albedo.rgb *= vanillaDiffuse;
     albedo.rgb = pow(albedo.rgb, vec3(1.0 / 2.2));
 }

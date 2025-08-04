@@ -1,6 +1,7 @@
-#include "/lib/common.glsl"
-
 #define COMPOSITE_0
+
+// Setings //
+#include "/lib/common.glsl"
 
 #ifdef FSH
 
@@ -128,6 +129,5 @@ void main() {
 
 	gl_Position = ftransform();
 }
-
 
 #endif
