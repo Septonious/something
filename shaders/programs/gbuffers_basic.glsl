@@ -99,8 +99,8 @@ void main() {
     vec3 shadow = vec3(0.0);
     gbuffersLighting(albedo, screenPos, viewPos, worldPos, newNormal, shadow, lightmap, NoU, NoL, NoE, 0.0, 0.0, 0.0, 0.0);
 
-    /* DRAWBUFFERS:0 */
-    gl_FragData[0] = albedo;
+	/* DRAWBUFFERS:0 */
+	gl_FragData[0] = vec4(albedo.rgb, mix(1.0, albedo.a, float(length(albedo.rgb) > 0.0)));
 }
 
 #endif

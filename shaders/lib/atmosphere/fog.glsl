@@ -31,7 +31,7 @@ void getDenseFog(inout vec3 color, float lViewPos) {
 
 //Normal Fog
 #ifndef END
-void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in vec3 worldPos, in float lViewPos, in float lWorldPos) {
+void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in vec3 worldPos, in float lViewPos, in float lWorldPos, in float z0) {
     #if defined DISTANT_HORIZONS && (defined DEFERRED || defined DH_WATER || defined GBUFFERS_WATER)
     float farPlane = dhRenderDistance * 0.6;
     #else
@@ -101,17 +101,29 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
 	vec3 fogCol = netherColSqrt.rgb * 0.25;
 	#endif
 
+    //Mixing Colors depending on depth
+	#if !defined NETHER && defined DEFERRED && !defined DISTANT_HORIZONS
+    float zMixer = float(z0 < 1.0);
+
+	#if MC_VERSION >= 12104
+		  zMixer = mix(zMixer, 1.0, isPaleGarden);
+	#endif
+	      zMixer = clamp(zMixer, 0.0, 1.0);
+
+	fog *= zMixer;
+	#endif
+
 	color = mix(color, fogCol, fog);
 }
 #endif
 
-void Fog(inout vec3 color, in vec3 viewPos, in vec3 worldPos, in vec3 atmosphereColor) {
+void Fog(inout vec3 color, in vec3 viewPos, in vec3 worldPos, in vec3 atmosphereColor, in float z0) {
     float lViewPos = length(viewPos.xz);
     float lWorldPos = length(worldPos.xz);
 
 	if (isEyeInWater < 1) {
 		#ifndef END
-        getNormalFog(color, atmosphereColor, viewPos, worldPos, lViewPos, lWorldPos);
+        getNormalFog(color, atmosphereColor, viewPos, worldPos, lViewPos, lWorldPos, z0);
 		#endif
     } else if (1 < isEyeInWater) {
         getDenseFog(color, lViewPos);

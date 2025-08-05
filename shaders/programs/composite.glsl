@@ -11,7 +11,7 @@ in vec2 texCoord;
 // Uniforms //
 uniform sampler2D colortex0;
 
-#ifdef VL
+#if defined VL || defined LPV_FOG
 uniform int frameCounter;
 uniform int isEyeInWater;
 
@@ -38,6 +38,10 @@ uniform sampler2D colortex3;
 
 #ifdef VOLUMETRIC_CLOUDS
 uniform sampler2D colortex5;
+#endif
+
+#ifdef LPV_FOG
+uniform sampler3D floodfillSampler, floodfillSamplerCopy;
 #endif
 
 uniform sampler2D noisetex;
@@ -87,6 +91,11 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 
 #if defined VL && defined VC_SHADOWS
 #include "/lib/lighting/cloudShadows.glsl"
+#endif
+
+#ifdef LPV_FOG
+#include "/lib/lighting/lightning.glsl"
+#include "/lib/vx/voxelization.glsl"
 #endif
 
 #include "/lib/atmosphere/volumetrics.glsl"

@@ -52,11 +52,11 @@ vec3 getBlocklightColor(in int id) {
     //Nether Portal
     if (id == 31) color = vec3(NP_R, NP_G, NP_B) * NP_I;
     //Orchre Froglight
-    if (id == 32) color = normalize(vec3(1.00, 0.55, 0.25)) * 4.0;
+    if (id == 32) color = vec3(OF_R, OF_G, OF_B) * OF_I;
     //Verdant Froglight
-    if (id == 33) color = normalize(vec3(0.0, 1.00, 0.05)) * 4.0;
+    if (id == 33) color = vec3(VF_R, VF_G, VF_B) * VF_I;
     //Pearlescent Froglight
-    if (id == 34) color = normalize(vec3(1.00, 0.20, 0.90)) * 4.0;
+    if (id == 34) color = vec3(PF_R, PF_G, PF_B) * PF_I;
 
 	#ifdef EMISSIVE_FLOWERS
     //Red Potted flowers
@@ -112,7 +112,7 @@ vec3 getBlocklightColor(in int id) {
     //Candle
     if (id == 59) color = normalize(vec3(0.6, 0.5, 0.4));
     //Beacon
-    if (id == 60) color = vec3(0.6, 0.7, 1.0) * 8.0;
+    if (id == 60) color = vec3(BC_R, BC_G, BC_B) * BC_I;
 	//Sculk Sensor
 	if (id == 62) color = vec3(0.20, 0.55, 1.00) * 2.5;
 	//Calibrated Sculk Sensor

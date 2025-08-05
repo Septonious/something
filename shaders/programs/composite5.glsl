@@ -37,7 +37,7 @@ void main() {
 	vec3 color = texture2D(colortex0, texCoord).rgb;
 
 	#ifdef VL
-	vec3 volumetrics = getDiskBlur8RGB(colortex1, texCoord, 4.0);
+	vec3 volumetrics = getDiskBlur8RGB(colortex1, texCoord, 2.0);
 	volumetrics = pow8(volumetrics) * 256.0;
 
 	color += volumetrics;

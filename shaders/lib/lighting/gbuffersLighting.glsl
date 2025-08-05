@@ -74,11 +74,12 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     }
 
     //Scene Lighting
+    float fade = clamp(length(worldPos) * 0.01, 0.0, 1.0);
+    vec3 worldPosM = worldPos;
+
     #ifndef NETHER
     if (NoL > 0.0001 && shadowVisibility > 0.0) {
         float lightmapS = lightmap.y * lightmap.y * (3.0 - 2.0 * lightmap.y);
-
-        vec3 worldPosM = worldPos;
 
         #ifdef GBUFFERS_TEXTURED
             vec3 centerWorldPos = floor(worldPos + cameraPosition) - cameraPosition + 0.5;
@@ -109,11 +110,10 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
         #endif
 
         vec3 shadowPos = ToShadow(worldPosM);
-        float fade = clamp(lViewPos * 0.01, 0.0, 1.0);
         float offset = 0.00075 - shadowMapResolution * 0.0000001; 
               offset *= 1.0 + subsurface * (3.0 - 3.5 * fade);
 
-        shadow = computeShadow(shadowPos, offset, subsurface, lightmap.y, 1.0 - fade);
+        computeShadow(shadow, shadowPos, offset, subsurface, lightmap.y);
     }
 
     NoL = clamp(NoL * 1.01 - 0.01, 0.0, 1.0);
@@ -150,7 +150,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
         cloudShadow = noise * VC_OPACITY;
     }
-    shadow *= cloudShadow;
+    shadow *= mix(1.0, cloudShadow, shadowFade);
     #endif
 
     //Specular Highlight
@@ -158,7 +158,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     #if (defined GBUFFERS_TERRAIN || defined GBUFFERS_ENTITIES || defined GBUFFERS_BLOCK) && !defined NETHER
     if (emission < 0.01) {
-        vec3 baseReflectance = vec3(0.25 + float(smoothness < 0.05) * 9.0);
+        vec3 baseReflectance = vec3(0.75);
 
         float smoothnessF = 0.3;
               smoothnessF = mix(smoothnessF, 1.0, smoothness);
@@ -168,12 +168,14 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     #endif
 
     //Main color mixing
+    ambientCol *= 0.05 + lightmap.y * lightmap.y * 0.95;
+    lightCol *= 0.15 + lightmap.y * 0.85;
     lightCol *= 1.0 + specularHighlight;
 
     #ifdef OVERWORLD
     float rainFactor = 1.0 - wetness * 0.5;
 
-    vec3 sceneLighting = mix(ambientCol * (0.05 + lightmap.y * lightmap.y * 0.95), lightCol * (0.15 + lightmap.y * 0.85), shadow * rainFactor * shadowFade);
+    vec3 sceneLighting = mix(ambientCol, lightCol, shadow * rainFactor * shadowFade);
          sceneLighting *= 1.0 + sss * shadow;
     #elif defined END
     vec3 sceneLighting = mix(endAmbientCol, endLightCol, shadow) * 0.25;

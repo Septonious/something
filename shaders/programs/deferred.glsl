@@ -1,3 +1,6 @@
+#define DEFERRED
+
+// Settings //
 #include "/lib/common.glsl"
 
 #ifdef FSH
@@ -183,7 +186,7 @@ void main() {
 		#endif
     }
 
-	Fog(color, viewPos, worldPos, atmosphereColor);
+	Fog(color, viewPos, worldPos, atmosphereColor, z0);
 
 	//Volumetric Clouds
 	#if defined VOLUMETRIC_CLOUDS || defined END_CLOUDY_FOG

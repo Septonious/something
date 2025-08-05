@@ -16,8 +16,8 @@ vec3 getAtmosphere(vec3 viewPos, vec3 worldPos) {
     float mieScattering = pow10(VoSClamped);
 
     float VoUcm = max(VoUClamped + 0.15, 0.0);
-    float rayleighScatteringMixer = pow(VoUcm, 0.4);
-    vec3 rayleighScattering = mix(vec3(8.8 - timeBrightnessSqrt * 3.4, 1.2, 0.0), vec3(4.25, 5.25, 0.5), rayleighScatteringMixer);
+    float rayleighScatteringMixer = pow(VoUcm, 0.4 + timeBrightnessSqrt * 0.15);
+    vec3 rayleighScattering = mix(vec3(8.8 - timeBrightnessSqrt * 3.8, 1.2, 0.0), vec3(4.25, 5.25, 0.5), rayleighScatteringMixer);
         rayleighScattering = mix(rayleighScattering, lightColSqrt * 4.0, VoUPositive * VoUPositive * 0.5);
         rayleighScattering *= VoUcm * pow3(1.0 - VoUcm);
         rayleighScattering *= (0.6 + sunVisibility * 0.4) + (0.6 - sunVisibility * 0.6) * exp(VoSPositive);

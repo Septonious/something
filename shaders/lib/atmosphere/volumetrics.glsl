@@ -6,8 +6,23 @@ float texture2DShadow(sampler2D shadowtex, vec3 shadowPos) {
 }
 #endif
 
-float smoothstep1(float x) {
-    return x * x * (3.0 - 2.0 * x);
+float get3DNoise(vec3 rayPos) {
+	rayPos += vec3(frameTimeCounter, 0.0, 0.0);
+	rayPos.xz /= 512.0;
+
+	float yResolution = 3.0;
+	float yOffsetScale = 0.35;
+	float yLow  = floor(rayPos.y / yResolution) * yOffsetScale;
+	float yHigh = yLow + yOffsetScale;
+	float yBlend = fract(rayPos.y / yResolution);
+
+	float noiseLow  = texture2D(noisetex, rayPos.xz + yLow).r;
+	float noiseHigh = texture2D(noisetex, rayPos.xz + yHigh).r;
+
+	float noise = mix(noiseLow, noiseHigh, yBlend);
+	noise = sin(noise * 28.0 + frameTimeCounter * 4.0) * 0.25 + 0.5;
+
+	return noise;
 }
 
 void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither) {
@@ -45,17 +60,20 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
 	totalVisibility *= 1.0 - blindFactor;
 
     //Volumetric Lighting Variables
+    float vlIntensity = 0.0;
+
+    #ifdef VL
 	#ifdef OVERWORLD
         float VoLm = pow(VoLClamped, 2.0 + sunVisibility);
-        float vlVisibility = sunVisibility * (1.0 - VL_STRENGTH_RATIO) * (1.0 - timeBrightness) + VL_STRENGTH_RATIO * VoLm;
-              vlVisibility *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY * (3.0 - eBS * 2.0), timeBrightness), sunVisibility);
-          #if !defined VC_SHADOWS
-            vlVisibility *= max(pow6(1.0 - VoUClamped * (1.0 - timeBrightness) * sunVisibility), float(isEyeInWater == 1));
-          #endif
-            vlVisibility *= caveFactor * shadowFade;
+        vlIntensity = sunVisibility * (1.0 - VL_STRENGTH_RATIO) * (1.0 - timeBrightness) + VL_STRENGTH_RATIO * VoLm;
+        vlIntensity *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY * (3.0 - eBS * 2.0), timeBrightness), sunVisibility);
+        #if !defined VC_SHADOWS
+        vlIntensity *= max(pow6(1.0 - VoUClamped * (1.0 - timeBrightness) * sunVisibility), float(isEyeInWater == 1));
+        #endif
+        vlIntensity *= caveFactor * shadowFade;
 
        vec3 nSkyColor = normalize(skyColor + 0.000001) * mix(vec3(1.0), biomeColor, sunVisibility * isSpecificBiome);
-       vec3 vlCol = mix(lightCol, lightCol * nSkyColor, timeBrightnessSqrt);
+       vec3 vlCol = mix(lightCol, nSkyColor, timeBrightness * 0.75);
 	#else
        float dragonBattle = 1.0;
        #if MC_VERSION <= 12104
@@ -64,16 +82,21 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
        float endBlackHolePos = pow2(clamp(dot(nViewPos, sunVec), 0.0, 1.0));
        float visibilityNormal = endBlackHolePos * 0.25;
        float visibilityDragon = 0.25 + endBlackHolePos * 0.5;
-       float vlVisibility = float(0.56 < z0) * mix(visibilityDragon, visibilityNormal, clamp(dragonBattle, 0.0, 1.0)) * 0.25;
+       vlIntensity = float(0.56 < z0) * mix(visibilityDragon, visibilityNormal, clamp(dragonBattle, 0.0, 1.0)) * 0.25;
 
        vec3 vlCol = endLightColSqrt;
 	#endif
 
-    vlVisibility *= VL_STRENGTH;
+    vlIntensity *= VL_STRENGTH;
+    #endif
 
-    if (totalVisibility * vlVisibility > 0.0) {
+    //LPV Fog Variables
+    float lpvFogIntensity = LPV_FOG_STRENGTH * (16.0 - float(isEyeInWater == 1) * 14.0);
+          lpvFogIntensity *= 1.0 - eBS * sunVisibility * 0.5;
+
+    if (totalVisibility > 0.0) {
         //Crepuscular rays parameters
-        #ifdef VC_SHADOWS
+        #if defined VC_SHADOWS && defined VL
 		float speed = VC_SPEED;
 		float amount = VC_AMOUNT;
 		float frequency = VC_FREQUENCY;
@@ -119,46 +142,87 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
 
             vec3 rayPos = worldPos + cameraPosition;
 
-            vec3 shadowCol = vec3(0.0);
-            float shadow0 = 1.0;
-            float shadow1 = 0.0;
+            #ifdef VL
+            vec3 vlSample = vec3(0.0);
 
-            if (lWorldPos <= shadowDistance) {
-                vec3 shadowPos = ToShadow(worldPos);
-                shadow0 = texture2DShadow(shadowtex0, shadowPos);
+            if (vlIntensity > 0.0) {
+                vec3 shadowCol = vec3(0.0);
+                float shadow0 = 1.0;
+                float shadow1 = 0.0;
 
-                #ifdef SHADOW_COLOR
-                if (shadow0 < 1.0) {
-                    shadow1 = texture2DShadow(shadowtex1, shadowPos);
-                    if (shadow1 > 0.0) {
-                        shadowCol = texture2D(shadowcolor0, shadowPos.xy).rgb;
+                if (lWorldPos <= shadowDistance) {
+                    vec3 shadowPos = ToShadow(worldPos);
+                    shadow0 = texture2DShadow(shadowtex0, shadowPos);
+
+                    #ifdef SHADOW_COLOR
+                    if (shadow0 < 1.0) {
+                        shadow1 = texture2DShadow(shadowtex1, shadowPos);
+                        if (shadow1 > 0.0) {
+                            shadowCol = texture2D(shadowcolor0, shadowPos.xy).rgb;
+                        }
                     }
+                    #endif
                 }
+
+                vlSample = clamp(shadow1 * shadowCol + shadow0 * vlCol * float(isEyeInWater == 0), 0.0, 1.0);
+
+                //Crepuscular rays
+                #ifdef VC_SHADOWS
+                if (rayPos.y < cloudTop) {
+                    vec3 cloudShadowPos = rayPos + (worldSunVec / max(abs(worldSunVec.y), 0.0)) * max(cloudTop - rayPos.y, 0.0);
+
+                    float noise = 0.0;
+                    getCloudShadow(cloudShadowPos.xz / scale, wind, amount, frequency, density, noise);
+                    vlSample *= noise * shadowFade;
+                }
+                vlSample *= 1.0 - min((rayPos.y - thickness) * (1.0 / cloudTop), 1.0);
                 #endif
             }
+            #endif
 
-            vec3 vlSample = clamp(shadow1 * shadowCol + shadow0 * vlCol * float(isEyeInWater == 0), 0.0, 1.0);
+            //LPV Fog calculations
+            vec3 lpvFogSample = vec3(0.0);
 
-            //Crepuscular rays
-            #ifdef VC_SHADOWS
-            if (rayPos.y < cloudTop) {
-                vec3 cloudShadowPos = rayPos + (worldSunVec / max(abs(worldSunVec.y), 0.0)) * max(cloudTop - rayPos.y, 0.0);
+            #ifdef LPV_FOG
+            vec3 voxelPos = worldToVoxel(worldPos);
+                 voxelPos /= voxelVolumeSize;
+                 voxelPos = clamp(voxelPos, 0.0, 1.0);
 
-                float noise = 0.0;
-                getCloudShadow(cloudShadowPos.xz / scale, wind, amount, frequency, density, noise);
-                vlSample *= noise;
+            if (isInsideVoxelVolume(voxelPos)) {
+                float floodfillFade = maxOf(abs(worldPos) / (voxelVolumeSize * 0.5));
+                      floodfillFade = clamp(floodfillFade, 0.0, 1.0);
+
+                vec4 lightVolume = vec4(0.0);
+                if ((frameCounter & 1) == 0) {
+                    lightVolume = texture(floodfillSamplerCopy, voxelPos);
+                } else {
+                    lightVolume = texture(floodfillSampler, voxelPos);
+                }
+
+                lpvFogSample = pow(lightVolume.rgb, vec3(1.0 / FLOODFILL_RADIUS)) * (1.0 - floodfillFade * floodfillFade);
+
+                #ifdef LPV_CLOUDY_FOG
+                vec3 noisePos = rayPos * 3.0;
+                float n3da = texture2D(noisetex, noisePos.xz * 0.0025 + floor(noisePos.y * 0.25) * 0.25).r;
+                float n3db = texture2D(noisetex, noisePos.xz * 0.0025 + floor(noisePos.y * 0.25 + 1.0) * 0.25).r;
+
+                float cloudyNoise = mix(n3da, n3db, fract(noisePos.y * 0.25));
+                      cloudyNoise = max(cloudyNoise * cloudyNoise * cloudyNoise, 0.0);
+                lpvFogSample *= cloudyNoise;
+                #endif
             }
-            vlSample *= 1.0 - min((rayPos.y - thickness) * (1.0 / cloudTop), 1.0);
             #endif
 
             //Translucency Blending
             if (linearDepth0 < currentDist) {
                 vlSample *= translucent;
+                lpvFogSample *= translucent;
             }
 
             //Accumulate samples
-            vl += vlSample * currentSampleIntensity;
+            vl += vlSample * currentSampleIntensity * vlIntensity;
+            vl += lpvFogSample * currentSampleIntensity * lpvFogIntensity;
         }
-        vl *= vlVisibility * totalVisibility;
+        vl *= totalVisibility;
     }
 }

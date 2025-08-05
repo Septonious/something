@@ -37,6 +37,8 @@ uniform vec4 lightningBoltPosition;
 
 uniform sampler2D texture, noisetex;
 
+uniform sampler2D gaux4;
+
 #ifdef VX_SUPPORT
 uniform sampler3D floodfillSampler, floodfillSamplerCopy;
 uniform usampler3D voxelSampler;
@@ -102,7 +104,8 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 
 // Main //
 void main() {
-    vec4 albedo = texture2D(texture, texCoord) * color;
+	vec4 albedoTexture = texture2D(texture, texCoord);
+    vec4 albedo = albedoTexture * color;
 
     vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
     vec3 newNormal = normal;

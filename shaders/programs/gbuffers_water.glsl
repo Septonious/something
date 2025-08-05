@@ -130,13 +130,7 @@ void main() {
 	if (albedo.a <= 0.00001) discard;
 	albedo *= color;
 
-	if (mat == 10001) {
-		albedo.rgb = mix(color.rgb, waterColor.rgb, 0.5) * WATER_I;
-		#ifdef VANILLA_WATER
-		albedo.rgb *= albedoTexture.rgb * (1.0 + pow4(length(albedoTexture.rgb)));
-		#endif
-		albedo.a = WATER_A;
-	}
+	float lAlbedo = length(albedoTexture.rgb);
 
     vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
     vec3 newNormal = normal;
@@ -146,10 +140,26 @@ void main() {
 	vec3 nViewPos = normalize(viewPos);
 	vec2 refraction = vec2(0.0);
 
-    float emission = pow8(lmCoord.x) + int(mat == 10031);
+	float portal = float(mat == 10031);
 	float ice = float(mat == 10000);
 	float water = float(mat == 10001);
 	float tintedGlass = float(mat >= 10201 && mat <= 10216);
+	float emission = pow8(lmCoord.x) + portal * lAlbedo * lAlbedo * 2.0;
+
+	if (water > 0.5) {
+		albedo.rgb = mix(color.rgb, waterColor.rgb, 0.5) * WATER_I;
+		#ifdef VANILLA_WATER
+		albedo.rgb *= albedoTexture.rgb * (1.0 + pow4(lAlbedo));
+		#endif
+		albedo.a = WATER_A;
+	} else if (portal > 0.5) {
+		vec2 noisePos = worldPos.xy + cameraPosition.xy;
+			 noisePos += worldPos.zy + cameraPosition.zy;
+			 noisePos.y *= 0.5;
+		float portalNoise = texture2D(noisetex, noisePos * 0.1 + 0.01 * vec2(sin(frameTimeCounter * 0.6) + frameTimeCounter * 0.4, frameTimeCounter * 0.5 - cos(frameTimeCounter * 0.7))).r;
+			  portalNoise *= portalNoise * portalNoise;
+		albedo.rgb = pow(vec3(NP_R, NP_G, NP_B), vec3(1.0 - portalNoise * 3.0 - pow4(lAlbedo) * 0.25)) * NP_I * portalNoise * (0.8 + pow4(lAlbedo) * 0.6);
+	}
 
 	//Volumetric Clouds Blending
 	float cloudBlendOpacity = 1.0;
@@ -231,7 +241,7 @@ void main() {
 	#endif
 
     //Fog
-    Fog(albedo.rgb, viewPos, worldPos, atmosphereColor);
+    Fog(albedo.rgb, viewPos, worldPos, atmosphereColor, 0.0);
 	albedo.a *= cloudBlendOpacity;
 
 	/* DRAWBUFFERS:013 */

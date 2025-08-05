@@ -29,22 +29,7 @@ float texture2DShadow(sampler2D shadowtex, vec3 shadowPos) {
     return clamp((shadow - shadowPos.z) * 65536.0, 0.0, 1.0);
 }
 
-#ifdef VPS
-//Variable Penumbra Shadows based on Tech's Lux Shader (https://github.com/TechDevOnGitHub)
-void findBlockerDistance(vec3 shadowPos, mat2 ditherMatrix, inout float offset, float skyLightMap, float vpsFade) {
-    float blockerDistance = 0.0;
-        
-    for (int i = 0; i < 4; i++){
-        vec2 pixelOffset = ditherMatrix * 0.015 * shadowOffsets4[i];
-        blockerDistance += shadowPos.z - texture2D(shadowtex1, shadowPos.xy + pixelOffset).r;
-    }
-    blockerDistance *= 0.25;
-    
-    offset = mix(offset, clamp(blockerDistance * VPS_BLUR_STRENGTH, offset, offset * 6.0), skyLightMap * vpsFade);
-}
-#endif
-
-vec3 computeShadow(vec3 shadowPos, float offset, float subsurface, float skyLightMap, float vpsFade) {
+void computeShadow(inout vec3 shadow, vec3 shadowPos, float offset, float subsurface, float skyLightMap) {
     float shadow0 = 0.0;
     vec3 shadowCol = vec3(0.0);    
 
@@ -56,10 +41,6 @@ vec3 computeShadow(vec3 shadowPos, float offset, float subsurface, float skyLigh
 	float cosTheta = cos(dither);
 	float sinTheta = sin(dither);
 	mat2 ditherMatrix = mat2(cosTheta, -sinTheta, sinTheta, cosTheta);
-
-    #ifdef VPS
-    if (subsurface < 0.1 && vpsFade > 0.0 && skyLightMap > 0.05) findBlockerDistance(shadowPos, ditherMatrix, offset, skyLightMap, vpsFade);
-    #endif
 
     for (int i = 0; i < 8; i++) {
         vec2 shadowOffset = ditherMatrix * offset * shadowOffsets8[i];
@@ -83,7 +64,7 @@ vec3 computeShadow(vec3 shadowPos, float offset, float subsurface, float skyLigh
     shadow0 *= mix(shadow0, 1.0, subsurface);
     shadowCol *= shadowCol;
 
-    return clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(16.0));
+    shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(16.0));
 }
 
 vec3 getFakeShadow(float skyLight) {

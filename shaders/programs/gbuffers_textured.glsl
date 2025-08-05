@@ -37,6 +37,10 @@ uniform float isPaleGarden;
 uniform vec3 skyColor;
 #endif
 
+#ifdef GENERATED_EMISSION
+uniform ivec2 atlasSize;
+#endif
+
 uniform ivec2 eyeBrightnessSmooth;
 uniform vec3 cameraPosition;
 uniform vec4 lightningBoltPosition;
@@ -97,9 +101,12 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 
 // Main //
 void main() {
-    vec4 albedo = texture2D(texture, texCoord) * color;
+	vec4 albedoTexture = texture2D(texture, texCoord);
+	if (albedoTexture.a <= 0.00001) discard;
+	vec4 albedo = albedoTexture * color;
+		 albedo.a *= albedo.a;
 
-    if (albedo.r < 0.29 && albedo.g < 0.45 && albedo.b > 0.75) discard; //Water splash particles
+	if (albedo.r < 0.29 && albedo.g < 0.45 && albedo.b > 0.75) discard;
 
     vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
     vec3 newNormal = normal;
@@ -114,8 +121,28 @@ void main() {
 	float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
 	float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
 
-    vec3 shadow = vec3(0.0);
-    gbuffersLighting(albedo, screenPos, viewPos, worldPos, newNormal, shadow, lightmap, NoU, NoL, NoE, subsurface, emission, 0.0, 0.0);
+	//iPBR Generated Emission
+	#ifdef GENERATED_EMISSION
+	if (atlasSize.x < 900.0) { // We don't want to detect particles from the block atlas
+		float lAlbedo = length(albedo.rgb);
+		vec3 gamePos = worldPos + cameraPosition;
+
+		if (color.a < 1.01 && lAlbedo < 1.0) // Campfire Smoke, World Border
+			albedo.a *= 0.4;
+		else if (albedoTexture.r > 0.99) {
+			emission = max(pow4(albedo.r), 0.1) * pow4(lightmap.x);
+		}
+
+		if (max(abs(albedoTexture.r - albedoTexture.b), abs(albedoTexture.b - albedoTexture.g)) < 0.001) { // Grayscale Particles
+			if (lAlbedo > 0.3 && color.g < 0.5 && color.b > color.r * 1.1 && color.r > 0.3) // Ender Particle, Crying Obsidian Drop
+				emission = max(pow4(albedo.r), 0.1) * 4.0;
+			if (lAlbedo > 0.3 && color.g < 0.5 && color.r > (color.g + color.b) * 3.0) // Redstone Particle
+				lightmap = vec2(0.0), emission = max(pow4(albedo.r), 0.1);
+		}
+	}
+	#endif
+
+
 
     //Fog
     #if defined OVERWORLD
@@ -126,7 +153,7 @@ void main() {
 	vec3 atmosphereColor = endLightCol * 0.15;
 	#endif
 
-    Fog(albedo.rgb, viewPos, worldPos, atmosphereColor);
+    Fog(albedo.rgb, viewPos, worldPos, atmosphereColor, 0.0);
 
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = albedo;
