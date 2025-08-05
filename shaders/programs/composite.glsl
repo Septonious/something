@@ -36,10 +36,6 @@ uniform vec3 skyColor, cameraPosition;
 uniform sampler2D colortex1;
 uniform sampler2D colortex3;
 
-#ifdef VOLUMETRIC_CLOUDS
-uniform sampler2D colortex5;
-#endif
-
 #ifdef LPV_FOG
 uniform sampler3D floodfillSampler, floodfillSamplerCopy;
 #endif
@@ -58,7 +54,7 @@ uniform mat4 shadowProjection;
 #endif
 
 // Global Variables //
-#ifdef VL
+#if defined VL || defined LPV_FOG
 #if defined OVERWORLD
 const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 float fractTimeAngle = fract(timeAngle - 0.25);
@@ -81,7 +77,7 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #endif
 
 // Includes //
-#ifdef VL
+#if defined VL || defined LPV_FOG
 #include "/lib/util/transformMacros.glsl"
 #include "/lib/util/ToView.glsl"
 #include "/lib/util/ToWorld.glsl"
@@ -105,7 +101,7 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 void main() {
 	vec3 color = texture2D(colortex0, texCoord).rgb;
 
-	#if defined VL
+	#if defined VL || defined LPV_FOG
 	vec3 volumetrics = vec3(0.0);
 
 	float blueNoiseDither = texture2D(noisetex, gl_FragCoord.xy / 512.0).b;
@@ -118,7 +114,7 @@ void main() {
 	computeVolumetricLight(volumetrics, translucent, blueNoiseDither);
 	#endif
 
-	#if defined VL
+	#if defined VL || defined LPV_FOG
 		/* DRAWBUFFERS:01 */
 		gl_FragData[0].rgb = pow(color, vec3(2.2));
 		gl_FragData[1].rgb = pow(volumetrics / 256.0, vec3(0.125));

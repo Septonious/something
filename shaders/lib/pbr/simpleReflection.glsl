@@ -27,15 +27,17 @@ void getReflection(inout vec4 color, in vec3 viewPos, in vec3 normal, in float f
 	vec4 reflection = vec4(0.0);
 	if (reflectPos.z < zThreshold) {
 		float fovScale = gbufferProjection[1][1] / 1.37;
-		float dist = 0.15 * pow2(1.0 - smoothness) * reflectPos.a * fovScale;
+		float dist =  0.125 * pow2(1.0 - smoothness) * reflectPos.a * fovScale;
 		float lod = log2(viewHeight * dist);
-		float blurStrength = exp2(lod - 1.0);
 
-		for (int i = 0; i < 4; i++) {
-			vec2 offset = roughReflectionOffsets[i] * (blurStrength / vec2(viewWidth, viewHeight));
-			reflection += texture2DLod(colortex0, reflectPos.xy + offset, max(lod - 1, 0));
+		for (int i = -2; i <= 2; i++) {
+			for (int j = -2; j <= 2; j++) {
+				vec2 offset = vec2(i, j) * exp2(lod - 1.0) / vec2(viewWidth, viewHeight);
+				reflection += texture2DLod(colortex0, reflectPos.xy + offset, max(lod - 1, 0.0));
+			}
 		}
-		reflection *= 0.25;
+
+		reflection /= 25.0;
 		reflection.rgb *= float(reflection.a > 0.0);
 		reflection.a *= border;
 	}
@@ -67,5 +69,5 @@ void getReflection(inout vec4 color, in vec3 viewPos, in vec3 normal, in float f
 
 	vec3 finalReflection = max(mix(falloff, reflection.rgb, reflection.a), vec3(0.0));
 
-	color.rgb = mix(color.rgb, finalReflection, fresnel * smoothness);
+	color.rgb = mix(color.rgb, finalReflection, pow(fresnel, 1.5) * smoothness);
 }

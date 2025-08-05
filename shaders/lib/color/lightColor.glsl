@@ -1,5 +1,3 @@
-uniform float isLushCaves, isDesert, isSwamp, isMushroom;
-
 float timeBrightnessSqrt = sqrt(timeBrightness);
 float mefade = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
 float dfade = 1.0 - pow(1.0 - timeBrightness, 1.5);
@@ -15,5 +13,16 @@ vec3 ambientColRaw = mix(ambientNight, ambientSun, sunVisibility);
 vec3 ambientColSqrt = mix(ambientColRaw, dot(ambientColRaw, vec3(0.448, 0.880, 0.171)) * weatherCol, wetness * 0.75);
 vec3 ambientCol = ambientColSqrt * ambientColSqrt;
 
-vec3 biomeColor = vec3(0.425, 0.375, 0.150) * isLushCaves + vec3(1.105, 0.705, 0.515) * (1.0 + timeBrightness * 0.5) * isDesert + vec3(0.925, 1.285, 0.785) * isSwamp + vec3(1.115, 0.745, 0.975) * isMushroom;
-float isSpecificBiome = isLushCaves + isDesert + isSwamp + isMushroom;
+//Per-biome weather
+//Every biome specified here has a corresponding uniform in the /shaders/shaders.properties file
+uniform float isLushCaves, isDesert, isSwamp, isMushroom, isJungle;
+
+//Color for each biome. Format: vec3(biome_color_red, biome_color_green, biome_color_blue) * isBiome
+vec3 biomeColor = vec3(0.425, 0.375, 0.150) * isLushCaves +
+                  vec3(1.105, 0.705, 0.515) * (1.0 + timeBrightness * 0.5) * isDesert +
+                  vec3(0.925, 1.285, 0.785) * isSwamp +
+                  vec3(1.115, 0.745, 0.975) * isMushroom +
+                  vec3(0.955, 1.185, 0.895) * isJungle;
+
+//This variable toggles per-biome weather when a player enters a specific biome
+float isSpecificBiome = isLushCaves + isDesert + isSwamp + isMushroom + isJungle;

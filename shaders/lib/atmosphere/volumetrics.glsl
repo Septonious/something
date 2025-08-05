@@ -93,6 +93,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
     //LPV Fog Variables
     float lpvFogIntensity = LPV_FOG_STRENGTH * (16.0 - float(isEyeInWater == 1) * 14.0);
           lpvFogIntensity *= 1.0 - eBS * sunVisibility * 0.5;
+          lpvFogIntensity *= 3.0 - caveFactor * 2.0;
 
     if (totalVisibility > 0.0) {
         //Crepuscular rays parameters
@@ -142,9 +143,10 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
 
             vec3 rayPos = worldPos + cameraPosition;
 
-            #ifdef VL
+            //Volumetric lighting
             vec3 vlSample = vec3(0.0);
 
+            #ifdef VL
             if (vlIntensity > 0.0) {
                 vec3 shadowCol = vec3(0.0);
                 float shadow0 = 1.0;
@@ -180,7 +182,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
             }
             #endif
 
-            //LPV Fog calculations
+            //LPV Fog
             vec3 lpvFogSample = vec3(0.0);
 
             #ifdef LPV_FOG

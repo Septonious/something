@@ -1,10 +1,10 @@
 void drawSunMoon(inout vec3 color, in vec3 worldPos, in vec3 nViewPos, in float VoU, in float VoS, in float VoM, in float caveFactor, inout float occlusion) {
     float visibility = (1.0 - wetness * 0.8) * caveFactor;
           visibility *= 1.0 - occlusion;
-          visibility *= VoU;
+          visibility *= mix(0.0, 1.0, pow(VoU, 0.25));
 
     if (visibility > 0.0) {
-        float sun = max(pow32(pow32(VoS)) - 0.4, 0.0) * (64.0 - timeBrightnessSqrt * 48.0) * sunVisibility;
+        float sun = max(pow32(pow32(VoS)) - 0.4, 0.0) * 16.0 * sunVisibility;
         float moon = max(pow32(pow32(VoM)) - 0.4, 0.0);
               moon = float(moon > 0.0) * 2.0 * moonVisibility;
         float glare = pow32(VoS * sunVisibility + VoM * moonVisibility) * 0.2;

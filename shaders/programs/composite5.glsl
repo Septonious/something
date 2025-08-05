@@ -9,7 +9,7 @@
 in vec2 texCoord;
 
 // Uniforms //
-#ifdef VL
+#if defined VL || defined LPV_FOG
 uniform float viewWidth, viewHeight;
 
 uniform sampler2D colortex1;
@@ -17,18 +17,8 @@ uniform sampler2D colortex1;
 
 uniform sampler2D colortex0;
 
-// Global Variables //
-#ifdef VL
-const vec2 vlOffsets[4] = vec2[4](
-   vec2(0.21848650099008202, -0.09211370200809937),
-   vec2(-0.5866112654782878, 0.32153793477769893),
-   vec2(-0.06595078555407359, -0.879656059066481),
-   vec2(0.43407555004227927, 0.6502318262968816)
-);
-#endif
-
 // Includes //
-#ifdef VL
+#if defined VL || defined LPV_FOG
 #include "/lib/filters/diskBlur.glsl"
 #endif
 
@@ -36,7 +26,7 @@ const vec2 vlOffsets[4] = vec2[4](
 void main() {
 	vec3 color = texture2D(colortex0, texCoord).rgb;
 
-	#ifdef VL
+	#if defined VL || defined LPV_FOG
 	vec3 volumetrics = getDiskBlur8RGB(colortex1, texCoord, 2.0);
 	volumetrics = pow8(volumetrics) * 256.0;
 
