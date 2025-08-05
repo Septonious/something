@@ -3,6 +3,8 @@ void generateIPBR(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, inout ve
     int material = max(mat - 10000, 0);
     int material2 = max(mat - 20000, 0);
     float lAlbedo = clamp(length(albedo.rgb), 0.0, 1.0);
+    vec3 albedo3 = pow3(albedo.rgb);
+    float lAlbedo3 = clamp(length(albedo3), 0.0, 1.0);
     float smoothness = 0.0;
 
     #include "/lib/pbr/blocks/amethyst_block.glsl"
@@ -70,7 +72,6 @@ void generateIPBR(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, inout ve
 
     #ifdef GENERATED_SPECULAR
     smoothness2 = clamp(smoothness, 0.0, 0.95);
-    metalness = smoothness2;
     #endif
 }
 #endif

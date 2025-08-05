@@ -13,11 +13,11 @@ float cdist(vec2 coord) {
 const float errMult = 1.8;
 
 vec4 Raytrace(sampler2D depthtex, vec3 viewPos, vec3 normal, float dither, out float border, 
-			  int refinementSteps, float stepSize, float refStepSize, float stepLength, int sampleCount) {
+			  int refinementSteps, float stepSize, float refMult, float stepLength, int sampleCount) {
 	vec3 pos = vec3(0.0);
 	float dist = 0.0;
 
-	vec3 start = viewPos + normal * (0.075 + min(0.5, length(viewPos) * 0.125));
+	vec3 start = viewPos + normal * (0.075 + min(0.35, length(viewPos) * 0.125));
 
     vec3 rayIncrement = stepSize * reflect(normalize(viewPos), normalize(normal));
     viewPos += rayIncrement;
@@ -39,7 +39,7 @@ vec4 Raytrace(sampler2D depthtex, vec3 viewPos, vec3 normal, float dither, out f
 			refinedSamples++;
 			if (refinedSamples >= refinementSteps) break;
 			rayDir -= rayIncrement;
-			rayIncrement *= refStepSize;
+			rayIncrement *= refMult;
 		}
         rayIncrement *= stepLength;
         rayDir += rayIncrement * (0.1 * dither + 0.9);

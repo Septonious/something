@@ -54,6 +54,8 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     }
     #endif
 
+    blockLighting *= 1.0 - smoothness * 0.5;
+
     //Shadow Calculations
     //Some code made by Emin and gri573
     float shadowVisibility = maxOf(abs(worldPos) / (vec3(shadowDistance)));
@@ -158,7 +160,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     #if (defined GBUFFERS_TERRAIN || defined GBUFFERS_ENTITIES || defined GBUFFERS_BLOCK) && !defined NETHER
     if (emission < 0.01) {
-        vec3 baseReflectance = vec3(0.75);
+        vec3 baseReflectance = vec3(1.5);
 
         float smoothnessF = 0.3;
               smoothnessF = mix(smoothnessF, 1.0, smoothness);

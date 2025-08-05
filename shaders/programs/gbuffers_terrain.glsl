@@ -128,7 +128,7 @@ void main() {
 	float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
 	float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
 
-	#ifdef GENERATED_EMISSION
+	#if defined GENERATED_EMISSION || defined GENERATED_SPECULAR
 	generateIPBR(albedo, worldPos, viewPos, lightmap, NoU, emission, smoothness, metalness, subsurface);
 	#endif
 

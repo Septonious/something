@@ -1,4 +1,4 @@
-void getReflection(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, in vec3 nViewPos, in vec3 normal, in float fresnel, in float skyLightMap) {
+void getReflection(inout vec4 albedo, in vec3 viewPos, in vec3 nViewPos, in vec3 normal, in float fresnel, in float skyLightMap) {
 	float border = 0.0;
 	float dither = Bayer8(gl_FragCoord.xy);
 
@@ -35,8 +35,7 @@ void getReflection(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, in vec3
 		if (skyLightMap > 0.0) {
 			#ifdef OVERWORLD
 			vec3 viewPosRef = reflect(normalize(viewPos), normal);
-			vec3 worldPosRef = reflect(normalize(worldPos), normal);
-			vec3 reflectedAtmosphere = getAtmosphere(viewPosRef, worldPosRef);
+			vec3 reflectedAtmosphere = getAtmosphere(viewPosRef);
 			falloff = mix(falloff, reflectedAtmosphere, skyLightMap);
 			#endif
 		}

@@ -196,7 +196,7 @@ void main() {
     gbuffersLighting(albedo, screenPos, viewPos, worldPos, newNormal, shadow, lightmap, NoU, NoL, NoE, 0.0, emission, 0.6, 0.0);
 
     #if defined OVERWORLD
-    vec3 atmosphereColor = getAtmosphere(viewPos, worldPos);
+    vec3 atmosphereColor = getAtmosphere(viewPos);
 	#elif defined NETHER
 	vec3 atmosphereColor = netherColSqrt.rgb * 0.25;
 	#elif defined END
@@ -224,7 +224,7 @@ void main() {
 	#ifdef WATER_REFLECTIONS
 	if (water > 0.5 || tintedGlass > 0.5) {
 		fresnel = pow3(fresnel);
-		getReflection(albedo, worldPos, viewPos, nViewPos, newNormal, fresnel * 0.85 + 0.15, lightmap.y);
+		getReflection(albedo, viewPos, nViewPos, newNormal, fresnel * 0.85 + 0.15, lightmap.y);
 		albedo.a = mix(albedo.a, 1.0, fresnel);
 	}
 	#endif
