@@ -66,12 +66,14 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
 	#ifdef OVERWORLD
         float VoLm = pow(VoLClamped, 2.0 + sunVisibility);
         vlIntensity = sunVisibility * (1.0 - VL_STRENGTH_RATIO) * (1.0 - timeBrightness) + VL_STRENGTH_RATIO * VoLm;
-        vlIntensity *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY * (3.0 - eBS * 2.0), timeBrightness), sunVisibility);
+        vlIntensity = mix(0.5 + VoLm, vlIntensity, eBS);
+        vlIntensity *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY, timeBrightness), sunVisibility) * (3.0 - eBS * 2.0);
         #if !defined VC_SHADOWS
         vlIntensity *= max(pow6(1.0 - VoUClamped * (1.0 - timeBrightness) * sunVisibility), float(isEyeInWater == 1));
+        #else
+        vlIntensity = mix(vlIntensity, eBS * 0.5, float(isEyeInWater == 1));
         #endif
         vlIntensity *= caveFactor * shadowFade;
-
        vec3 nSkyColor = normalize(skyColor + 0.000001) * mix(vec3(1.0), biomeColor, sunVisibility * isSpecificBiome);
        vec3 vlCol = mix(lightCol, nSkyColor, timeBrightness * 0.75);
 	#else
@@ -91,9 +93,8 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
     #endif
 
     //LPV Fog Variables
-    float lpvFogIntensity = LPV_FOG_STRENGTH * (16.0 - float(isEyeInWater == 1) * 14.0);
-          lpvFogIntensity *= 1.0 - eBS * sunVisibility * 0.5;
-          lpvFogIntensity *= 3.0 - caveFactor * 2.0;
+    float lpvFogIntensity = LPV_FOG_STRENGTH * (16.0 - float(isEyeInWater == 1) * 15.0);
+          lpvFogIntensity *= 1.0 - eBS * timeBrightnessSqrt;
 
     if (totalVisibility > 0.0) {
         //Crepuscular rays parameters
@@ -119,9 +120,9 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
         #ifdef VC_SHADOWS
             maxDist += 128.0;
         #endif
-            maxDist /= 1.0 + float(isEyeInWater == 1) * 3.0;
+            maxDist /= 1.0 + float(isEyeInWater == 1) * 5.0;
 
-        float rayLength = (maxDist / (sampleCount + 1.0)) * 0.5;
+        float rayLength = (maxDist / (sampleCount + 1.0)) * 0.05;
 
         maxDist *= viewFactor;
         rayLength *= viewFactor;
@@ -130,7 +131,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
 
         //Ray marching
         for (int i = 0; i < sampleCount; i++) {
-            float currentDist = (i + dither) * rayLength;
+            float currentDist = pow(exp2(i + dither), 1.5) * rayLength;
 
             if (currentDist > maxCurrentDist) break;
 
@@ -139,7 +140,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
 
             if (lWorldPos > maxDist) break;
 
-            float currentSampleIntensity = (currentDist / maxDist) / sampleCount;
+            float currentSampleIntensity = pow(currentDist / maxDist, 1.5) / sampleCount;
 
             vec3 rayPos = worldPos + cameraPosition;
 
@@ -166,7 +167,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
                     #endif
                 }
 
-                vlSample = clamp(shadow1 * shadowCol + shadow0 * vlCol * float(isEyeInWater == 0), 0.0, 1.0);
+                vlSample = clamp(shadow1 * shadowCol * shadowCol * 2.0 + shadow0 * vlCol * float(isEyeInWater == 0), 0.0, 1.0);
 
                 //Crepuscular rays
                 #ifdef VC_SHADOWS
@@ -186,32 +187,34 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
             vec3 lpvFogSample = vec3(0.0);
 
             #ifdef LPV_FOG
-            vec3 voxelPos = worldToVoxel(worldPos);
-                 voxelPos /= voxelVolumeSize;
-                 voxelPos = clamp(voxelPos, 0.0, 1.0);
+            if (lpvFogIntensity > 0.0) {
+                vec3 voxelPos = worldToVoxel(worldPos);
+                     voxelPos /= voxelVolumeSize;
+                     voxelPos = clamp(voxelPos, 0.0, 1.0);
 
-            if (isInsideVoxelVolume(voxelPos)) {
-                float floodfillFade = maxOf(abs(worldPos) / (voxelVolumeSize * 0.5));
-                      floodfillFade = clamp(floodfillFade, 0.0, 1.0);
+                if (isInsideVoxelVolume(voxelPos)) {
+                    float floodfillFade = maxOf(abs(worldPos) / (voxelVolumeSize * 0.5));
+                        floodfillFade = clamp(floodfillFade, 0.0, 1.0);
 
-                vec4 lightVolume = vec4(0.0);
-                if ((frameCounter & 1) == 0) {
-                    lightVolume = texture(floodfillSamplerCopy, voxelPos);
-                } else {
-                    lightVolume = texture(floodfillSampler, voxelPos);
+                    vec4 lightVolume = vec4(0.0);
+                    if ((frameCounter & 1) == 0) {
+                        lightVolume = texture(floodfillSamplerCopy, voxelPos);
+                    } else {
+                        lightVolume = texture(floodfillSampler, voxelPos);
+                    }
+
+                    lpvFogSample = pow(lightVolume.rgb, vec3(1.0 / FLOODFILL_RADIUS)) * (1.0 - floodfillFade * floodfillFade);
+
+                    #ifdef LPV_CLOUDY_FOG
+                    vec3 noisePos = rayPos * 3.0;
+                    float n3da = texture2D(noisetex, noisePos.xz * 0.0025 + floor(noisePos.y * 0.25) * 0.25).r;
+                    float n3db = texture2D(noisetex, noisePos.xz * 0.0025 + floor(noisePos.y * 0.25 + 1.0) * 0.25).r;
+
+                    float cloudyNoise = mix(n3da, n3db, fract(noisePos.y * 0.25));
+                        cloudyNoise = max(cloudyNoise * cloudyNoise * cloudyNoise, 0.0);
+                    lpvFogSample *= cloudyNoise;
+                    #endif
                 }
-
-                lpvFogSample = pow(lightVolume.rgb, vec3(1.0 / FLOODFILL_RADIUS)) * (1.0 - floodfillFade * floodfillFade);
-
-                #ifdef LPV_CLOUDY_FOG
-                vec3 noisePos = rayPos * 3.0;
-                float n3da = texture2D(noisetex, noisePos.xz * 0.0025 + floor(noisePos.y * 0.25) * 0.25).r;
-                float n3db = texture2D(noisetex, noisePos.xz * 0.0025 + floor(noisePos.y * 0.25 + 1.0) * 0.25).r;
-
-                float cloudyNoise = mix(n3da, n3db, fract(noisePos.y * 0.25));
-                      cloudyNoise = max(cloudyNoise * cloudyNoise * cloudyNoise, 0.0);
-                lpvFogSample *= cloudyNoise;
-                #endif
             }
             #endif
 
@@ -225,6 +228,6 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
             vl += vlSample * currentSampleIntensity * vlIntensity;
             vl += lpvFogSample * currentSampleIntensity * lpvFogIntensity;
         }
-        vl *= totalVisibility;
+        vl *= totalVisibility * 2;
     }
 }

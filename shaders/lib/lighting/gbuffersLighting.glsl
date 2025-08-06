@@ -17,9 +17,6 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
           blockLightMap *= blockLightMap * 0.5;
 
     vec3 blockLighting = blockLightCol * blockLightMap * (1.0 - min(emission, 1.0));
-    #ifdef OVERWORLD
-         blockLighting *= 1.0 - pow4(lightmap.y) * 0.75;
-    #endif
 
     //Floodfill Lighting. Works only on Iris
     #if !defined GBUFFERS_BASIC && !defined GBUFFERS_WATER && !defined GBUFFERS_TEXTURED && !defined DH_TERRAIN && !defined DH_WATER && defined VX_SUPPORT
@@ -55,6 +52,9 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     #endif
 
     blockLighting *= 1.0 - smoothness * 0.5;
+    #ifdef OVERWORLD
+    blockLighting *= 1.0 - pow4(lightmap.y) * 0.75;
+    #endif
 
     //Shadow Calculations
     //Some code made by Emin and gri573
@@ -90,7 +90,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
             //Shadow bias without peter-panning
             float distanceBias = pow(dot(worldPos, worldPos), 0.75);
                   distanceBias = 0.1 + 0.0004 * distanceBias * (1.0 - float(subsurface > 0.0));
-            vec3 bias = worldNormal * distanceBias * (2.0 - 0.95 * max(NoL, 0.0));
+            vec3 bias = worldNormal * distanceBias;
 
             //Fix light leaking in caves
             if (lightmapS < 0.999) {
@@ -160,18 +160,18 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     #if (defined GBUFFERS_TERRAIN || defined GBUFFERS_ENTITIES || defined GBUFFERS_BLOCK) && !defined NETHER
     if (emission < 0.01) {
-        vec3 baseReflectance = vec3(1.5);
+        vec3 baseReflectance = vec3(2.0);
 
         float smoothnessF = 0.3;
               smoothnessF = mix(smoothnessF, 1.0, smoothness);
 
-        specularHighlight = clamp(GGX(newNormal, normalize(viewPos), smoothnessF, baseReflectance, 0.04) * shadowFade, vec3(0.0), vec3(8.0));
+        specularHighlight = clamp(GGX(newNormal, normalize(viewPos), smoothnessF, baseReflectance, 0.04) * shadowFade * 4.0, vec3(0.0), vec3(2.0));
     }
     #endif
 
     //Main color mixing
     ambientCol *= 0.05 + lightmap.y * lightmap.y * 0.95;
-    lightCol *= 0.15 + lightmap.y * 0.85;
+    lightCol *= 0.5 + lightmap.y * 0.5;
     lightCol *= 1.0 + specularHighlight;
 
     #ifdef OVERWORLD
