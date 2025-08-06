@@ -106,10 +106,10 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
 		float density = VC_DENSITY;
 		float height = VC_HEIGHT;
         float scale = VC_SCALE;
-        float cloudTop = VC_HEIGHT + VC_THICKNESS * scale - 50.0;
 
         getDynamicWeather(speed, amount, frequency, thickness, density, height, scale);
 
+        float cloudTop = height + thickness * scale - 50.0;
         vec2 wind = vec2(frameTimeCounter * speed * 0.005, sin(frameTimeCounter * speed * 0.1) * 0.01) * speed * 0.1;
         #endif
 

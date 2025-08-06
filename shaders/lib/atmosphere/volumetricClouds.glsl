@@ -117,6 +117,7 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 			float halfVoLSqr = halfVoL * halfVoL;
 			float scattering = pow20(halfVoL);
 			float noiseLightFactor = (2.0 - VoL * shadowFade) * density;
+			float heightFactor = 1.0 - clamp(cameraPosition.y / cloudTop, 0.0, 1.0);
 
 			vec3 rayPos = startPos + rayIncrement * dither;
 			
@@ -147,6 +148,7 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 				float noise = 0.0;
 				float attenuation = smoothstep(height, cloudTop, rayPos.y);
 
+				amount += max(0.0, heightFactor - lWorldPos * 0.0075);
 				getCloudSample(rayPos.xz / scale, wind, attenuation, amount, frequency, thickness, density, detail, noise);
 
                 float lightning = min(lightningFlashEffect(worldPos, lightningBoltPosition.xyz, 512.0) * lightningBoltPosition.w * 32.0, 1.0);
@@ -172,11 +174,12 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
             vec3 cloudAmbientColor = mix(atmosphereColor * atmosphereColor * 0.5, 
 									 mix(ambientCol, atmosphereColor * nSkyColor * 0.3, 0.2 + timeBrightnessSqrt * 0.3 + isSpecificBiome * 0.4),
 									 sunVisibility * (1.0 - wetness));
-            vec3 cloudLightColor = mix(lightCol, lightCol * nSkyColor * 3.0, timeBrightnessSqrt * (0.5 - wetness * 0.5)) * (1.0 + scattering * shadowFade);
+            vec3 cloudLightColor = mix(lightCol, lightCol * nSkyColor * 2.0, timeBrightnessSqrt * (0.5 - wetness * 0.5)) * (1.0 + scattering * shadowFade);
+				 cloudLightColor *= 0.5 + timeBrightnessSqrt * 0.5 + moonVisibility * 0.5;
 			vec3 cloudColor = mix(cloudAmbientColor, cloudLightColor, cloudLighting) * mix(vec3(1.0), biomeColor, isSpecificBiome * sunVisibility);
 			    cloudColor = mix(cloudColor, atmosphereColor * length(cloudColor) * 0.5, wetness * 0.6);
 
-			float opacity = clamp(mix(VC_OPACITY, 0.99, (max(0.0, cameraPosition.y) / height)), 0.0, 1.0 - wetness * 0.5);
+			float opacity = clamp(mix(VC_OPACITY, 1.00, (max(0.0, cameraPosition.y) / height)), 0.0, 1.0 - wetness * 0.5);
 
 			#if MC_VERSION >= 12104
 			opacity = mix(opacity, opacity * 0.5, isPaleGarden);
