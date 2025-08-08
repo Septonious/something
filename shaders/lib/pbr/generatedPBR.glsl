@@ -39,6 +39,7 @@ void generateIPBR(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, inout ve
     #include "/lib/pbr/blocks/prismarine.glsl"
     #include "/lib/pbr/blocks/purpur.glsl"
     #include "/lib/pbr/blocks/quartz.glsl"
+    #include "/lib/pbr/blocks/raw_metals.glsl"
     #include "/lib/pbr/blocks/redstone_lamp.glsl"
     #include "/lib/pbr/blocks/redstone_ore.glsl"
     #include "/lib/pbr/blocks/reflective_materials.glsl"
