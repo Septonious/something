@@ -120,7 +120,7 @@ void main() {
 				z0 = texture2D(depthtex0, newCoord).r;
 				z1 = texture2D(depthtex1, newCoord).r;
 				color.rgb = texture2D(colortex0, newCoord).rgb;
-				getChromaticAberration(colortex0, color.rgb, newCoord);
+				getWaterChromaticAberration(colortex0, color.rgb, newCoord, distort.xy * float(distortMask > 0.0));
 			}
 
 			screenPos = vec3(newCoord.xy, z0);

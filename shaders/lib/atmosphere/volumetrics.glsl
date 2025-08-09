@@ -71,7 +71,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
         #if !defined VC_SHADOWS
         vlIntensity *= max(pow6(1.0 - VoUClamped * (1.0 - timeBrightness) * sunVisibility), float(isEyeInWater == 1));
         #else
-        vlIntensity = mix(vlIntensity, eBS * 0.5, float(isEyeInWater == 1));
+        vlIntensity = mix(vlIntensity, eBS * (0.5 + timeBrightnessSqrt * 0.5), float(isEyeInWater == 1));
         #endif
         vlIntensity *= caveFactor * shadowFade;
        vec3 nSkyColor = normalize(skyColor + 0.000001) * mix(vec3(1.0), biomeColor, sunVisibility * isSpecificBiome);

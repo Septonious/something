@@ -29,7 +29,6 @@ uniform float darknessFactor;
 #endif
 
 #ifdef AURORA
-uniform float isSnowy;
 uniform int moonPhase;
 #endif
 

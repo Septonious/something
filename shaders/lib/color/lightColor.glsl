@@ -15,7 +15,7 @@ vec3 ambientCol = ambientColSqrt * ambientColSqrt;
 
 //Per-biome weather
 //Every biome specified here has a corresponding uniform in the /shaders/shaders.properties file
-uniform float isLushCaves, isDesert, isSwamp, isMushroom, isJungle;
+uniform float isSnowy, isLushCaves, isDesert, isSwamp, isMushroom, isJungle;
 
 //Color for each biome. Format: vec3(biome_color_red, biome_color_green, biome_color_blue) * isBiome
 vec3 biomeColor = vec3(0.425, 0.375, 0.150) * isLushCaves +

@@ -22,6 +22,10 @@ uniform int worldTime;
 uniform float shadowFade;
 #endif
 
+#ifdef RAINBOW
+uniform float rainStrength;
+#endif
+
 uniform float timeAngle, timeBrightness, wetness;
 
 #if MC_VERSION >= 12104
@@ -50,6 +54,10 @@ uniform vec4 lightningBoltPosition;
 uniform sampler2D colortex0;
 uniform sampler2D depthtex0;
 uniform sampler2D noisetex;
+
+#ifdef MILKY_WAY
+uniform sampler2D depthtex2;
+#endif
 
 #if defined VOLUMETRIC_CLOUDS || defined END_CLOUDY_FOG
 uniform sampler2D shadowtex1;
@@ -109,9 +117,7 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/atmosphere/volumetricClouds.glsl"
 #endif
 
-#ifdef STARS
-#include "/lib/atmosphere/stars.glsl"
-#endif
+#include "/lib/atmosphere/skyEffects.glsl"
 #endif
 
 #include "/lib/atmosphere/fog.glsl"
@@ -175,8 +181,24 @@ void main() {
 		if (VoU > 0.0) {
 			float nebulaFactor = 0.0;
 
+			#ifdef PLANAR_CLOUDS
+			drawPlanarClouds(color, atmosphereColor, worldPos, viewPos, VoU, caveFactor, vc.a, occlusion);
+			#endif
+
+			#ifdef MILKY_WAY
+			drawMilkyWay(color, worldPos, VoU, caveFactor, nebulaFactor, occlusion);
+			#endif
+
+			#ifdef AURORA
+			drawAurora(color, worldPos, VoU, caveFactor);
+			#endif
+
 			#ifdef STARS
 			drawStars(color, worldPos, sunVec, VoU, VoS, caveFactor, nebulaFactor, occlusion, 0.6);
+			#endif
+
+			#ifdef RAINBOW
+			getRainbow(color, worldPos, VoU, 1.75, 0.05, caveFactor);
 			#endif
 		}
 
