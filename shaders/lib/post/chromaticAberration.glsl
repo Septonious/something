@@ -1,5 +1,5 @@
 void getChromaticAberration(sampler2D colortex, inout vec3 color, in vec2 coord) {
-	const float strength = 0.01 * CHROMATIC_ABERRATION_STRENGTH;
+	const float strength = 0.05;
 	vec2 viewScale = vec2(1.0 / aspectRatio, 1.0);
 
 	color *= vec3(0.0, 1.0, 0.0);

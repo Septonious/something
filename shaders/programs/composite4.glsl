@@ -76,6 +76,7 @@ float sunVisibility = clamp(dot(sunVec, upVec) + 0.1, 0.0, 0.25) * 4.0;
 
 #ifdef REFRACTION
 #include "/lib/util/encode.glsl"
+#include "/lib/post/chromaticAberration.glsl"
 #endif
 
 #ifdef WATER_FOG
@@ -119,6 +120,7 @@ void main() {
 				z0 = texture2D(depthtex0, newCoord).r;
 				z1 = texture2D(depthtex1, newCoord).r;
 				color.rgb = texture2D(colortex0, newCoord).rgb;
+				getChromaticAberration(colortex0, color.rgb, newCoord);
 			}
 
 			screenPos = vec3(newCoord.xy, z0);
