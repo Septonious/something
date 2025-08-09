@@ -73,7 +73,6 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #endif
 
 // Includes //
-#include "/lib/util/encode.glsl"
 #include "/lib/util/bayerDithering.glsl"
 #include "/lib/util/transformMacros.glsl"
 #include "/lib/util/ToNDC.glsl"
@@ -122,7 +121,7 @@ void main() {
 
 	/* DRAWBUFFERS:03 */
 	gl_FragData[0] = albedo;
-	gl_FragData[1] = vec4(encodeNormal(newNormal), 0.0, clamp(mix(smoothness, 1.0, metalness * metalness), 0.0, 0.95));
+	gl_FragData[1].a = 1.0;
 }
 
 #endif

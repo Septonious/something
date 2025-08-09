@@ -1,3 +1,3 @@
 else if (material == 80) {
-    smoothness = 0.3 + 0.3 * lAlbedo;
+    smoothness = 0.05 + 0.05 * lAlbedo;
 }

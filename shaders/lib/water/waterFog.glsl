@@ -25,7 +25,7 @@ vec4 getWaterFog(vec3 viewPos) {
 	#endif
 
 	//Light absorption
-	waterFogColor *= 0.2 + (1.0 - fog) * 0.5;
+	waterFogColor *= 0.3 + (1.0 - fog) * 0.5;
 
     //Dynamic Hand Lighting
     #ifdef DYNAMIC_HANDLIGHT

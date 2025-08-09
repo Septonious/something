@@ -18,14 +18,10 @@ uniform int moonPhase;
 
 #ifdef VOLUMETRIC_CLOUDS
 uniform int worldTime;
+#endif
 
 uniform float shadowFade;
-#endif
-
-#ifdef RAINBOW
 uniform float rainStrength;
-#endif
-
 uniform float timeAngle, timeBrightness, wetness;
 
 #if MC_VERSION >= 12104

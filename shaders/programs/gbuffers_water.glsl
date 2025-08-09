@@ -186,7 +186,11 @@ void main() {
 	}
 	#endif
 
-	refraction = (newNormal.xy - normal.xy) * 0.5 + 0.5;
+	if (water > 0.5) {
+		refraction = (newNormal.xy - normal.xy) * 0.5 + 0.5;	
+	} else {
+		refraction = newNormal.xy * 0.5 + 0.5;
+	}
 
 	float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
 	float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
@@ -247,7 +251,7 @@ void main() {
 	/* DRAWBUFFERS:013 */
 	gl_FragData[0] = albedo;
 	gl_FragData[1] = albedo;
-	gl_FragData[2] = vec4(refraction, float(albedo.a > 0.0 && albedo.a < 0.95) * 0.05 + waterFog.a * 0.5, 1.0);
+	gl_FragData[2] = vec4(refraction, water * 0.4 + 0.4, 1.0);
 }
 
 #endif

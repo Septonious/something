@@ -19,6 +19,8 @@ void getReflection(inout vec4 color, in vec3 viewPos, in vec3 normal, in float f
 	int sampleCount = int(30 - eBS * 15);
 	#endif
 
+	sampleCount = int(sampleCount * (0.5 + smoothness * 0.5));
+
 	vec4 reflectPos = Raytrace(depthtex1, viewPos, normal, blueNoiseDither, border, 3, 0.5, 0.2, 1.5, sampleCount);
 
 	border = clamp(2.0 * (1.0 - border), 0.0, 1.0);
@@ -68,6 +70,10 @@ void getReflection(inout vec4 color, in vec3 viewPos, in vec3 normal, in float f
 	}
 
 	vec3 finalReflection = max(mix(falloff, reflection.rgb, reflection.a), vec3(0.0));
+
+	#ifdef GENERATED_SPECULAR
+	smoothness = pow(smoothness, max(1.0, 1.5 - smoothness)); //Prevents crazy strong reflections on rough surfaces
+	#endif
 
 	color.rgb = mix(color.rgb, finalReflection, pow(fresnel, 1.5) * smoothness);
 }

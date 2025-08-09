@@ -53,7 +53,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     blockLighting *= 1.0 - smoothness * 0.5;
     #ifdef OVERWORLD
-    blockLighting *= 1.0 - pow4(lightmap.y) * 0.75;
+    blockLighting *= 1.0 - lightmap.y * lightmap.y * 0.5 * sunVisibility;
     #endif
 
     //Shadow Calculations
@@ -165,12 +165,13 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
         float smoothnessF = 0.3;
               smoothnessF = mix(smoothnessF, 1.0, smoothness);
 
-        specularHighlight = clamp(GGX(newNormal, normalize(viewPos), smoothnessF, baseReflectance, 0.04) * shadowFade * 2.0, vec3(0.0), vec3(2.0));
+        specularHighlight = clamp(GGX(newNormal, normalize(viewPos), smoothnessF, baseReflectance, 0.04) * shadowFade * 2.0, vec3(0.0), vec3(4.0));
     }
     #endif
 
     //Main color mixing
     ambientCol *= 0.05 + lightmap.y * lightmap.y * 0.95;
+    ambientCol *= 1.0 - VoL * VoL * 0.5;
     lightCol *= 0.5 + lightmap.y * 0.5;
     lightCol *= 1.0 + specularHighlight;
 

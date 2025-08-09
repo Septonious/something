@@ -115,12 +115,16 @@ void main() {
 			vec2 newCoord = clamp(texCoord + distort.xy, 0.0, 1.0);
 
 			float distortMask = texture2D(colortex3, newCoord).b;
+			float water = float(distortMask > 0.79 && distortMask < 0.81);
+			//float glass = float(distortMask > 0.39 && distortMask < 0.41);
 
-			if (distortMask > 0.0 && z0 > 0.56) {
+			if (water > 0.0 && z0 > 0.56) {
 				z0 = texture2D(depthtex0, newCoord).r;
 				z1 = texture2D(depthtex1, newCoord).r;
 				color.rgb = texture2D(colortex0, newCoord).rgb;
-				getWaterChromaticAberration(colortex0, color.rgb, newCoord, distort.xy * float(distortMask > 0.0));
+				if (water > 0.5) {
+					getWaterChromaticAberration(colortex0, color.rgb, newCoord, distort.xy * float(distortMask > 0.0));
+				}
 			}
 
 			screenPos = vec3(newCoord.xy, z0);

@@ -1,3 +1,3 @@
 else if (material2 == 319) { // Calcite & Bone
-    smoothness = clamp(pow24(lAlbedo) * 0.1 + pow4(lAlbedo3) * 0.3, 0.0, 0.4);
+    smoothness = lAlbedo3 * lAlbedo3 * 0.1;
 }

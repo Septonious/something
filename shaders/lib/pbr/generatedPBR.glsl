@@ -6,6 +6,9 @@ void generateIPBR(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, inout ve
     vec3 albedo3 = pow3(albedo.rgb);
     float lAlbedo3 = clamp(length(albedo3), 0.0, 1.0);
     float smoothness = 0.0;
+    #ifdef GENERATED_SPECULAR_ON_ALL_BLOCKS //Base reflectance for all materials
+    smoothness += 0.03 * lAlbedo * (1.0 - float(subsurface > 0.0));
+    #endif
 
     #include "/lib/pbr/blocks/amethyst_block.glsl"
     #include "/lib/pbr/blocks/amethyst.glsl"
@@ -72,7 +75,7 @@ void generateIPBR(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, inout ve
     #endif
 
     #ifdef GENERATED_SPECULAR
-    smoothness2 = clamp(smoothness, 0.0, 0.95);
+    smoothness2 = clamp(smoothness, 0.0, 0.95) * (1.0 - emission);
     #endif
 }
 #endif
