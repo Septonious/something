@@ -131,7 +131,7 @@ void main() {
 	#elif defined NETHER
 	vec3 atmosphereColor = netherColSqrt.rgb * 0.25;
 	#elif defined END
-	vec3 atmosphereColor = endLightCol * 0.15;
+	vec3 atmosphereColor = endAmbientColSqrt * 0.25;
 	#endif
 
 	#if defined OVERWORLD || defined END
@@ -201,7 +201,7 @@ void main() {
 		#endif
 
 		#ifdef END_STARS
-		drawStars(color, worldPos, VoU, caveFactor, nebulaFactor, occlusion, 0.6);
+		drawStars(color, worldPos, VoU, 1.0, nebulaFactor, 0.0, 0.6);
 		#endif
 
 		color *= 1.0 - blindFactor;

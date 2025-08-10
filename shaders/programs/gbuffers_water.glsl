@@ -210,7 +210,7 @@ void main() {
 	#elif defined NETHER
 	vec3 atmosphereColor = netherColSqrt.rgb * 0.25;
 	#elif defined END
-	vec3 atmosphereColor = endLightCol * 0.15;
+	vec3 atmosphereColor = endAmbientColSqrt * 0.25;
 	#endif
 
 	//Water Light Absorption & Scattering

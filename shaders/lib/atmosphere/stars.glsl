@@ -6,7 +6,7 @@ void drawStars(inout vec3 color, in vec3 worldPos, in float VoU, in float caveFa
 	#ifdef OVERWORLD
 	float visibility = moonVisibility * (1.0 - wetness) * pow(VoU, 0.5) * caveFactor;
 	#else
-	float visibility = 0.4 - nebulaFactor * 0.2;
+	float visibility = 1;
 	#endif
 
 	visibility *= 1.0 - occlusion;

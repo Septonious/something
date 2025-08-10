@@ -28,7 +28,7 @@ void getReflection(inout vec4 albedo, in vec3 viewPos, in vec3 nViewPos, in vec3
 	#elif defined NETHER
 	vec3 falloff = netherColSqrt.rgb * 0.25;
 	#elif defined END
-	vec3 falloff = endLightCol * 0.15;
+	vec3 falloff = endAmbientColSqrt * 0.25;
 	#endif
 
 	if (reflection.a < 1.0 && isEyeInWater == 0) {
