@@ -6,7 +6,7 @@ vec3 getBlocklightColor(in int id) {
 	//Brewing Stand
 	if (id == 4) color = vec3(BS_R, BS_G, BS_B) * BS_I;
 	//Torch, Lantern, Campfire, Fire
-	if (id == 5 || id == 15) color = vec3(TLCF_R, TLCF_G, TLCF_B) * TLCF_I;
+	if (id == 5 || id == 15) color = pow(vec3(TLCF_R, TLCF_G, TLCF_B), vec3(1.0 - cos(sin(frameTimeCounter * 3.0) * 5.0 + frameTimeCounter) * 0.1)) * TLCF_I;
 	//Soul Torch, Soul Lantern, Soul Campfire, Soul Fire
 	if (id == 6 || id == 16) color = vec3(SOUL_R, SOUL_G, SOUL_B) * SOUL_I;
 	//End Rod

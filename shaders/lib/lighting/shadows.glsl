@@ -49,7 +49,13 @@ void computeShadow(inout vec3 shadow, vec3 shadowPos, float offset, float subsur
     shadow0 *= 0.125;
 
     #ifdef SHADOW_COLOR
-    if (wetness < 0.5) {
+    float doShadowColor = 1.0;
+
+    #ifdef OVERWORLD
+    doShadowColor *= 1.0 - wetness;
+    #endif
+
+    if (doShadowColor > 0.0) {
         for (int i = 0; i < 4; i++) {
             vec2 shadowOffset = ditherMatrix * offset * 2.0 * shadowOffsets4[i];
 
@@ -58,7 +64,10 @@ void computeShadow(inout vec3 shadow, vec3 shadowPos, float offset, float subsur
             shadowCol += shadowColSample;
         }
     }
+
+    #ifdef OVERWORLD
     shadowCol *= 0.25 - wetness * 0.25;
+    #endif
     #endif
    
     shadow0 *= mix(shadow0, 1.0, subsurface);

@@ -27,6 +27,8 @@ uniform sampler3D floodfillSampler, floodfillSamplerCopy;
 uniform vec3 cameraPosition;
 uniform vec3 previousCameraPosition;
 
+uniform float frameTimeCounter;
+
 ivec3[6] offsets = ivec3[6](
 	ivec3( 1,  0,  0),
 	ivec3( 0,  1,  0),

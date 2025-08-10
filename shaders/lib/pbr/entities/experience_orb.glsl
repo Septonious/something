@@ -1,3 +1,3 @@
-if (mat == 100) {
+if (entityId == 100) {
     emission = lAlbedo * 6.0;
 }

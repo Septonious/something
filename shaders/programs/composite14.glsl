@@ -53,6 +53,7 @@ void main() {
 
 	color = Uncharted2Tonemap(color * TONEMAP_BRIGHTNESS) / Uncharted2Tonemap(vec3(TONEMAP_WHITE_THRESHOLD));
 	color = pow(color, vec3(1.0 / 2.2));
+	colorSaturation(color);
 	color += (Bayer8(gl_FragCoord.xy) - 0.25) / 128.0;
 
 	/* DRAWBUFFERS:12 */

@@ -1,3 +1,4 @@
+#ifdef OVERWORLD
 float timeBrightnessSqrt = sqrt(timeBrightness);
 float mefade = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
 float dfade = 1.0 - pow(1.0 - timeBrightness, 1.5);
@@ -26,3 +27,4 @@ vec3 biomeColor = vec3(0.425, 0.375, 0.150) * isLushCaves +
 
 //This variable toggles per-biome weather when a player enters a specific biome
 float isSpecificBiome = isLushCaves + isDesert + isSwamp + isMushroom + isJungle;
+#endif

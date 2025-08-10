@@ -77,14 +77,10 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
        vec3 nSkyColor = normalize(skyColor + 0.000001) * mix(vec3(1.0), biomeColor, sunVisibility * isSpecificBiome);
        vec3 vlCol = mix(lightCol, nSkyColor, timeBrightness * 0.75);
 	#else
-       float dragonBattle = 1.0;
-       #if MC_VERSION <= 12104
-            dragonBattle = gl_Fog.start / far;
-       #endif
        float endBlackHolePos = pow2(clamp(dot(nViewPos, sunVec), 0.0, 1.0));
        float visibilityNormal = endBlackHolePos * 0.25;
        float visibilityDragon = 0.25 + endBlackHolePos * 0.5;
-       vlIntensity = float(0.56 < z0) * mix(visibilityDragon, visibilityNormal, clamp(dragonBattle, 0.0, 1.0)) * 0.25;
+       vlIntensity = visibilityNormal;
 
        vec3 vlCol = endLightColSqrt;
 	#endif
@@ -94,7 +90,9 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
 
     //LPV Fog Variables
     float lpvFogIntensity = LPV_FOG_STRENGTH * (16.0 - float(isEyeInWater == 1) * 15.0);
+    #ifdef OVERWORLD
           lpvFogIntensity *= 1.0 - eBS * timeBrightnessSqrt;
+    #endif
 
     if (totalVisibility > 0.0) {
         //Crepuscular rays parameters

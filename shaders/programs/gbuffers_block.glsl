@@ -109,7 +109,13 @@ void main() {
     float emission = 0.0;
 
 	float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
+    #if defined OVERWORLD
 	float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
+    #elif defined END
+    float NoL = clamp(dot(newNormal, sunVec), 0.0, 1.0);
+    #else
+    float NoL = 0.0;
+    #endif
 	float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
 
     vec3 shadow = vec3(0.0);

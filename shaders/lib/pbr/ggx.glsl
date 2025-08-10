@@ -59,12 +59,21 @@ vec3 GGX(vec3 normal, vec3 viewPos, float smoothness, vec3 baseReflectance, floa
           roughness *= roughness;
     viewPos = -viewPos;
     
+    #ifdef OVERWORLD
     vec3 halfVec = normalize(lightVec + viewPos);
 
     float HoL = clamp(dot(halfVec, lightVec), 0.0, 1.0);
     float NoL = clamp(dot(normal,  lightVec), 0.0, 1.0);
     float NoV = clamp(dot(normal,  viewPos), -1.0, 1.0);
     float VoL = dot(lightVec, viewPos);
+    #else
+    vec3 halfVec = normalize(sunVec + viewPos);
+
+    float HoL = clamp(dot(halfVec, sunVec), 0.0, 1.0);
+    float NoL = clamp(dot(normal,  sunVec), 0.0, 1.0);
+    float NoV = clamp(dot(normal,  viewPos), -1.0, 1.0);
+    float VoL = dot(sunVec, viewPos);
+    #endif
 
     float NoHsqr = getNoHSquared(sunSize, NoL, NoV, VoL);
     if (NoV < 0.0){

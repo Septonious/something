@@ -10,6 +10,8 @@ in vec3 normal;
 in vec2 texCoord, lmCoord;
 
 // Uniforms //
+uniform int entityId;
+uniform int currentRenderedItemId;
 uniform int isEyeInWater;
 uniform int frameCounter;
 
@@ -95,6 +97,10 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 
 #include "/lib/lighting/gbuffersLighting.glsl"
 
+#if defined GENERATED_EMISSION || defined GENERATED_SPECULAR
+#include "/lib/pbr/generatedPBR.glsl"
+#endif
+
 // Main //
 void main() {
 	vec4 albedo = texture2D(texture, texCoord);
@@ -102,22 +108,36 @@ void main() {
 	albedo *= color;
 	albedo.rgb = mix(albedo.rgb, entityColor.rgb * entityColor.rgb * 2.0, entityColor.a);
 
-    vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
-    vec3 newNormal = normal;
-    vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
-    vec3 viewPos = ToNDC(screenPos);
-    vec3 worldPos = ToWorld(viewPos);
+	float lightningBolt = float(entityId == 1);
 
-	float subsurface = 0.0;
-    float emission = 0.0;
-	float smoothness = 0.0, metalness = 0.0, parallaxShadow = 0.0;
+	if (lightningBolt < 0.5) {
+		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
+		vec3 newNormal = normal;
+		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
+		vec3 viewPos = ToNDC(screenPos);
+		vec3 worldPos = ToWorld(viewPos);
 
-	float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
-	float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
-	float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
+		float subsurface = 0.0;
+		float emission = 0.0;
+		float smoothness = 0.0, metalness = 0.0, parallaxShadow = 0.0;
 
-    vec3 shadow = vec3(0.0);
-    gbuffersLighting(albedo, screenPos, viewPos, worldPos, newNormal, shadow, lightmap, NoU, NoL, NoE, subsurface, emission, smoothness, parallaxShadow);
+		float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
+		#if defined OVERWORLD
+		float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
+		#elif defined END
+		float NoL = clamp(dot(newNormal, sunVec), 0.0, 1.0);
+		#else
+		float NoL = 0.0;
+		#endif
+		float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
+
+		vec3 shadow = vec3(0.0);
+		gbuffersLighting(albedo, screenPos, viewPos, worldPos, newNormal, shadow, lightmap, NoU, NoL, NoE, subsurface, emission, smoothness, parallaxShadow);
+
+		#ifdef GENERATED_EMISSION
+		generateIPBR(albedo, worldPos, viewPos, lightmap, emission, smoothness, metalness, subsurface);
+		#endif
+	}
 
 	/* DRAWBUFFERS:03 */
 	gl_FragData[0] = albedo;

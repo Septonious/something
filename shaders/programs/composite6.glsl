@@ -19,24 +19,21 @@ uniform int frameCounter;
 uniform float viewHeight, viewWidth;
 #endif
 
-#ifdef OVERWORLD
-uniform float wetness;
 uniform float blindFactor;
-uniform float timeAngle, timeBrightness;
 
 #if MC_VERSION >= 11900
 uniform float darknessFactor;
 #endif
 
-#ifdef AURORA
-uniform int moonPhase;
-#endif
-
-uniform ivec2 eyeBrightnessSmooth;
+#ifdef OVERWORLD
+uniform float wetness;
+uniform float timeAngle, timeBrightness;
 
 uniform vec3 skyColor;
 uniform vec3 cameraPosition;
 #endif
+
+uniform ivec2 eyeBrightnessSmooth;
 
 uniform sampler2D colortex0;
 
@@ -69,8 +66,9 @@ vec3 sunVec = vec3(0.0);
 vec3 upVec = normalize(gbufferModelView[1].xyz);
 vec3 eastVec = normalize(gbufferModelView[0].xyz);
 
-#ifdef OVERWORLD
 float eBS = eyeBrightnessSmooth.y / 240.0;
+
+#ifdef OVERWORLD
 float caveFactor = mix(clamp((cameraPosition.y - 56.0) / 16.0, float(sign(isEyeInWater)), 1.0), 1.0, eBS);
 float sunVisibility = clamp((dot( sunVec, upVec) + 0.15) * 3.0, 0.0, 1.0);
 float moonVisibility = clamp((dot(-sunVec, upVec) + 0.15) * 3.0, 0.0, 1.0);

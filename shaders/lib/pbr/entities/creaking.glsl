@@ -1,3 +1,3 @@
-if (mat == 107) {
+if (entityId == 107) {
     emission = float(albedo.r > albedo.g + albedo.b) * 0.5;
 }

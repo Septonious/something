@@ -193,7 +193,13 @@ void main() {
 	}
 
 	float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
+    #if defined OVERWORLD
 	float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
+    #elif defined END
+    float NoL = clamp(dot(newNormal, sunVec), 0.0, 1.0);
+    #else
+    float NoL = 0.0;
+    #endif
 	float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
 
     vec3 shadow = vec3(0.0);
@@ -240,7 +246,12 @@ void main() {
 
 	float smoothnessF = 0.6 + length(albedo.rgb) * 0.2 * float(ice > 0.5 || water > 0.5);
 
+	#ifdef OVERWORLD
 	vec3 specularHighlight = getSpecularHighlight(newNormal, viewPos, smoothnessF, vec3(0.25), lightColSqrt, shadow * vanillaDiffuse, color.a);
+	#else
+	vec3 specularHighlight = getSpecularHighlight(newNormal, viewPos, smoothnessF, vec3(0.25), endLightColSqrt, shadow * vanillaDiffuse, color.a);
+	#endif
+
 	albedo.rgb += specularHighlight;
 	#endif
 

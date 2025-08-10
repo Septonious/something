@@ -82,7 +82,10 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/util/ToWorld.glsl"
 #include "/lib/util/ToShadow.glsl"
 #include "/lib/color/lightColor.glsl"
+
+#ifndef NETHER
 #include "/lib/pbr/ggx.glsl"
+#endif
 
 #ifdef VX_SUPPORT
 #include "/lib/vx/blocklightColor.glsl"
@@ -98,7 +101,7 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 
 #include "/lib/lighting/gbuffersLighting.glsl"
 
-#ifdef GENERATED_EMISSION
+#if defined GENERATED_EMISSION || defined GENERATED_SPECULAR
 #include "/lib/pbr/generatedPBR.glsl"
 #endif
 
@@ -119,13 +122,21 @@ void main() {
 	float subsurface = leaves + foliage * 0.6 + saplings * 0.4;
     float emission = 0.0, smoothness = 0.0, metalness = 0.0, parallaxShadow = 0.0;
     
+	#ifdef OVERWORLD
 	if (foliage > 0.5) {
 		float foliageNormalDistance = min(1.0, length(viewPos.xz) / shadowDistance);
 		newNormal = normalize(upVec) * (1.0 - foliageNormalDistance * 0.4 * timeBrightness);
 	}
+	#endif
 
 	float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
+    #if defined OVERWORLD
 	float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
+    #elif defined END
+    float NoL = clamp(dot(newNormal, sunVec), 0.0, 1.0);
+    #else
+    float NoL = 0.0;
+    #endif
 	float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
 
 	#if defined GENERATED_EMISSION || defined GENERATED_SPECULAR
