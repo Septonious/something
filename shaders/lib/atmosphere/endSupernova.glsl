@@ -24,7 +24,8 @@ void drawEndSupernova(inout vec3 color, in vec3 worldPos, in float VoU, in float
           nebulaColorMixer = pow4(nebulaColorMixer) * 4.0;
     float nebulaVisibility = pow24(VoS);
     vec3 nebula = (1.0 + noiseDiff) * mix(vec3(4.8, 3.0, 0.2) * endLightColSqrt, vec3(0.1, 2.8, 1.1), nebulaColorMixer) * baseNoise * offsetNoise * nebulaVisibility;
-
-    supernova += nebula * (0.1 + length(nebula) * 0.4);
+         nebula *= 0.1 + length(nebula) * 0.4;
+    supernova += nebula;
     color += supernova;
+    nebulaFactor += float(length(nebula) > 0.125);
 }
