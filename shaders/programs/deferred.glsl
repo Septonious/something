@@ -188,7 +188,7 @@ void main() {
 			#endif
 
 			#ifdef STARS
-			drawStars(color, worldPos, VoU, caveFactor, nebulaFactor, occlusion, 0.6);
+			drawStars(color, atmosphereColor, worldPos, VoU, VoS, caveFactor, nebulaFactor, occlusion, 0.6);
 			#endif
 
 			#ifdef RAINBOW
@@ -196,12 +196,12 @@ void main() {
 			#endif
 		}
 
-		#ifdef END_SUPERNOVA
-		drawEndSupernova(color, worldPos, VoU, VoS, nebulaFactor);
+		#ifdef END_STARS
+		drawStars(color, atmosphereColor, worldPos, VoU, VoS, 1.0, nebulaFactor, 0.0, 1.0);
 		#endif
 
-		#ifdef END_STARS
-		drawStars(color, worldPos, VoU, 1.0, nebulaFactor, 0.0, 0.6);
+		#ifdef END_SUPERNOVA
+		drawEndSupernova(color, worldPos, VoU, VoS);
 		#endif
 
 		color *= 1.0 - blindFactor;

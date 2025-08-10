@@ -21,10 +21,6 @@ float getSpiralWarping(vec2 coord){
 #include "/lib/atmosphere/endSupernova.glsl"
 #endif
 
-#ifdef END_VORTEX
-#include "/lib/atmosphere/endVortex.glsl"
-#endif
-
 #ifdef AURORA
 #include "/lib/atmosphere/aurora.glsl"
 #endif

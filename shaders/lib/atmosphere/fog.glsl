@@ -30,7 +30,6 @@ void getDenseFog(inout vec3 color, float lViewPos) {
 }
 
 //Normal Fog
-#ifndef END
 void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in vec3 worldPos, in float lViewPos, in float lWorldPos, in float z0) {
     #if defined DISTANT_HORIZONS && (defined DEFERRED || defined DH_WATER || defined GBUFFERS_WATER)
     float farPlane = dhRenderDistance * 0.6;
@@ -104,7 +103,7 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
 	#if !defined NETHER && defined DEFERRED && !defined DISTANT_HORIZONS
     float zMixer = float(z0 < 1.0);
 
-	#if MC_VERSION >= 12104
+	#if MC_VERSION >= 12104 && defined OVERWORLD
 		  zMixer = mix(zMixer, 1.0, isPaleGarden);
 	#endif
 	      zMixer = clamp(zMixer, 0.0, 1.0);
@@ -114,7 +113,6 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
 
 	color = mix(color, fogCol, fog);
 }
-#endif
 
 void Fog(inout vec3 color, in vec3 viewPos, in vec3 worldPos, in vec3 atmosphereColor, in float z0) {
     float lViewPos = length(viewPos.xz);

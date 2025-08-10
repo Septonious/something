@@ -30,12 +30,6 @@ float isSpecificBiome = isLushCaves + isDesert + isSwamp + isMushroom + isJungle
 
 #elif defined END
 
-#ifdef END_SUPERNOVA
-float pulse = 0.75 + max(cos(1.5 * sin(frameTimeCounter * 0.75) + frameTimeCounter) * 0.25, 0.0);
-#else
-float pulse = 1.0;
-#endif
-
 const vec3 endLightColSqrt = vec3(LIGHT_END_R, LIGHT_END_G, LIGHT_END_B) / 255.0 * LIGHT_END_I;
 const vec3 endLightCol = endLightColSqrt * endLightColSqrt;
 

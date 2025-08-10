@@ -78,11 +78,9 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
        vec3 vlCol = mix(lightCol, nSkyColor, timeBrightness * 0.75);
 	#else
        float endBlackHolePos = pow2(clamp(dot(nViewPos, sunVec), 0.0, 1.0));
-       float visibilityNormal = endBlackHolePos * 0.25;
-       float visibilityDragon = 0.25 + endBlackHolePos * 0.5;
-       vlIntensity = visibilityNormal;
+       vlIntensity = endBlackHolePos * 0.05;
 
-       vec3 vlCol = endLightColSqrt;
+       vec3 vlCol = pow4(endLightCol);
 	#endif
 
     vlIntensity *= VL_STRENGTH;
