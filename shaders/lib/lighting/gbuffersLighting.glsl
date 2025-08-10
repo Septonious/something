@@ -193,7 +193,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     vec3 sceneLighting = mix(ambientCol, lightCol, shadow * rainFactor * shadowFade);
          sceneLighting *= 1.0 + sss * shadow;
     #elif defined END
-    vec3 sceneLighting = mix(endAmbientCol, endLightCol * (1.0 + specularHighlight), shadow) * 0.25;
+    vec3 sceneLighting = mix(endAmbientCol, endLightCol * (1.0 + specularHighlight) * pulse, shadow) * 0.25;
     #elif defined NETHER
     vec3 sceneLighting = pow(netherColSqrt, vec3(0.75)) * 0.035;
     #endif

@@ -16,6 +16,7 @@ uniform int isEyeInWater;
 uniform int frameCounter;
 #endif
 
+uniform float frameTimeCounter;
 uniform float viewHeight, viewWidth;
 #endif
 
@@ -82,9 +83,9 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/util/ToView.glsl"
 #include "/lib/util/ToWorld.glsl"
 #include "/lib/util/encode.glsl"
+#include "/lib/color/lightColor.glsl"
 
 #ifdef OVERWORLD
-#include "/lib/color/lightColor.glsl"
 #include "/lib/atmosphere/sky.glsl"
 #endif
 

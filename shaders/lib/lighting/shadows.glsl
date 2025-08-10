@@ -64,9 +64,10 @@ void computeShadow(inout vec3 shadow, vec3 shadowPos, float offset, float subsur
             shadowCol += shadowColSample;
         }
     }
+    shadowCol *= 0.25;
 
     #ifdef OVERWORLD
-    shadowCol *= 0.25 - wetness * 0.25;
+    shadowCol *= 1.0 - wetness * 0.5;
     #endif
     #endif
    

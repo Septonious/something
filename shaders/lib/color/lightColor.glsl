@@ -1,4 +1,4 @@
-#ifdef OVERWORLD
+#if defined OVERWORLD
 float timeBrightnessSqrt = sqrt(timeBrightness);
 float mefade = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
 float dfade = 1.0 - pow(1.0 - timeBrightness, 1.5);
@@ -27,4 +27,18 @@ vec3 biomeColor = vec3(0.425, 0.375, 0.150) * isLushCaves +
 
 //This variable toggles per-biome weather when a player enters a specific biome
 float isSpecificBiome = isLushCaves + isDesert + isSwamp + isMushroom + isJungle;
+
+#elif defined END
+
+#ifdef END_SUPERNOVA
+float pulse = 0.75 + max(cos(1.5 * sin(frameTimeCounter * 0.75) + frameTimeCounter) * 0.25, 0.0);
+#else
+float pulse = 1.0;
+#endif
+
+const vec3 endLightColSqrt = vec3(LIGHT_END_R, LIGHT_END_G, LIGHT_END_B) / 255.0 * LIGHT_END_I;
+const vec3 endLightCol = endLightColSqrt * endLightColSqrt;
+
+const vec3 endAmbientColSqrt = vec3(AMBIENT_END_R, AMBIENT_END_G, AMBIENT_END_B) / 255.0 * AMBIENT_END_I;
+const vec3 endAmbientCol = endAmbientColSqrt * endAmbientColSqrt;
 #endif

@@ -97,9 +97,9 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/util/bayerDithering.glsl"
 #include "/lib/util/ToView.glsl"
 #include "/lib/util/ToWorld.glsl"
+#include "/lib/color/lightColor.glsl"
 
 #ifdef OVERWORLD
-#include "/lib/color/lightColor.glsl"
 #include "/lib/atmosphere/sky.glsl"
 
 #ifdef ROUND_SUN_MOON
@@ -112,10 +112,9 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/lighting/lightning.glsl"
 #include "/lib/atmosphere/volumetricClouds.glsl"
 #endif
-
-#include "/lib/atmosphere/skyEffects.glsl"
 #endif
 
+#include "/lib/atmosphere/skyEffects.glsl"
 #include "/lib/atmosphere/fog.glsl"
 
 // Main //
@@ -169,14 +168,13 @@ void main() {
         color = atmosphereColor;
 
 		float occlusion = vc.a;
+		float nebulaFactor = 0.0;
 
 		#ifdef ROUND_SUN_MOON
 		drawSunMoon(color, worldPos, nViewPos, VoU, VoS, VoM, caveFactor, occlusion);
 		#endif
 
 		if (VoU > 0.0) {
-			float nebulaFactor = 0.0;
-
 			#ifdef PLANAR_CLOUDS
 			drawPlanarClouds(color, atmosphereColor, worldPos, viewPos, VoU, caveFactor, vc.a, occlusion);
 			#endif
@@ -190,13 +188,21 @@ void main() {
 			#endif
 
 			#ifdef STARS
-			drawStars(color, worldPos, sunVec, VoU, VoS, caveFactor, nebulaFactor, occlusion, 0.6);
+			drawStars(color, worldPos, VoU, caveFactor, nebulaFactor, occlusion, 0.6);
 			#endif
 
 			#ifdef RAINBOW
 			getRainbow(color, worldPos, VoU, 1.75, 0.05, caveFactor);
 			#endif
 		}
+
+		#ifdef END_SUPERNOVA
+		drawEndSupernova(color, worldPos, VoU, VoS, nebulaFactor);
+		#endif
+
+		#ifdef END_STARS
+		drawStars(color, worldPos, VoU, caveFactor, nebulaFactor, occlusion, 0.6);
+		#endif
 
 		color *= 1.0 - blindFactor;
 		#if MC_VERSION >= 11900

@@ -17,8 +17,8 @@ float getSpiralWarping(vec2 coord){
 #include "/lib/atmosphere/milkyWay.glsl"
 #endif
 
-#ifdef END_NEBULA
-#include "/lib/atmosphere/endNebula.glsl"
+#ifdef END_SUPERNOVA
+#include "/lib/atmosphere/endSupernova.glsl"
 #endif
 
 #ifdef END_VORTEX
