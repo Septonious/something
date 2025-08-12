@@ -98,19 +98,18 @@ void main() {
 
 	#if defined PBR || defined GENERATED_SPECULAR
 	vec4 gbuffersData = texture2D(colortex3, texCoord);
+	float skyLightMap = gbuffersData.b * 2.0;
 
-	if (gbuffersData.b < 0.01) {
-		float z0 = texture2D(depthtex0, texCoord).r;
-		float z1 = texture2D(depthtex1, texCoord).r;
+	float z0 = texture2D(depthtex0, texCoord).r;
+	float z1 = texture2D(depthtex1, texCoord).r;
 
-		if (gbuffersData.a > 0.01 && gbuffersData.a <= 0.95 && z0 > 0.56 && z0 >= z1 && z1 < 1.0) {
-			vec3 normal = decodeNormal(gbuffersData.rg);
-			vec3 viewPos = ToView(vec3(texCoord, z0));
+	if (gbuffersData.a > 0.01 && gbuffersData.a <= 0.95 && z0 > 0.56 && z0 >= z1 && z1 < 1.0) {
+		vec3 normal = decodeNormal(gbuffersData.rg);
+		vec3 viewPos = ToView(vec3(texCoord, z0));
 
-			float fresnel = clamp(1.0 + dot(normal, normalize(viewPos)), 0.0, 1.0);
+		float fresnel = clamp(1.0 + dot(normal, normalize(viewPos)), 0.0, 1.0);
 
-			getReflection(color, viewPos, normal, fresnel, gbuffersData.a);
-		}
+		getReflection(color, viewPos, normal, fresnel, gbuffersData.a, skyLightMap);
 	}
 	#endif
 

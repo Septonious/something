@@ -134,7 +134,7 @@ void main() {
 		vec3 gamePos = worldPos + cameraPosition;
 
 		if (color.a < 1.01 && lAlbedo < 1.0) // Campfire Smoke, World Border
-			albedo.a *= 0.4;
+			albedo.a *= 0.6;
 		else if (albedoTexture.r > 0.99) {
 			emission = max(pow4(albedo.r), 0.1) * pow4(lightmap.x);
 		}

@@ -1,14 +1,3 @@
-float getSpiralWarping(vec2 coord){
-	float whirl = END_VORTEX_WHIRL;
-	float arms = END_VORTEX_ARMS;
-
-    coord = vec2(atan(coord.y, coord.x) + frameTimeCounter * 0.05, sqrt(coord.x * coord.x + coord.y * coord.y));
-    float center = pow8(1.0 - coord.y) * 24.0;
-    float spiral = sin((coord.x + sqrt(coord.y) * whirl) * arms) + center - coord.y;
-
-    return clamp(spiral * 0.1, 0.0, 1.0);
-}
-
 #if defined STARS || defined END_STARS
 #include "/lib/atmosphere/stars.glsl"
 #endif

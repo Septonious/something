@@ -5,7 +5,7 @@ const vec2 roughReflectionOffsets[4] = vec2[4](
    vec2(0.43407555004227927, 0.6502318262968816)
 );
 
-void getReflection(inout vec4 color, in vec3 viewPos, in vec3 normal, in float fresnel, in float smoothness) {
+void getReflection(inout vec4 color, in vec3 viewPos, in vec3 normal, in float fresnel, in float smoothness, in float skyLightMap) {
 	float border = 0.0;
 	float blueNoiseDither = texture2D(noisetex, gl_FragCoord.xy / 512.0).b;
 
@@ -16,7 +16,7 @@ void getReflection(inout vec4 color, in vec3 viewPos, in vec3 normal, in float f
 	#ifndef OVERWORLD
 	int sampleCount = 30;
 	#else
-	int sampleCount = int(30 - eBS * 15);
+	int sampleCount = int(30 - skyLightMap * 15);
 	#endif
 
 	sampleCount = int(sampleCount * (0.5 + smoothness * 0.5));
@@ -53,12 +53,12 @@ void getReflection(inout vec4 color, in vec3 viewPos, in vec3 normal, in float f
 	#endif
 
 	if (reflection.a < 1.0 && isEyeInWater == 0) {
-		if (eBS > 0.0) {
+		if (skyLightMap > 0.95) {
 			#ifdef OVERWORLD
 			vec3 viewPosRef = reflect(normalize(viewPos), normal);
 			vec3 reflectedAtmosphere = getAtmosphere(viewPosRef);
 			reflectedAtmosphere = pow(reflectedAtmosphere, vec3(2.2));
-			falloff = mix(falloff, reflectedAtmosphere, eBS);
+			falloff = mix(falloff, reflectedAtmosphere, skyLightMap);
 			#endif
 		}
 

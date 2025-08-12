@@ -63,25 +63,19 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
     float vlIntensity = 0.0;
 
     #ifdef VL
-	#ifdef OVERWORLD
-        float VoLm = pow(VoLClamped, 2.0 + sunVisibility);
-        vlIntensity = sunVisibility * (1.0 - VL_STRENGTH_RATIO) * (1.0 - timeBrightness) + VL_STRENGTH_RATIO * VoLm;
-        vlIntensity = mix(0.5 + VoLm, vlIntensity, eBS);
-        vlIntensity *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY, timeBrightness), sunVisibility) * (3.0 - eBS * 2.0);
-        #if !defined VC_SHADOWS
-        vlIntensity *= max(pow6(1.0 - VoUClamped * (1.0 - timeBrightness) * sunVisibility), float(isEyeInWater == 1));
-        #else
-        vlIntensity = mix(vlIntensity, eBS * (0.5 + timeBrightnessSqrt * 0.5), float(isEyeInWater == 1));
-        #endif
-        vlIntensity *= caveFactor * shadowFade;
-       vec3 nSkyColor = normalize(skyColor + 0.000001) * mix(vec3(1.0), biomeColor, sunVisibility * isSpecificBiome);
-       vec3 vlCol = mix(lightCol, nSkyColor, timeBrightness * 0.75);
-	#else
-       float endBlackHolePos = pow2(clamp(dot(nViewPos, sunVec), 0.0, 1.0));
-       vlIntensity = endBlackHolePos * 0.05;
+    float VoLm = pow(VoLClamped, 2.0 + sunVisibility);
+         vlIntensity = sunVisibility * (1.0 - VL_STRENGTH_RATIO) * (1.0 - timeBrightness) + VL_STRENGTH_RATIO * VoLm;
+         vlIntensity = mix(0.5 + VoLm, vlIntensity, eBS);
+         vlIntensity *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY, timeBrightness), sunVisibility) * (3.0 - eBS * 2.0);
+    #if !defined VC_SHADOWS
+         vlIntensity *= max(pow6(1.0 - VoUClamped * (1.0 - timeBrightness) * sunVisibility), float(isEyeInWater == 1));
+    #else
+         vlIntensity = mix(vlIntensity, eBS * (0.5 + timeBrightnessSqrt * 0.5), float(isEyeInWater == 1));
+    #endif
+         vlIntensity *= caveFactor * shadowFade;
 
-       vec3 vlCol = pow4(endLightCol);
-	#endif
+    vec3 nSkyColor = normalize(skyColor + 0.000001) * mix(vec3(1.0), biomeColor, sunVisibility * isSpecificBiome);
+    vec3 vlCol = mix(lightCol, nSkyColor, timeBrightness * 0.75);
 
     vlIntensity *= VL_STRENGTH;
     #endif
@@ -90,6 +84,8 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
     float lpvFogIntensity = LPV_FOG_STRENGTH * (16.0 - float(isEyeInWater == 1) * 15.0);
     #ifdef OVERWORLD
           lpvFogIntensity *= 1.0 - eBS * timeBrightnessSqrt;
+    #else
+          lpvFogIntensity *= 0.5;
     #endif
 
     if (totalVisibility > 0.0) {

@@ -148,7 +148,7 @@ void main() {
 
 	/* DRAWBUFFERS:03 */
 	gl_FragData[0] = albedo;
-	gl_FragData[1] = vec4(encodeNormal(newNormal), 0.0, clamp(mix(smoothness, 1.0, metalness * metalness), 0.0, 0.95));
+	gl_FragData[1] = vec4(encodeNormal(newNormal), lightmap.y * 0.5, clamp(mix(smoothness, 1.0, metalness * metalness), 0.0, 0.95));
 }
 
 #endif

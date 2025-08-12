@@ -105,13 +105,13 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #ifdef ROUND_SUN_MOON
 #include "/lib/atmosphere/sunMoon.glsl"
 #endif
+#endif
 
-#ifdef VOLUMETRIC_CLOUDS
+#if defined VOLUMETRIC_CLOUDS || defined END_CLOUDY_FOG
 #include "/lib/atmosphere/spaceConversion.glsl"
 #include "/lib/util/ToShadow.glsl"
 #include "/lib/lighting/lightning.glsl"
 #include "/lib/atmosphere/volumetricClouds.glsl"
-#endif
 #endif
 
 #include "/lib/atmosphere/skyEffects.glsl"
@@ -161,6 +161,10 @@ void main() {
 	
 	#ifdef VOLUMETRIC_CLOUDS
 	computeVolumetricClouds(vc, atmosphereColor, z0, blueNoiseDither, cloudDepth);
+	#endif
+
+	#ifdef END_CLOUDY_FOG
+	computeEndVolumetricClouds(vc, atmosphereColor, z0, blueNoiseDither, cloudDepth);
 	#endif
 
 	//Sky
