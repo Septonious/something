@@ -194,11 +194,11 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 #endif
 
 #ifdef END_CLOUDY_FOG
-float getSpiralWarping(vec2 coord){
-	float whirl = 5;
+float getProtoplanetaryDisk(vec2 coord){
+	float whirl = -5;
 	float arms = 5;
 
-    coord = vec2(atan(coord.y, coord.x) - frameTimeCounter * 0.01, sqrt(coord.x * coord.x + coord.y * coord.y));
+    coord = vec2(atan(coord.y, coord.x) + frameTimeCounter * 0.01, sqrt(coord.x * coord.x + coord.y * coord.y));
     float center = pow4(1.0 - coord.y) * 1.0;
     float spiral = sin((coord.x + sqrt(coord.y) * whirl) * arms) + center - coord.y;
 
@@ -221,7 +221,7 @@ void getEndCloudSample(vec2 rayPos, vec2 wind, float attenuation, inout float no
 		  noiseCoverage *= noiseCoverage * 5.0;
 	
 	noise = mix(noiseBase, noiseDetail, 0.025 * int(0 < noiseBase)) * 22.0 - noiseCoverage;
-	noise = max(noise - VF_END_AMOUNT - 1.0 + getSpiralWarping(rayPos), 0.0);
+	noise = max(noise - VF_END_AMOUNT - 1.0 + getProtoplanetaryDisk(rayPos), 0.0);
 	noise /= sqrt(noise * noise + 0.25);
 }
 
@@ -272,7 +272,7 @@ void computeEndVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0
 			float VoS = dot(nViewPos, sunVec);
 			float halfVoLSqrt = VoS * 0.5 + 0.5;
 			float halfVoL = halfVoLSqrt * halfVoLSqrt;
-			float scattering = pow6(halfVoLSqrt);
+			float scattering = pow3(halfVoLSqrt);
 			float noiseLightFactor = (2.0 - VoS) * 5.0;
 
 			vec3 rayPos = startPos + sampleStep * dither;
@@ -317,7 +317,7 @@ void computeEndVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0
 			}
 
 			//Final color calculations
-			vec3 cloudColor = mix(endAmbientCol * 0.5, vec3(0.95, 1.0, 0.5) * endLightCol, cloudLighting) * (1.0 + scattering) * 0.2;
+			vec3 cloudColor = mix(endAmbientCol * 0.5, vec3(0.95, 1.0, 0.5) * endLightCol, cloudLighting) * (1.0 + scattering * 3.0) * 0.2;
 
 			vc = vec4(cloudColor, cloudAlpha * VF_END_OPACITY) * visibility;
 		}

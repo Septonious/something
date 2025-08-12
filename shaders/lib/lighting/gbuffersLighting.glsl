@@ -6,7 +6,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     float lViewPos = length(viewPos.xz);
     float lAlbedo = length(albedo.rgb);
     float ao = color.a * color.a;
-    vec3 worldNormal = normalize(ToWorld(normal * 100000000.0));
+    vec3 worldNormal = normalize(ToWorld(newNormal * 100000000.0));
 
     //Vanilla Directional Lighting
     float vanillaDiffuse = (0.25 * NoU + 0.75) + (0.667 - abs(NoE)) * (1.0 - abs(NoU)) * 0.15;
@@ -172,12 +172,17 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     #if (defined GBUFFERS_TERRAIN || defined GBUFFERS_ENTITIES || defined GBUFFERS_BLOCK) && !defined NETHER
     if (emission < 0.01) {
-        vec3 baseReflectance = vec3(1.5);
+        #ifdef GBUFFERS_TERRAIN
+        float isMaterialSmooth = float(mat >= 20298 && mat <= 20322);
+        vec3 baseReflectance = vec3(6.0 - isMaterialSmooth * 5.0);
+        #else
+        vec3 baseReflectance = vec3(2.0);
+        #endif
 
-        float smoothnessF = 0.3;
+        float smoothnessF = 0.25;
               smoothnessF = mix(smoothnessF, 1.0, smoothness);
 
-        specularHighlight = clamp(GGX(newNormal, normalize(viewPos), smoothnessF, baseReflectance, 0.04) * 2.0, vec3(0.0), vec3(4.0));
+        specularHighlight = clamp(GGX(newNormal, normalize(viewPos), smoothnessF, baseReflectance, 0.04), vec3(0.0), vec3(4.0));
     }
     #endif
 
@@ -193,7 +198,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     vec3 sceneLighting = mix(ambientCol, lightCol, shadow * rainFactor * shadowFade);
          sceneLighting *= 1.0 + sss * shadow;
     #elif defined END
-    vec3 sceneLighting = mix(endAmbientCol, endLightCol * (1.0 + specularHighlight), shadow) * 0.25;
+    vec3 sceneLighting = mix((endLightCol * AMBIENT_END_I + endAmbientCol) * 0.25, endLightCol * (1.0 + specularHighlight), shadow) * 0.25;
     #elif defined NETHER
     vec3 sceneLighting = pow(netherColSqrt, vec3(0.75)) * 0.035;
     #endif

@@ -6,9 +6,17 @@
 
 // VSH Data //
 in vec4 color;
-in vec3 normal;
+in vec3 normal, binormal, tangent;
 in vec2 texCoord, lmCoord;
 flat in int mat;
+
+#if defined GENERATED_NORMALS || defined PARALLAX || defined PBR || defined RAIN_PUDDLES
+in float dist;
+flat in vec2 absMidCoordPos;
+in vec2 signMidCoordPos;
+in vec3 viewVector;
+in vec4 vTexCoord, vTexCoordAM;
+#endif
 
 // Uniforms //
 uniform int isEyeInWater;
@@ -29,6 +37,10 @@ uniform float darknessFactor;
 uniform float wetness;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
+#endif
+
+#ifdef GENERATED_NORMALS
+uniform ivec2 atlasSize;
 #endif
 
 uniform ivec2 eyeBrightnessSmooth;
@@ -74,6 +86,9 @@ float moonVisibility = clamp((dot(-sunVec, upVec) + 0.15) * 3.0, 0.0, 1.0);
 vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
 #endif
 
+vec2 dcdx = dFdx(texCoord);
+vec2 dcdy = dFdy(texCoord);
+
 // Includes //
 #include "/lib/util/encode.glsl"
 #include "/lib/util/bayerDithering.glsl"
@@ -105,6 +120,10 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/pbr/generatedPBR.glsl"
 #endif
 
+#ifdef GENERATED_NORMALS
+#include "/lib/pbr/generatedNormals.glsl"
+#endif
+
 // Main //
 void main() {
 	vec4 albedoTexture = texture2D(texture, texCoord);
@@ -121,7 +140,15 @@ void main() {
 	float foliage = float(mat >= 10304 && mat <= 10319 || mat >= 10035 && mat <= 10040) * (1.0 - leaves) * (1.0 - saplings);
 	float subsurface = leaves + foliage * 0.6 + saplings * 0.4;
     float emission = 0.0, smoothness = 0.0, metalness = 0.0, parallaxShadow = 0.0;
-    
+
+	#if defined GENERATED_NORMALS || defined PARALLAX || defined PBR || defined RAIN_PUDDLES
+	vec2 newCoord = vTexCoord.st * vTexCoordAM.pq + vTexCoordAM.st;
+	#endif
+
+	#ifdef GENERATED_NORMALS
+    if (subsurface < 0.1) generateNormals(newNormal, albedoTexture.rgb, viewPos, mat);
+	#endif
+
 	#ifdef OVERWORLD
 	if (foliage > 0.5) {
 		float foliageNormalDistance = min(1.0, length(viewPos.xz) / shadowDistance);
@@ -161,9 +188,17 @@ void main() {
 
 // VSH Data //
 out vec4 color;
-out vec3 normal;
+out vec3 normal, binormal, tangent;
 out vec2 texCoord, lmCoord;
 flat out int mat;
+
+#if defined GENERATED_NORMALS || defined PARALLAX || defined PBR || defined RAIN_PUDDLES
+out float dist;
+flat out vec2 absMidCoordPos;
+out vec2 signMidCoordPos;
+out vec3 viewVector;
+out vec4 vTexCoord, vTexCoordAM;
+#endif
 
 // Uniforms //
 #ifdef TAA
@@ -181,10 +216,8 @@ uniform mat4 gbufferModelViewInverse;
 
 // Attributes //
 attribute vec4 mc_Entity;
-
-#if defined WAVING_PLANTS || defined WAVING_LEAVES
 attribute vec4 mc_midTexCoord;
-#endif
+attribute vec4 at_tangent;
 
 // Includes //
 #ifdef TAA
@@ -204,7 +237,27 @@ void main() {
 	
     color = gl_Color;
 
-    normal = normalize(gl_NormalMatrix * gl_Normal);
+	//Normal, Binormal and Tangent
+	normal = normalize(gl_NormalMatrix * gl_Normal);
+	binormal = normalize(gl_NormalMatrix * cross(at_tangent.xyz, gl_Normal.xyz) * at_tangent.w);
+	tangent = normalize(gl_NormalMatrix * at_tangent.xyz);
+
+	#if defined GENERATED_NORMALS || defined PARALLAX || defined PBR || defined RAIN_PUDDLES
+	mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
+						  tangent.y, binormal.y, normal.y,
+						  tangent.z, binormal.z, normal.z);
+	
+	dist = length(gl_ModelViewMatrix * gl_Vertex);
+	viewVector = tbnMatrix * (gl_ModelViewMatrix * gl_Vertex).xyz;
+
+	vec2 midCoord = (gl_TextureMatrix[0] * mc_midTexCoord).st;
+	vec2 texMinMidCoord = texCoord - midCoord;
+	signMidCoordPos = sign(texMinMidCoord);
+	absMidCoordPos = abs(texMinMidCoord);
+	vTexCoordAM.pq = abs(texMinMidCoord) * 2.0;
+	vTexCoordAM.st = min(texCoord, midCoord - texMinMidCoord);
+	vTexCoord.xy = sign(texMinMidCoord) * 0.5 + 0.5;
+	#endif
 
     mat = int(mc_Entity.x + 0.5);
 

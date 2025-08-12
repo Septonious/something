@@ -44,6 +44,10 @@ void computeShadow(inout vec3 shadow, vec3 shadowPos, float offset, float subsur
 
     for (int i = 0; i < 8; i++) {
         vec2 shadowOffset = ditherMatrix * offset * shadowOffsets8[i];
+        #ifdef END
+             shadowOffset *= 2.0;
+        #endif
+
         shadow0 += texture2DShadow(shadowtex0, vec3(shadowPos.st + shadowOffset, shadowPos.z));
     }
     shadow0 *= 0.125;
@@ -58,6 +62,9 @@ void computeShadow(inout vec3 shadow, vec3 shadowPos, float offset, float subsur
     if (doShadowColor > 0.0) {
         for (int i = 0; i < 4; i++) {
             vec2 shadowOffset = ditherMatrix * offset * 2.0 * shadowOffsets4[i];
+            #ifdef END
+                 shadowOffset *= 2.0;
+            #endif
 
             vec3 shadowColSample = texture2D(shadowcolor0, shadowPos.st + shadowOffset).rgb *
                             texture2DShadow(shadowtex1, vec3(shadowPos.st + shadowOffset, shadowPos.z));

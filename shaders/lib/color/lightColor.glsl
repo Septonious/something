@@ -27,12 +27,4 @@ vec3 biomeColor = vec3(0.425, 0.375, 0.150) * isLushCaves +
 
 //This variable toggles per-biome weather when a player enters a specific biome
 float isSpecificBiome = isLushCaves + isDesert + isSwamp + isMushroom + isJungle;
-
-#elif defined END
-
-const vec3 endLightColSqrt = vec3(LIGHT_END_R, LIGHT_END_G, LIGHT_END_B) / 255.0 * LIGHT_END_I;
-const vec3 endLightCol = endLightColSqrt * endLightColSqrt;
-
-const vec3 endAmbientColSqrt = vec3(AMBIENT_END_R, AMBIENT_END_G, AMBIENT_END_B) / 255.0 * AMBIENT_END_I;
-const vec3 endAmbientCol = endAmbientColSqrt * endAmbientColSqrt;
 #endif

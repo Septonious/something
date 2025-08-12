@@ -6,8 +6,8 @@
 #include "/lib/atmosphere/milkyWay.glsl"
 #endif
 
-#ifdef END_SUPERNOVA
-#include "/lib/atmosphere/endSupernova.glsl"
+#ifdef END_NEBULA
+#include "/lib/atmosphere/endNebula.glsl"
 #endif
 
 #ifdef AURORA

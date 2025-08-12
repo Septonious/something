@@ -12,6 +12,7 @@ in vec2 texCoord, lmCoord;
 // Uniforms //
 uniform int isEyeInWater;
 uniform int frameCounter;
+uniform int blockEntityId;
 
 #ifdef VC_SHADOWS
 uniform int worldDay, worldTime;
@@ -95,6 +96,14 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 
 #include "/lib/lighting/gbuffersLighting.glsl"
 
+void sampleNebulaNoise(vec2 coord, inout float colorMixer, inout float noise) {
+    colorMixer = texture2D(noisetex, coord * 0.25).r;
+    noise = texture2D(noisetex, coord * 0.50).r;
+    noise *= colorMixer;
+    noise *= texture2D(noisetex, coord * 0.125).r;
+    noise *= 4.0;
+}
+
 // Main //
 void main() {
     vec4 albedo = texture2D(texture, texCoord) * color;
@@ -105,21 +114,85 @@ void main() {
     vec3 viewPos = ToNDC(screenPos);
     vec3 worldPos = ToWorld(viewPos);
 
-	float subsurface = 0.0;
+    float subsurface = 0.0;
     float emission = 0.0;
 
-	float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
+    float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
     #if defined OVERWORLD
-	float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
+    float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
     #elif defined END
     float NoL = clamp(dot(newNormal, sunVec), 0.0, 1.0);
     #else
     float NoL = 0.0;
     #endif
-	float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
+    float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
 
-    vec3 shadow = vec3(0.0);
-    gbuffersLighting(albedo, screenPos, viewPos, worldPos, newNormal, shadow, lightmap, NoU, NoL, NoE, subsurface, emission, 0.0, 0.0);
+    if (blockEntityId == 9999) {
+        const vec3[8] portalColors = vec3[](
+            vec3(0.35, 0.65, 0.75),
+            vec3(0.60, 0.75, 1.10),
+            vec3(0.45, 0.80, 0.90),
+            vec3(0.35, 1.05, 1.85),
+            vec3(0.75, 0.85, 0.65),
+            vec3(0.40, 0.55, 0.80),
+            vec3(0.50, 0.65, 1.00),
+            vec3(0.55, 0.45, 0.80)
+        );
+
+        albedo.rgb = endAmbientColSqrt * 0.25;
+
+        float frequency = 1.5;
+
+        for (int i = 1; i <= 8; i++) {
+            float colormult = 1.0 / (25.0 + i);
+            float rotation = (i - 0.1 * i + 0.71 * i - 11 * i + 21) * 0.01 + i * 0.01;
+            float Cos = cos(radians(rotation));
+            float Sin = sin(radians(rotation));
+            vec2 offset = vec2(0.0, 0.000025 * pow2(16.0 - i));
+
+            vec3 worldPosM = normalize((gbufferModelViewInverse * vec4(viewPos * (i * frequency + 1), 1.0)).xyz);
+            if (abs(NoU) > 0.95) {
+                worldPosM.xz /= worldPosM.y;
+                worldPosM.xz *= 0.05 * sign(- worldPos.y);
+                worldPosM.xz *= abs(worldPos.y) + i * frequency;
+                worldPosM.xz -= cameraPosition.xz * 0.05;
+            } else {
+                vec3 absPos = abs(worldPos);
+                if (abs(NoE) > 0.9) {
+                    worldPosM.xz = worldPosM.yz / worldPosM.x;
+                    worldPosM.xz *= 0.05 * sign(- worldPos.x);
+                    worldPosM.xz *= abs(worldPos.x) + i * frequency;
+                    worldPosM.xz -= cameraPosition.yz * 0.05;
+                } else {
+                    worldPosM.xz = worldPosM.yx / worldPosM.z;
+                    worldPosM.xz *= 0.05 * sign(- worldPos.z);
+                    worldPosM.xz *= abs(worldPos.z) + i * frequency;
+                    worldPosM.xz -= cameraPosition.yx * 0.05;
+                }
+            }
+
+            vec2 animation = fract((frameTimeCounter + 1000.0) * (i + 8) * 0.125 * offset);
+            vec2 coord = mat2(Cos, Sin, -Sin, Cos) * worldPosM.xz + animation;
+            if (i % 2 != 0) coord = coord.yx + vec2(-1.0, 1.0) * animation.y;
+
+            if (i > 6) {
+                float nebulaNoise = 0.0;
+                float nebulaColorMixer = 0.0;
+                sampleNebulaNoise(coord, nebulaColorMixer, nebulaNoise);
+                      nebulaColorMixer = pow4(nebulaColorMixer) * 6.0;
+
+                vec3 nebula =  mix(vec3(5.6, 2.2, 0.2), vec3(0.1, 2.8, 1.1), nebulaColorMixer) * nebulaNoise * nebulaNoise;
+                     nebula *= length(nebula) * END_NEBULA_BRIGHTNESS;
+
+                albedo.rgb += nebula * colormult;
+            }
+            vec3 portalSample = pow(texture2D(texture, coord).rgb * portalColors[i-1], vec3(0.75));
+            albedo.rgb += portalSample * length(portalSample) * colormult * 12.0;
+        }
+    } else {
+        vec3 shadow = vec3(0.0);
+        gbuffersLighting(albedo, screenPos, viewPos, worldPos, newNormal, shadow, lightmap, NoU, NoL, NoE, subsurface, emission, 0.0, 0.0);
+    }
 
 	/* DRAWBUFFERS:03 */
 	gl_FragData[0] = albedo;

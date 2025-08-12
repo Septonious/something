@@ -126,7 +126,7 @@ vec3 getBlocklightColor(in int id) {
 	//Mob Spawner
 	if (id == 69) color = vec3(0.1, 0.01, 0.15);
 	//End Portal With Eye
-	if (id == 71) color = vec3(0.1, 0.9, 0.3) * 0.5;
+	if (id == 71) color = vec3(0.1, 0.9, 0.6) * 0.5;
 	//Zinc Ore
 	if (id == 72) color = vec3(0.4);
 	//Creaking Heart (Active)

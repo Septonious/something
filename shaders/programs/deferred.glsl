@@ -12,6 +12,8 @@ in vec2 texCoord;
 uniform int isEyeInWater;
 uniform int frameCounter;
 
+uniform float viewWidth, viewHeight;
+
 #ifdef OVERWORLD
 uniform int worldDay;
 uniform int moonPhase;
@@ -46,7 +48,7 @@ uniform vec3 cameraPosition;
 #ifdef VOLUMETRIC_CLOUDS
 uniform vec4 lightningBoltPosition;
 #endif
-
+uniform vec3 sunPosition;
 uniform sampler2D colortex0;
 uniform sampler2D depthtex0;
 uniform sampler2D noisetex;
@@ -122,11 +124,14 @@ void main() {
     vec3 color = texture2D(colortex0, texCoord).rgb;
 
     float z0 = texture2D(depthtex0, texCoord).r;
-	vec3 viewPos = ToView(vec3(texCoord, z0));
-	vec3 worldPos = ToWorld(viewPos);
+	vec4 screenPos = vec4(texCoord, z0, 1.0);
+	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
+		 viewPos /= viewPos.w;
+	vec4 worldPos = gbufferModelViewInverse * vec4(viewPos.xyz, 1.0);
+		 worldPos.xyz /= worldPos.w;
 
     #if defined OVERWORLD
-    vec3 atmosphereColor = getAtmosphere(viewPos);
+    vec3 atmosphereColor = getAtmosphere(viewPos.xyz);
 		 atmosphereColor *= 1.0 + Bayer8(gl_FragCoord.xy) / 64.0;
 	#elif defined NETHER
 	vec3 atmosphereColor = netherColSqrt.rgb * 0.25;
@@ -135,7 +140,7 @@ void main() {
 	#endif
 
 	#if defined OVERWORLD || defined END
-	vec3 nViewPos = normalize(viewPos);
+	vec3 nViewPos = normalize(viewPos.xyz);
 
 	float VoU = dot(nViewPos, upVec);
 	float VoS = clamp(dot(nViewPos, sunVec), 0.0, 1.0);
@@ -175,37 +180,37 @@ void main() {
 		float nebulaFactor = 0.0;
 
 		#ifdef ROUND_SUN_MOON
-		drawSunMoon(color, worldPos, nViewPos, VoU, VoS, VoM, caveFactor, occlusion);
+		drawSunMoon(color, worldPos.xyz, nViewPos, VoU, VoS, VoM, caveFactor, occlusion);
 		#endif
 
 		if (VoU > 0.0) {
 			#ifdef PLANAR_CLOUDS
-			drawPlanarClouds(color, atmosphereColor, worldPos, viewPos, VoU, caveFactor, vc.a, occlusion);
+			drawPlanarClouds(color, atmosphereColor, worldPos.xyz, viewPos.xyz, VoU, caveFactor, vc.a, occlusion);
 			#endif
 
 			#ifdef MILKY_WAY
-			drawMilkyWay(color, worldPos, VoU, caveFactor, nebulaFactor, occlusion);
+			drawMilkyWay(color, worldPos.xyz, VoU, caveFactor, nebulaFactor, occlusion);
 			#endif
 
 			#ifdef AURORA
-			drawAurora(color, worldPos, VoU, caveFactor);
+			drawAurora(color, worldPos.xyz, VoU, caveFactor);
 			#endif
 
 			#ifdef STARS
-			drawStars(color, atmosphereColor, worldPos, VoU, VoS, caveFactor, nebulaFactor, occlusion, 0.6);
+			drawStars(color, atmosphereColor, worldPos.xyz, VoU, VoS, caveFactor, nebulaFactor, occlusion, 0.6);
 			#endif
 
 			#ifdef RAINBOW
-			getRainbow(color, worldPos, VoU, 1.75, 0.05, caveFactor);
+			getRainbow(color, worldPos.xyz, VoU, 1.75, 0.05, caveFactor);
 			#endif
 		}
 
 		#ifdef END_STARS
-		drawStars(color, atmosphereColor, worldPos, VoU, VoS, 1.0, nebulaFactor, 0.0, 1.0);
+		drawStars(color, atmosphereColor, worldPos.xyz, VoU, VoS, 1.0, nebulaFactor, 0.0, 0.85);
 		#endif
 
-		#ifdef END_SUPERNOVA
-		drawEndSupernova(color, worldPos, VoU, VoS);
+		#ifdef END_NEBULA
+		drawEndNebula(color, worldPos.xyz, VoU, VoS);
 		#endif
 
 		color *= 1.0 - blindFactor;
@@ -213,8 +218,6 @@ void main() {
 		color *= 1.0 - darknessFactor;
 		#endif
     }
-
-	Fog(color, viewPos, worldPos, atmosphereColor, z0);
 
 	//Volumetric Clouds
 	#if defined VOLUMETRIC_CLOUDS || defined END_CLOUDY_FOG
@@ -228,6 +231,8 @@ void main() {
 
 	color = mix(color, vc.rgb, vc.a);
 	#endif
+
+	Fog(color, viewPos.xyz, worldPos.xyz, atmosphereColor, z0);
 
     /* DRAWBUFFERS:045 */
     gl_FragData[0].rgb = color;

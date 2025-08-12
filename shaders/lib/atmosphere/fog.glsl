@@ -99,8 +99,21 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
 	vec3 fogCol = netherColSqrt.rgb * 0.25;
 	#endif
 
+	//End fog
+	#ifdef END
+	float VoU = dot(normalize(viewPos), upVec);
+	float density = pow4(1.0 - abs(VoU));
+		  density *= 1.0 - clamp((cameraPosition.y - 100.0) * 0.01, 0.0, 1.0);
+		  
+
+	float fog = 1.0 - exp(-0.0001 * lViewPos);
+		  fog = clamp(fog * density, 0.0, 1.0);
+
+	vec3 fogCol = vec3(0.9, 1.0, 0.8) * endLightCol;
+	#endif
+
     //Mixing Colors depending on depth
-	#if !defined NETHER && defined DEFERRED && !defined DISTANT_HORIZONS
+	#if !defined NETHER && !defined END && defined DEFERRED && !defined DISTANT_HORIZONS
     float zMixer = float(z0 < 1.0);
 
 	#if MC_VERSION >= 12104 && defined OVERWORLD
@@ -119,9 +132,7 @@ void Fog(inout vec3 color, in vec3 viewPos, in vec3 worldPos, in vec3 atmosphere
     float lWorldPos = length(worldPos.xz);
 
 	if (isEyeInWater < 1) {
-		#ifndef END
         getNormalFog(color, atmosphereColor, viewPos, worldPos, lViewPos, lWorldPos, z0);
-		#endif
     } else if (1 < isEyeInWater) {
         getDenseFog(color, lViewPos);
     }
