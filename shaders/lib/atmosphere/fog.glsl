@@ -41,11 +41,11 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
 	#ifdef OVERWORLD
     float distanceFactor = 50.0 * (0.5 + timeBrightness * 0.5) + FOG_DISTANCE * (0.75 + caveFactor * 0.25) - wetness * 25.0;
 	float distance = max(256.0 / farPlane, 2.0) * (100.0 / distanceFactor);
-	float AltitudeFactor = FOG_HEIGHT - 50.0 + timeBrightness * 40.0 + (wetness + moonVisibility) * 30.0;
-	float noise = texture2D(noisetex, (worldPos.xz + cameraPosition.xz + frameCounter * 0.01) * 0.001).r;
-	float variableAltitude = AltitudeFactor + noise * noise * 50.0 * min(cameraPosition.y * 0.01, 1.0);
+	float AltitudeFactor = FOG_HEIGHT - 50.0 + timeBrightness * 25.0 + (wetness + moonVisibility) * 25.0;
+	float noise = texture2D(noisetex, (worldPos.xz + cameraPosition.xz + frameCounter * 0.01) * 0.0005).r;
+	float variableAltitude = AltitudeFactor + noise * 50.0 * min(cameraPosition.y * 0.01, 1.0);
 	float altitude = exp2(-max(worldPos.y + cameraPosition.y - variableAltitude, 0.0) / exp2(FOG_HEIGHT_FALLOFF));
-	float density = FOG_DENSITY * (1.0 - timeBrightness * 0.35 + wetness * 0.5);
+	float density = FOG_DENSITY * (1.0 - timeBrightness * 0.35 + wetness * 0.5 + noise * noise * 0.5);
 		  density += isLushCaves * 0.35 + isDesert * 0.25;
 
 	#if MC_VERSION >= 12104
