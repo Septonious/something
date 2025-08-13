@@ -29,8 +29,10 @@ void getReflection(inout vec4 color, in vec3 viewPos, in vec3 normal, in float f
 	vec4 reflection = vec4(0.0);
 	if (reflectPos.z < zThreshold) {
 		float fovScale = gbufferProjection[1][1] / 1.37;
-		float dist =  0.125 * pow2(1.0 - smoothness) * reflectPos.a * fovScale;
-		float lod = log2(viewHeight * dist);
+		float dist = reflectPos.a * fovScale;
+        float lodFactor = 1.0 - exp(-0.125 * (1.0 - smoothness * smoothness) * dist);
+        float lod = log2(viewHeight / 4.0 * (1.0 - smoothness * smoothness) * lodFactor) * 0.5;
+        lod = max(lod - 1.0, 0.0);
 
 		for (int i = -2; i <= 2; i++) {
 			for (int j = -2; j <= 2; j++) {

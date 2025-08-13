@@ -219,6 +219,10 @@ void main() {
 		#endif
     }
 
+    #ifndef END
+	Fog(color, viewPos.xyz, worldPos.xyz, atmosphereColor, z0); //Apply fog before the clouds in Overworld
+    #endif
+
 	//Volumetric Clouds
 	#if defined VOLUMETRIC_CLOUDS || defined END_CLOUDY_FOG
 	vc.rgb = pow(vc.rgb, vec3(1.0 / 2.2));
@@ -232,7 +236,9 @@ void main() {
 	color = mix(color, vc.rgb, vc.a);
 	#endif
 
-	Fog(color, viewPos.xyz, worldPos.xyz, atmosphereColor, z0);
+    #ifdef END
+	Fog(color, viewPos.xyz, worldPos.xyz, atmosphereColor, z0); //Apply fog after the clouds in The End
+    #endif
 
     /* DRAWBUFFERS:045 */
     gl_FragData[0].rgb = color;

@@ -8,9 +8,9 @@
 in vec4 color;
 in vec3 normal;
 in vec2 texCoord, lmCoord;
+flat in int mat;
 
 // Uniforms //
-uniform int entityId;
 uniform int currentRenderedItemId;
 uniform int isEyeInWater;
 uniform int frameCounter;
@@ -108,7 +108,7 @@ void main() {
 	albedo *= color;
 	albedo.rgb = mix(albedo.rgb, entityColor.rgb * entityColor.rgb * 2.0, entityColor.a);
 
-	float lightningBolt = float(entityId == 1);
+	float lightningBolt = float(mat == 1);
 
 	if (lightningBolt < 0.5) {
 		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
@@ -156,17 +156,17 @@ void main() {
 out vec4 color;
 out vec3 normal;
 out vec2 texCoord, lmCoord;
+flat out int mat;
 
 // Uniforms //
+uniform int entityId;
+
 #ifdef TAA
 uniform float viewWidth, viewHeight;
 #endif
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
-
-// Attributes //
-attribute vec4 mc_Entity;
 
 // Includes //
 #ifdef TAA
@@ -183,6 +183,8 @@ void main() {
     color = gl_Color;
 
     normal = normalize(gl_NormalMatrix * gl_Normal);
+
+    mat = int(entityId);
 
 	//Position
 	vec4 position = gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;

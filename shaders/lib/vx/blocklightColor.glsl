@@ -59,17 +59,17 @@ vec3 getBlocklightColor(in int id) {
     if (id == 34) color = vec3(PF_R, PF_G, PF_B) * PF_I;
 
 	#ifdef EMISSIVE_FLOWERS
-    //Red Potted flowers
-    if (id == 35) color = normalize(vec3(1.00, 0.05, 0.05)) * 0.20;
-    //Pink Potted flowers
-    if (id == 36) color = normalize(vec3(0.80, 0.20, 0.60)) * 0.20;
-    //Yellow Potted flowers
-    if (id == 37) color = normalize(vec3(0.80, 0.50, 0.05)) * 0.20;
-    //Blue Potted flowers
+    //Red flowers
+    if (id == 35 || id == 309 || id == 310) color = normalize(vec3(1.00, 0.05, 0.05)) * 0.20;
+    //Pink flowers
+    if (id == 36 || id == 305 || id == 306 || id == 311 || id == 312) color = normalize(vec3(0.80, 0.20, 0.60)) * 0.20;
+    //Yellow flowers
+    if (id == 37 || id == 307 || id == 308) color = normalize(vec3(0.80, 0.50, 0.05)) * 0.20;
+    //Blue flowers
     if (id == 38) color = normalize(vec3(0.00, 0.15, 1.00)) * 0.20;
-    //White Potted flowers
+    //White flowers
     if (id == 39) color = normalize(vec3(0.80, 0.80, 0.80)) * 0.20;
-    //Orange Potted flowers
+    //Orange flowers
     if (id == 40) color = normalize(vec3(1.00, 0.70, 0.05)) * 0.20;
 	#endif
 
