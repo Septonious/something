@@ -1,8 +1,8 @@
 #ifdef VL
-float texture2DShadow(sampler2D shadowtex, vec3 shadowPos) {
-    float shadow = texture2D(shadowtex, shadowPos.xy).r;
+float texture2DShadow(sampler2D shadowtex, vec3 sampleShadowPos) {
+    float shadow = texture2D(shadowtex, sampleShadowPos.xy).r;
 
-    return clamp((shadow - shadowPos.z) * 65536.0, 0.0, 1.0);
+    return clamp((shadow - sampleShadowPos.z) * 65536.0, 0.0, 1.0);
 }
 #endif
 
@@ -25,25 +25,44 @@ float get3DNoise(vec3 rayPos) {
 	return noise;
 }
 
+bool isRayMarcherHit(float currentDist, float maxDist, float linearZ0, float linearZ1, vec3 translucent) {
+	bool isMaxReached = currentDist >= maxDist;
+	bool opaqueReached = currentDist > linearZ1;
+	bool solidTransparentReached = currentDist > linearZ0 && translucent == vec3(0.0);
+	
+	return isMaxReached || opaqueReached || solidTransparentReached;
+}
+
 void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither) {
 	//Depths
 	float z0 = texture2D(depthtex0, texCoord).r;
 	float z1 = texture2D(depthtex1, texCoord).r;
-    float linearDepth0 = getLinearDepth2(z0);
-    float linearDepth1 = getLinearDepth2(z1);
+	float linearZ0 = getLinearDepth(z0, gbufferProjectionInverse);
+	float linearZ1 = getLinearDepth(z1, gbufferProjectionInverse);
+
+    #ifdef DISTANT_HORIZONS
+	float DHz0 = texture2D(dhDepthTex0, texCoord).r;
+	float DHz1 = texture2D(dhDepthTex1, texCoord).r;
+	float DHlinearZ0 = getLinearDepth(DHz0, dhProjectionInverse);
+	float DHlinearZ1 = getLinearDepth(DHz1, dhProjectionInverse);
+
+    linearZ0 = min(linearZ0, DHlinearZ0);
+    linearZ1 = min(linearZ1, DHlinearZ1);
+    #endif
 
 	//Positions & Common variables
     #ifdef VC_SHADOWS
-	vec3 worldSunVec = mat3(gbufferModelViewInverse) * lightVec;
+	vec3 wSunVec = mat3(gbufferModelViewInverse) * lightVec;
     #endif
 
 	vec3 viewPos = ToView(vec3(texCoord.xy, z1));
-	vec3 nViewPos = normalize(viewPos);
     vec3 worldPos = ToWorld(viewPos);
-    vec3 nWorldPos = normalize(worldPos);
+	vec3 nViewPos = normalize(viewPos);
+	vec3 nWorldPos = normalize(worldPos);
+	     nWorldPos /= -nViewPos.z;
+
     float lViewPos = length(viewPos);
     float viewFactor = 1.0 - 0.7 * pow2(dot(nViewPos.xy, nViewPos.xy));
-
     float VoL = dot(nViewPos, lightVec);
     float VoU = dot(nViewPos, upVec);
     float VoLPositive = VoL * 0.5 + 0.5;
@@ -119,22 +138,22 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
         maxDist *= viewFactor;
         rayLength *= viewFactor;
 
-        float maxCurrentDist = min(maxDist, linearDepth1);
+        float maxCurrentDist = min(maxDist, linearZ1);
 
         //Ray marching
         for (int i = 0; i < sampleCount; i++) {
             float currentDist = pow(exp2(i + dither), 1.5) * rayLength;
 
-            if (currentDist > maxCurrentDist) break;
+            if (isRayMarcherHit(currentDist, maxDist, linearZ0, linearZ1, translucent)) break;
 
-            vec3 worldPos = ToWorld(ToView(vec3(texCoord, getLogarithmicDepth(currentDist))));
-            float lWorldPos = length(worldPos);
+            vec3 sampleWorldPos = nWorldPos * currentDist;
+            float lWorldPos = length(sampleWorldPos);
 
             if (lWorldPos > maxDist) break;
 
             float currentSampleIntensity = pow(currentDist / maxDist, 1.5) / sampleCount;
 
-            vec3 rayPos = worldPos + cameraPosition;
+            vec3 rayPos = sampleWorldPos + cameraPosition;
 
             //Volumetric lighting
             vec3 vlSample = vec3(0.0);
@@ -145,26 +164,26 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
                 float shadow0 = 1.0;
                 float shadow1 = 0.0;
 
-                if (lWorldPos <= shadowDistance) {
-                    vec3 shadowPos = ToShadow(worldPos);
-                    shadow0 = texture2DShadow(shadowtex0, shadowPos);
+                vec3 sampleShadowPos = ToShadow(sampleWorldPos);
+                if (length(sampleShadowPos.xy * 2.0 - 1.0) < 1.0) {
+                    shadow0 = texture2DShadow(shadowtex0, sampleShadowPos);
 
                     #ifdef SHADOW_COLOR
                     if (shadow0 < 1.0) {
-                        shadow1 = texture2DShadow(shadowtex1, shadowPos);
+                        shadow1 = texture2DShadow(shadowtex1, sampleShadowPos);
                         if (shadow1 > 0.0) {
-                            shadowCol = texture2D(shadowcolor0, shadowPos.xy).rgb;
+                            shadowCol = texture2D(shadowcolor0, sampleShadowPos.xy).rgb;
                         }
                     }
                     #endif
-                }
+                    vlSample = clamp(shadow1 * shadowCol * shadowCol * length(pow(shadowCol, vec3(1.0 + float(isEyeInWater == 1) * 23.0))) * 0.075 + shadow0 * vlCol * float(isEyeInWater == 0), 0.0, 1.0);
 
-                vlSample = clamp(shadow1 * shadowCol * shadowCol * length(pow(shadowCol, vec3(1.0 + float(isEyeInWater == 1) * 23.0))) * 0.075 + shadow0 * vlCol * float(isEyeInWater == 0), 0.0, 1.0);
+                }
 
                 //Crepuscular rays
                 #ifdef VC_SHADOWS
                 if (rayPos.y < cloudTop) {
-                    vec3 cloudShadowPos = rayPos + (worldSunVec / max(abs(worldSunVec.y), 0.0)) * max(cloudTop - rayPos.y, 0.0);
+                    vec3 cloudShadowPos = rayPos + (wSunVec / max(abs(wSunVec.y), 0.0)) * max(cloudTop - rayPos.y, 0.0);
 
                     float noise = 0.0;
                     getCloudShadow(cloudShadowPos.xz / scale, wind, amount, frequency, density, noise);
@@ -180,12 +199,12 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
 
             #ifdef LPV_FOG
             if (lpvFogIntensity > 0.0) {
-                vec3 voxelPos = worldToVoxel(worldPos);
+                vec3 voxelPos = worldToVoxel(sampleWorldPos);
                      voxelPos /= voxelVolumeSize;
                      voxelPos = clamp(voxelPos, 0.0, 1.0);
 
                 if (isInsideVoxelVolume(voxelPos)) {
-                    float floodfillFade = maxOf(abs(worldPos) / (voxelVolumeSize * 0.5));
+                    float floodfillFade = maxOf(abs(sampleWorldPos) / (voxelVolumeSize * 0.5));
                         floodfillFade = clamp(floodfillFade, 0.0, 1.0);
 
                     vec4 lightVolume = vec4(0.0);
@@ -211,7 +230,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
             #endif
 
             //Translucency Blending
-            if (linearDepth0 < currentDist) {
+            if (linearZ0 < currentDist) {
                 vlSample *= translucent;
                 lpvFogSample *= translucent;
             }

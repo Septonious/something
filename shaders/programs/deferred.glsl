@@ -12,7 +12,9 @@ in vec2 texCoord;
 uniform int isEyeInWater;
 uniform int frameCounter;
 
-uniform float viewWidth, viewHeight;
+#ifdef DISTANT_HORIZONS
+uniform int dhRenderDistance;
+#endif
 
 #ifdef OVERWORLD
 uniform int worldDay;
@@ -33,8 +35,11 @@ uniform float isPaleGarden;
 uniform vec3 skyColor;
 #endif
 
+uniform float viewWidth, viewHeight;
 uniform float far, near;
-
+#ifdef DISTANT_HORIZONS
+uniform float dhFarPlane;
+#endif
 uniform float blindFactor, nightVision;
 #if MC_VERSION >= 11900
 uniform float darknessFactor;
@@ -51,6 +56,9 @@ uniform vec4 lightningBoltPosition;
 uniform vec3 sunPosition;
 uniform sampler2D colortex0;
 uniform sampler2D depthtex0;
+#ifdef DISTANT_HORIZONS
+uniform sampler2D dhDepthTex0;
+#endif
 uniform sampler2D noisetex;
 
 #ifdef MILKY_WAY
@@ -66,6 +74,10 @@ uniform mat4 shadowModelView, shadowProjection;
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjectionInverse;
+
+#ifdef DISTANT_HORIZONS
+uniform mat4 dhProjectionInverse;
+#endif
 
 // Pipeline Options //
 const bool colortex4Clear = false;
@@ -124,6 +136,10 @@ void main() {
     vec3 color = texture2D(colortex0, texCoord).rgb;
 
     float z0 = texture2D(depthtex0, texCoord).r;
+	#ifdef DISTANT_HORIZONS
+	float dhZ = texture2D(dhDepthTex0, texCoord).r;
+	#endif
+
 	vec4 screenPos = vec4(texCoord, z0, 1.0);
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 		 viewPos /= viewPos.w;
@@ -173,54 +189,72 @@ void main() {
 	#endif
 
 	//Sky
-    if (z0 == 1.0) {
-        color = atmosphereColor;
+    vec3 skyColor = atmosphereColor;
 
-		float occlusion = vc.a;
-		float nebulaFactor = 0.0;
+    float occlusion = vc.a;
+    float nebulaFactor = 0.0;
 
-		#ifdef ROUND_SUN_MOON
-		drawSunMoon(color, worldPos.xyz, nViewPos, VoU, VoS, VoM, caveFactor, occlusion);
-		#endif
+    #ifdef ROUND_SUN_MOON
+    drawSunMoon(skyColor, worldPos.xyz, nViewPos, VoU, VoS, VoM, caveFactor, occlusion);
+    #endif
 
-		if (VoU > 0.0) {
-			#ifdef PLANAR_CLOUDS
-			drawPlanarClouds(color, atmosphereColor, worldPos.xyz, viewPos.xyz, VoU, caveFactor, vc.a, occlusion);
-			#endif
+    if (VoU > 0.0) {
+        #ifdef PLANAR_CLOUDS
+        drawPlanarClouds(skyColor, atmosphereColor, worldPos.xyz, viewPos.xyz, VoU, caveFactor, vc.a, occlusion);
+        #endif
 
-			#ifdef MILKY_WAY
-			drawMilkyWay(color, worldPos.xyz, VoU, caveFactor, nebulaFactor, occlusion);
-			#endif
+        #ifdef MILKY_WAY
+        drawMilkyWay(skyColor, worldPos.xyz, VoU, caveFactor, nebulaFactor, occlusion);
+        #endif
 
-			#ifdef AURORA
-			drawAurora(color, worldPos.xyz, VoU, caveFactor);
-			#endif
+        #ifdef AURORA
+        drawAurora(skyColor, worldPos.xyz, VoU, caveFactor);
+        #endif
 
-			#ifdef STARS
-			drawStars(color, atmosphereColor, worldPos.xyz, VoU, VoS, caveFactor, nebulaFactor, occlusion, 0.6);
-			#endif
+        #ifdef STARS
+        drawStars(skyColor, worldPos.xyz, VoU, VoS, caveFactor, nebulaFactor, occlusion, 0.6);
+        #endif
 
-			#ifdef RAINBOW
-			getRainbow(color, worldPos.xyz, VoU, 1.75, 0.05, caveFactor);
-			#endif
-		}
-
-		#ifdef END_STARS
-		drawStars(color, atmosphereColor, worldPos.xyz, VoU, VoS, 1.0, nebulaFactor, 0.0, 0.85);
-		#endif
-
-		#ifdef END_NEBULA
-		drawEndNebula(color, worldPos.xyz, VoU, VoS);
-		#endif
-
-		color *= 1.0 - blindFactor;
-		#if MC_VERSION >= 11900
-		color *= 1.0 - darknessFactor;
-		#endif
+        #ifdef RAINBOW
+        getRainbow(skyColor, worldPos.xyz, VoU, 1.75, 0.05, caveFactor);
+        #endif
     }
 
+    #ifdef END_STARS
+    drawStars(skyColor, worldPos.xyz, VoU, VoS, 1.0, nebulaFactor, 0.0, 0.85);
+    #endif
+
+    #ifdef END_NEBULA
+    drawEndNebula(skyColor, worldPos.xyz, VoU, VoS);
+    #endif
+
+    skyColor *= 1.0 - blindFactor;
+    #if MC_VERSION >= 11900
+    skyColor *= 1.0 - darknessFactor;
+    #endif
+
+
+	#ifndef DISTANT_HORIZONS
+	if (z0 == 1.0) color = skyColor;
+	#else
+	if (dhZ == 1.0 && z0 == 1.0) color = skyColor;
+	#endif
+
+	//Apply fog before the clouds in Overworld
     #ifndef END
-	Fog(color, viewPos.xyz, worldPos.xyz, atmosphereColor, z0); //Apply fog before the clouds in Overworld
+	#ifdef DISTANT_HORIZONS
+	if (z0 != 1.0) {
+		Fog(color, viewPos.xyz, worldPos.xyz, atmosphereColor, z0);
+	} else if (dhZ != 1.0) {
+		vec4 dhScreenPos = vec4(texCoord, dhZ, 1.0);
+		vec4 dhViewPos = dhProjectionInverse * (dhScreenPos * 2.0 - 1.0);
+			 dhViewPos /= dhViewPos.w;
+
+        Fog(color, dhViewPos.xyz, ToWorld(dhViewPos.xyz), atmosphereColor, z0);
+	}
+	#else
+	Fog(color, viewPos.xyz, worldPos.xyz, atmosphereColor, z0);
+	#endif
     #endif
 
 	//Volumetric Clouds
@@ -236,8 +270,21 @@ void main() {
 	color = mix(color, vc.rgb, vc.a);
 	#endif
 
+	//Apply fog after the clouds in The End
     #ifdef END
-	Fog(color, viewPos.xyz, worldPos.xyz, atmosphereColor, z0); //Apply fog after the clouds in The End
+	#ifdef DISTANT_HORIZONS
+	if (z0 != 1.0) {
+		Fog(color, viewPos.xyz, worldPos.xyz, atmosphereColor, z0);
+	} else if (dhZ != 1.0) {
+		vec4 dhScreenPos = vec4(texCoord, dhZ, 1.0);
+		vec4 dhViewPos = dhProjectionInverse * (dhScreenPos * 2.0 - 1.0);
+			 dhViewPos /= dhViewPos.w;
+
+        Fog(color, dhViewPos.xyz, ToWorld(dhViewPos.xyz), atmosphereColor, z0);
+	}
+	#else
+	Fog(color, viewPos.xyz, worldPos.xyz, atmosphereColor, z0);
+	#endif
     #endif
 
     /* DRAWBUFFERS:045 */

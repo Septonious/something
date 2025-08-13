@@ -21,6 +21,9 @@ uniform int worldDay, worldTime;
 
 uniform float shadowFade;
 uniform float far, near;
+#ifdef DISTANT_HORIZONS
+uniform float dhFarPlane, dhNearPlane;
+#endif
 uniform float frameTimeCounter;
 uniform float timeAngle, timeBrightness;
 uniform float wetness;
@@ -44,6 +47,12 @@ uniform sampler2D noisetex;
 uniform sampler2D shadowcolor0;
 uniform sampler2D shadowtex0, shadowtex1;
 uniform sampler2D depthtex0, depthtex1;
+
+#ifdef DISTANT_HORIZONS
+uniform sampler2D dhDepthTex0, dhDepthTex1;
+
+uniform mat4 dhProjectionInverse;
+#endif
 
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;

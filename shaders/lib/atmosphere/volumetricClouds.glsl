@@ -99,8 +99,13 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 		float planeDifference = maxDist - minDist;
 		vec3 startPos = cameraPosition + minDist * nWorldPos;
 
+        #ifndef DISTANT_HORIZONS
 		float rayLength = thickness * 4.0;
 			  rayLength /= nWorldPos.y * nWorldPos.y * 4.0 + 1.0;
+        #else
+		float rayLength = thickness * 6.0;
+			  rayLength /= nWorldPos.y * nWorldPos.y * 6.0 + 1.0;
+        #endif
 
 		vec3 rayIncrement = nWorldPos * rayLength;
 		int sampleCount = min(int(planeDifference / rayLength + 1), 6 + VC_DISTANCE / 1000);

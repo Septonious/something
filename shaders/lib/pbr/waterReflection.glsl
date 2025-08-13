@@ -6,11 +6,19 @@ void getReflection(inout vec4 albedo, in vec3 viewPos, in vec3 nViewPos, in vec3
 	dither = fract(dither + frameTimeCounter * 16.0);
 	#endif
 
-	#if WATER_NORMALS > 0
-	vec4 reflectPos = Raytrace(depthtex1, viewPos, normal, dither, border, 6, 1.0, 0.1, 1.6, 10);
-	#else
-	vec4 reflectPos = Raytrace(depthtex1, viewPos, normal, dither, border, 6, 1.0, 0.4, 1.4, 30);
-	#endif
+    #ifndef DH_WATER
+        #if WATER_NORMALS > 0
+        vec4 reflectPos = Raytrace(depthtex1, viewPos, normal, dither, border, 6, 1.0, 0.1, 1.6, 10);
+        #else
+        vec4 reflectPos = Raytrace(depthtex1, viewPos, normal, dither, border, 6, 1.0, 0.4, 1.4, 30);
+        #endif
+    #else
+        #if WATER_NORMALS > 0
+        vec4 reflectPos = Raytrace(dhDepthTex1, viewPos, normal, dither, border, 6, 1.0, 0.1, 1.6, 10);
+        #else
+        vec4 reflectPos = Raytrace(dhDepthTex1, viewPos, normal, dither, border, 6, 1.0, 0.4, 1.4, 30);
+        #endif
+    #endif
 
 	border = clamp(2.0 * (1.0 - border), 0.0, 1.0);
 

@@ -27,6 +27,7 @@ uniform int worldDay, worldTime;
 #endif
 
 uniform float frameTimeCounter;
+uniform float far, near;
 uniform float viewWidth, viewHeight;
 uniform float blindFactor, nightVision;
 #if MC_VERSION >= 11900

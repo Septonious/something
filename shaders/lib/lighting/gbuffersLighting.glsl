@@ -59,7 +59,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     //Shadow Calculations
     //Some code made by Emin and gri573
-    float shadowVisibility = maxOf(abs(worldPos) / (vec3(shadowDistance)));
+    float shadowVisibility = maxOf(abs(worldPos) / (vec3(min(shadowDistance, far))));
           shadowVisibility = clamp(shadowVisibility, 0.0, 1.0);
           shadowVisibility = 1.0 - pow3(shadowVisibility);
 
