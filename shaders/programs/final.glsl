@@ -14,7 +14,8 @@ uniform float viewWidth, viewHeight;
 const bool shadowHardwareFiltering = false;
 const int noiseTextureResolution = 512;
 const float shadowDistanceRenderMul = 1.0;
-const float wetnessHalflife = 128.0;
+const float drynessHalflife = 300.0;
+const float wetnessHalflife = 300.0;
 
 /*
 const int colortex0Format = R11F_G11F_B10F; //Main scene

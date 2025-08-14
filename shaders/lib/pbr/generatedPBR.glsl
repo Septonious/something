@@ -50,6 +50,7 @@ void generateIPBR(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, inout ve
     #include "/lib/pbr/blocks/sculk.glsl"
     #include "/lib/pbr/blocks/soul_emitters.glsl"
     #include "/lib/pbr/blocks/spawner.glsl"
+    #include "/lib/pbr/blocks/stripped_logs.glsl"
     #include "/lib/pbr/blocks/terracotta.glsl"
     #include "/lib/pbr/blocks/torch_lantern.glsl"
     #include "/lib/pbr/blocks/water_cauldron.glsl"

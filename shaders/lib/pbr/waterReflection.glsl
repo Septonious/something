@@ -1,26 +1,28 @@
 void getReflection(inout vec4 albedo, in vec3 viewPos, in vec3 nViewPos, in vec3 normal, in float fresnel, in float skyLightMap) {
-	float border = 0.0;
 	float dither = Bayer8(gl_FragCoord.xy);
 
 	#ifdef TAA
 	dither = fract(dither + frameTimeCounter * 16.0);
 	#endif
 
+    float border = 0.0;
+    float lRfragPos = 0.0;
+    float dist = 0.0;
+    vec2 cdist = vec2(0.0);
+
     #ifndef DH_WATER
         #if WATER_NORMALS > 0
-        vec4 reflectPos = Raytrace(depthtex1, viewPos, normal, dither, border, 6, 1.0, 0.1, 1.6, 10);
+        vec3 reflectPos = Raytrace(depthtex1, viewPos, normal, dither, fresnel, 6, 1.0, 0.1, 1.6, 10, border, lRfragPos, dist, cdist);
         #else
-        vec4 reflectPos = Raytrace(depthtex1, viewPos, normal, dither, border, 6, 1.0, 0.4, 1.4, 30);
+        vec3 reflectPos = Raytrace(depthtex1, viewPos, normal, dither, fresnel, 6, 1.0, 0.4, 1.4, 30, border, lRfragPos, dist, cdist);
         #endif
     #else
         #if WATER_NORMALS > 0
-        vec4 reflectPos = Raytrace(dhDepthTex1, viewPos, normal, dither, border, 6, 1.0, 0.1, 1.6, 10);
+        vec3 reflectPos = Raytrace(dhDepthTex1, viewPos, normal, dither, fresnel, 6, 1.0, 0.1, 1.6, 10, border, lRfragPos, dist, cdist);
         #else
-        vec4 reflectPos = Raytrace(dhDepthTex1, viewPos, normal, dither, border, 6, 1.0, 0.4, 1.4, 30);
+        vec3 reflectPos = Raytrace(dhDepthTex1, viewPos, normal, dither, fresnel, 6, 1.0, 0.4, 1.4, 30, border, lRfragPos, dist, cdist);
         #endif
     #endif
-
-	border = clamp(2.0 * (1.0 - border), 0.0, 1.0);
 
 	float zThreshold = 1.0 + 1e-5;
 	vec4 reflection = vec4(0);

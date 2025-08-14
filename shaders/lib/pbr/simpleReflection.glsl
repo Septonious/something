@@ -6,7 +6,6 @@ const vec2 roughReflectionOffsets[4] = vec2[4](
 );
 
 void getReflection(inout vec4 color, in vec3 viewPos, in vec3 normal, in float fresnel, in float smoothness, in float skyLightMap) {
-	float border = 0.0;
 	float blueNoiseDither = texture2D(noisetex, gl_FragCoord.xy / 512.0).b;
 
 	#ifdef TAA
@@ -19,32 +18,40 @@ void getReflection(inout vec4 color, in vec3 viewPos, in vec3 normal, in float f
 	int sampleCount = int(30 - skyLightMap * 15);
 	#endif
 
-	sampleCount = int(sampleCount * (0.5 + smoothness * 0.5));
+	sampleCount = int(sampleCount * (0.5 + smoothness * 0.5)); //No need for high precision when the reflection is gonna be blurred anyway
 
-	vec4 reflectPos = Raytrace(depthtex1, viewPos, normal, blueNoiseDither, border, 3, 0.5, 0.2, 1.5, sampleCount);
-
-	border = clamp(2.0 * (1.0 - border), 0.0, 1.0);
-
-	float zThreshold = 1.0 + 1e-5;
+    float border = 0.0;
+    float lRfragPos = 0.0;
+    float dist = 0.0;
+    vec2 cdist = vec2(0.0);
+	vec3 reflectPos = Raytrace(depthtex1, viewPos, normal, blueNoiseDither, fresnel, 6, 0.5, 0.1, 1.5, sampleCount, border, lRfragPos, dist, cdist);
 	vec4 reflection = vec4(0.0);
-	if (reflectPos.z < zThreshold) {
-		float fovScale = gbufferProjection[1][1] / 1.37;
-		float dist = reflectPos.a * fovScale;
-        float lodFactor = 1.0 - exp(-0.125 * (1.0 - smoothness * smoothness) * dist);
-        float lod = log2(viewHeight / 4.0 * (1.0 - smoothness * smoothness) * lodFactor) * 0.5;
-        lod = max(lod - 1.0, 0.0);
 
-		for (int i = -2; i <= 2; i++) {
-			for (int j = -2; j <= 2; j++) {
-				vec2 offset = vec2(i, j) * exp2(lod - 1.0) / vec2(viewWidth, viewHeight);
-				reflection += texture2DLod(colortex0, reflectPos.xy + offset, max(lod - 1, 0.0));
-			}
-		}
+    if (reflectPos.z < 0.99997) {
+        if (border > 0.001) {
+            vec2 edgeFactor = pow4(cdist);
+            reflectPos.y += blueNoiseDither * (edgeFactor.x + edgeFactor.y) * 0.05;
 
-		reflection /= 25.0;
-		reflection.rgb *= float(reflection.a > 0.0);
-		reflection.a *= border;
-	}
+            float lodFactor = 1.0 - exp(-0.125 * pow2(1.0 - smoothness) * dist);
+            float lod = log2(viewHeight * 0.125 * pow2(1.0 - smoothness) * lodFactor) * (0.8 - smoothness * 0.4);
+            lod = max(lod - 1.0, 0.0);
+
+            for (int i = -2; i <= 2; i++) {
+                for (int j = -2; j <= 2; j++) {
+                    vec2 offset = vec2(i, j) * exp2(lod - 1.0) / vec2(viewWidth, viewHeight);
+                    reflection += texture2DLod(colortex0, reflectPos.xy + offset, max(lod - 1, 0.0));
+                }
+            }
+
+            reflection /= 25.0;
+
+            edgeFactor.x *= edgeFactor.x;
+            edgeFactor = 1.0 - edgeFactor;
+            reflection.a *= border * pow(edgeFactor.x * edgeFactor.y, (1.0 + length(reflection.rgb)) * 2.0);
+        }
+
+        reflection.a *= clamp(lRfragPos - length(viewPos) + 2.5, 0.0, 1.0);
+    }
 
 	#ifdef OVERWORLD
 	vec3 falloff = color.rgb;
@@ -77,5 +84,5 @@ void getReflection(inout vec4 color, in vec3 viewPos, in vec3 normal, in float f
 	smoothness = pow(smoothness, max(1.0, 1.5 - smoothness)); //Prevents crazy strong reflections on rough surfaces
 	#endif
 
-	color.rgb = mix(color.rgb, finalReflection, pow(fresnel, 1.5) * smoothness);
+	color.rgb += finalReflection * (0.2 + fresnel * 0.8) * smoothness;
 }
