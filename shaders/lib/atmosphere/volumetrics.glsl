@@ -220,7 +220,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
                     float n3db = texture2D(noisetex, noisePos.xz * 0.0025 + floor(noisePos.y * 0.25 + 1.0) * 0.25).r;
 
                     float cloudyNoise = mix(n3da, n3db, fract(noisePos.y * 0.25));
-                        cloudyNoise = max(cloudyNoise * cloudyNoise * cloudyNoise, 0.0);
+                          cloudyNoise = max(cloudyNoise * cloudyNoise * cloudyNoise, 0.0);
                     lpvFogSample *= cloudyNoise;
                     #endif
                 }
