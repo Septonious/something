@@ -62,8 +62,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
 	     nWorldPos /= -nViewPos.z;
 
     float lViewPos = length(viewPos);
-    float viewFactor = 1.0 - 0.7 * pow2(dot(nViewPos.xy, nViewPos.xy));
-    float VoL = dot(nViewPos, lightVec);
+    float VoL = dot(nViewPos, sunVec);
     float VoU = dot(nViewPos, upVec);
     float VoLPositive = VoL * 0.5 + 0.5;
     float VoUPositive = VoU * 0.5 + 0.5;
@@ -83,7 +82,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
 
     #ifdef VL
     float VoLm = pow(VoLClamped, 2.0 + sunVisibility);
-         vlIntensity = sunVisibility * (1.0 - VL_STRENGTH_RATIO) * (1.0 - timeBrightness) + VL_STRENGTH_RATIO * VoLm;
+         vlIntensity = sunVisibility * (1.0 - VL_STRENGTH_RATIO) + VoLm * VL_STRENGTH_RATIO;
          vlIntensity = mix(0.5 + VoLm, vlIntensity, eBS);
          vlIntensity *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY, timeBrightness), sunVisibility) * (3.0 - eBS * 2.0);
     #if !defined VC_SHADOWS
@@ -127,22 +126,21 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
         //Ray marcher parameters
         int sampleCount = VL_SAMPLES;
 
+        #ifdef OVERWORLD
+        float distanceFactor = 1.5 - timeBrightnessSqrt * 0.5;
+        #else
+        float distanceFactor = 1.0;
+        #endif
+
         float maxDist = shadowDistance;
         #ifdef VC_SHADOWS
             maxDist += 128.0;
         #endif
             maxDist /= 1.0 + float(isEyeInWater == 1) * 5.0;
 
-        float rayLength = (maxDist / (sampleCount + 1.0)) * 0.05;
-
-        maxDist *= viewFactor;
-        rayLength *= viewFactor;
-
-        float maxCurrentDist = min(maxDist, linearZ1);
-
         //Ray marching
         for (int i = 0; i < sampleCount; i++) {
-            float currentDist = pow(exp2(i + dither), 1.5) * rayLength;
+            float currentDist = pow(exp2(i + dither), distanceFactor);
 
             if (isRayMarcherHit(currentDist, maxDist, linearZ0, linearZ1, translucent)) break;
 
@@ -151,7 +149,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
 
             if (lWorldPos > maxDist) break;
 
-            float currentSampleIntensity = pow(currentDist / maxDist, 1.5) / sampleCount;
+            float currentSampleIntensity = pow(currentDist / maxDist, distanceFactor) / sampleCount;
 
             vec3 rayPos = sampleWorldPos + cameraPosition;
 

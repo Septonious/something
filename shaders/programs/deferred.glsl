@@ -212,7 +212,7 @@ void main() {
         #endif
 
         #ifdef STARS
-        drawStars(skyColor, worldPos.xyz, VoU, VoS, caveFactor, nebulaFactor, occlusion, 0.6);
+        drawStars(skyColor, worldPos.xyz, VoU, VoS, caveFactor, nebulaFactor, occlusion, 0.7);
         #endif
 
         #ifdef RAINBOW
@@ -232,7 +232,6 @@ void main() {
     #if MC_VERSION >= 11900
     skyColor *= 1.0 - darknessFactor;
     #endif
-
 
 	#ifndef DISTANT_HORIZONS
 	if (z0 == 1.0) color = skyColor;

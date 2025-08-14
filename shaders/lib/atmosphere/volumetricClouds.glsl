@@ -173,6 +173,29 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 			}
 
 			//Final color calculations
+            #ifdef AURORA_LIGHTING_INFLUENCE
+            float kpIndex = abs(worldDay % 9 - worldDay % 4); //Determines the brightness of Aurora, its widespreadness across the sky and tilt factor
+            float auroraVisibility = pow6(1.0 - sunVisibility) * (1.0 - wetness) * caveFactor * AURORA_BRIGHTNESS;
+
+            #ifdef OVERWORLD
+            #ifdef AURORA_FULL_MOON_VISIBILITY
+            kpIndex += float(moonPhase == 0) * 3;
+            #endif
+
+            #ifdef AURORA_COLD_BIOME_VISIBILITY
+            kpIndex += isSnowy * 5;
+            #endif
+            #endif
+
+            #ifdef AURORA_ALWAYS_VISIBLE
+            auroraVisibility = 1.0;
+            kpIndex = 9.0;
+            #endif
+
+            kpIndex = clamp(kpIndex, 0.0, 9.0) / 9.0;
+            auroraVisibility *= kpIndex;
+            #endif
+
 			float VoS = clamp(dot(nViewPos, sunVec), 0.0, 1.0);
 			cloudLighting = cloudLighting * shadowFade + pow8(1.0 - cloudLighting) * pow(VoS, 5.0 - shadowFade * 4.0) * (1.0 - shadowFade) * 0.75;
 
@@ -184,7 +207,10 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 				 cloudLightColor *= 0.5 + timeBrightnessSqrt * 0.5 + moonVisibility * 0.5;
 				 cloudLightColor *= 1.0 + scattering * shadowFade;
 			vec3 cloudColor = mix(cloudAmbientColor, cloudLightColor, cloudLighting) * mix(vec3(1.0), biomeColor, isSpecificBiome * sunVisibility);
-			    cloudColor = mix(cloudColor, atmosphereColor * length(cloudColor) * 0.5, wetness * 0.6);
+			     cloudColor = mix(cloudColor, atmosphereColor * length(cloudColor) * 0.5, wetness * 0.6);
+                 #ifdef AURORA_LIGHTING_INFLUENCE
+                 cloudColor = mix(cloudColor, vec3(0.4, 1.5, 0.6), auroraVisibility * pow3(cloudLighting) * 0.2);
+                 #endif
 
 			float opacity = clamp(mix(VC_OPACITY, 1.00, (max(0.0, cameraPosition.y) / height)), 0.0, 1.0 - wetness * 0.5);
 

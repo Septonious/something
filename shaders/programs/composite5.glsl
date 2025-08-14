@@ -28,7 +28,7 @@ void main() {
 
 	#if defined VL || defined LPV_FOG
 	vec3 volumetrics = getDiskBlur8RGB(colortex1, texCoord, 2.0);
-	volumetrics = pow8(volumetrics) * 256.0;
+	     volumetrics *= volumetrics;
 
 	color += volumetrics;
 	#endif

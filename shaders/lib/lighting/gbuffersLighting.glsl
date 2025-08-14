@@ -174,7 +174,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     if (emission < 0.01) {
         #ifdef GBUFFERS_TERRAIN
         float isMaterialSmooth = float(mat >= 20298 && mat <= 20322);
-        vec3 baseReflectance = vec3(6.0 - isMaterialSmooth * 5.0);
+        vec3 baseReflectance = vec3(max(6.0 - isMaterialSmooth * 5.0 - timeBrightness * 4.0, 1.0));
         #else
         vec3 baseReflectance = vec3(2.0);
         #endif

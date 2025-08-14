@@ -126,7 +126,7 @@ void main() {
 	#if defined VL || defined LPV_FOG
 		/* DRAWBUFFERS:01 */
 		gl_FragData[0].rgb = pow(color, vec3(2.2));
-		gl_FragData[1].rgb = pow(volumetrics / 256.0, vec3(0.125));
+		gl_FragData[1].rgb = sqrt(volumetrics);
 	#else
 		/* DRAWBUFFERS:0 */
 		gl_FragData[0].rgb = pow(color, vec3(2.2));

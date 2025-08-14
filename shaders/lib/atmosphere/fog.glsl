@@ -55,7 +55,7 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
     float fog = 1.0 - exp(-0.005 * lViewPos * distance);
 		  fog = clamp(fog * density * altitude, 0.0, 1.0);
 
-    vec3 nSkyColor = pow(normalize(skyColor + 0.000001), vec3(0.6)) * mix(vec3(1.0), biomeColor, sunVisibility * isSpecificBiome) * 0.8;
+    vec3 nSkyColor = sqrt(normalize(skyColor + 0.000001)) * mix(vec3(1.0), biomeColor, sunVisibility * isSpecificBiome);
 	vec3 fogCol = mix(caveMinLightCol * nSkyColor,
                    mix(atmosphereColor, nSkyColor, sunVisibility * (1.0 - wetness) * (1.0 - fog)),
                    caveFactor);
@@ -104,7 +104,6 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
 	float VoU = dot(normalize(viewPos), upVec);
 	float density = pow4(1.0 - abs(VoU));
 		  density *= 1.0 - clamp((cameraPosition.y - 100.0) * 0.01, 0.0, 1.0);
-		  
 
 	float fog = 1.0 - exp(-0.0001 * lViewPos);
 		  fog = clamp(fog * density, 0.0, 1.0);
