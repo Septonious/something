@@ -225,6 +225,17 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 #endif
 
 #ifdef END_CLOUDY_FOG
+#if MC_VERSION >= 12100
+float endFlashPosToPoint(vec3 flashPosition, vec3 worldPos) {
+    vec3 flashPos = mat3(gbufferModelViewInverse) * flashPosition;
+    vec2 flashCoord = flashPos.xz / (flashPos.y + length(flashPos));
+    vec2 planeCoord = worldPos.xz / (length(worldPos) + worldPos.y) - flashCoord;
+    float flashPoint = 1.0 - clamp(length(planeCoord), 0.0, 1.0);
+
+    return flashPoint;
+}
+#endif
+
 float getProtoplanetaryDisk(vec2 coord){
 	float whirl = -5;
 	float arms = 5;
@@ -270,7 +281,8 @@ void computeEndVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0
 		//Positions
 		vec3 viewPos = ToView(vec3(texCoord, z0));
 		vec3 nViewPos = normalize(viewPos);
-		vec3 nWorldPos = normalize(ToWorld(viewPos));
+        vec3 worldPos = ToWorld(viewPos);
+		vec3 nWorldPos = normalize(worldPos);
 
 		#ifdef DISTANT_HORIZONS
 		float dhZ = texture2D(dhDepthTex0, texCoord).r;
@@ -301,10 +313,11 @@ void computeEndVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0
 			//Scattering variables
 			float VoU = dot(nViewPos, upVec);
 			float VoS = dot(nViewPos, sunVec);
+
 			float halfVoLSqrt = VoS * 0.5 + 0.5;
 			float halfVoL = halfVoLSqrt * halfVoLSqrt;
 			float scattering = pow3(halfVoLSqrt);
-			float noiseLightFactor = (2.0 - VoS) * 5.0;
+			float noiseLightFactor = (2.0 - VoS) * 16.0;
 
 			vec3 rayPos = startPos + sampleStep * dither;
 			
@@ -332,7 +345,7 @@ void computeEndVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0
 
 				getEndCloudSample(rayPos.xz, wind, attenuation, noise);
 
-				float sampleLighting = pow(attenuation, 0.9 + halfVoL * 1.1) * 1.25 + 0.25;
+				float sampleLighting = pow(attenuation, 0.9 + halfVoL * 1.1) * 1.5;
 					  sampleLighting *= 1.0 - pow(noise, noiseLightFactor);
 
 				cloudLighting = mix(cloudLighting, sampleLighting, noise * (1.0 - cloud * cloud));
@@ -348,7 +361,12 @@ void computeEndVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0
 			}
 
 			//Final color calculations
-			vec3 cloudColor = mix(endAmbientCol * 0.5, vec3(0.95, 1.0, 0.5) * endLightCol, cloudLighting) * (1.0 + scattering * 3.0) * 0.2;
+            vec3 cloudColor = vec3(0.95, 1.0, 0.5) * endLightCol;
+            #if MC_VERSION >= 12100
+            float endFlashPoint = endFlashPosToPoint(endFlashPosition, worldPos);
+                 cloudColor = mix(cloudColor, endFlashCol, endFlashPoint * endFlashIntensity * 0.4);
+            #endif
+			     cloudColor *= cloudLighting * (1.0 + scattering * 2.0) * 0.175;
 
 			vc = vec4(cloudColor, cloudAlpha * VF_END_OPACITY) * visibility;
 		}

@@ -147,6 +147,9 @@ vec3 getBlocklightColor(in int id) {
     if (id == 79) color = normalize(vec3(1.00, 0.70, 0.05)) * 0.20;
 	#endif
 
+    //Chorus
+    if (id == 80) color = vec3(0.12, 0.1, 0.1);
+
 	//Generic emitters with different colors
 	//Blocks in this range will emit their respective color
 	//A good way to quickly make modded blocks emit light

@@ -1,3 +1,17 @@
+#if MC_VERSION >= 12100
+uniform vec3 endFlashPosition;
+uniform float endFlashIntensity;
+
+float endFlashPosToPoint(vec3 flashPosition, vec3 worldPos) {
+    vec3 flashPos = mat3(gbufferModelViewInverse) * flashPosition;
+    vec2 flashCoord = flashPos.xz / (flashPos.y + length(flashPos));
+    vec2 planeCoord = worldPos.xz / (length(worldPos) + worldPos.y) - flashCoord;
+    float flashPoint = 1.0 - clamp(length(planeCoord), 0.0, 1.0);
+
+    return flashPoint;
+}
+#endif
+
 void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in vec3 worldPos, in vec3 newNormal, inout vec3 shadow, in vec2 lightmap, 
                       in float NoU, in float NoL, in float NoE,
                       in float subsurface, in float emission, in float smoothness, in float parallaxShadow) {
@@ -197,6 +211,11 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     vec3 sceneLighting = mix(ambientCol, lightCol, shadow * rainFactor * shadowFade);
          sceneLighting *= 1.0 + sss * shadow;
     #elif defined END
+    #if MC_VERSION >= 12100
+    float endFlashPoint = endFlashPosToPoint(endFlashPosition, worldPos);
+    endLightCol += endFlashCol * endFlashPoint * endFlashIntensity * clamp(NoU, 0.0, 1.0);
+    #endif
+
     vec3 sceneLighting = mix((endLightCol * AMBIENT_END_I + endAmbientCol) * 0.25, endLightCol * (1.0 + specularHighlight), shadow) * 0.25;
     #elif defined NETHER
     vec3 sceneLighting = pow(netherColSqrt, vec3(0.75)) * 0.035;

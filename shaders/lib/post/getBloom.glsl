@@ -16,13 +16,21 @@ void getBloom(inout vec3 color, vec2 bloomCoord) {
 
 	vec3 blur = (blur1 * 3.58 + blur2 * 3.35 + blur3 * 2.72 + blur4 * 1.87 + blur5) / 12.52;
 
+    #if defined OVERWORLD
+    float bloomStrength = BLOOM_STRENGTH_OVERWORLD;
+    #elif defined NETHER
+    float bloomStrength = BLOOM_STRENGTH_NETHER;
+    #elif defined END
+    float bloomStrength = BLOOM_STRENGTH_END;
+    #endif
+
 	#if BLOOM_CONTRAST == 0
-	color = mix(color, blur, 0.25 * BLOOM_STRENGTH);
+	color = mix(color, blur, 0.25 * bloomStrength);
 	#else
 	vec3 bloomContrast = vec3(exp2(BLOOM_CONTRAST * 0.25));
 	color = pow(color, bloomContrast);
 	blur = pow(blur, bloomContrast);
-	vec3 strengthFactor = pow(vec3(0.2 * BLOOM_STRENGTH), bloomContrast);
+	vec3 strengthFactor = pow(vec3(0.2 * bloomStrength), bloomContrast);
 	color = mix(color, blur, strengthFactor);
 	color = pow(color, 1.0 / bloomContrast);
 	#endif

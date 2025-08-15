@@ -49,11 +49,18 @@ uniform float frameTimeCounter;
 
 uniform ivec2 eyeBrightnessSmooth;
 
+#if defined END && MC_VERSION >= 12100
+uniform float endFlashIntensity;
+
+uniform vec3 endFlashPosition;
+#endif
+
 uniform vec3 cameraPosition;
+
 #ifdef VOLUMETRIC_CLOUDS
 uniform vec4 lightningBoltPosition;
 #endif
-uniform vec3 sunPosition;
+
 uniform sampler2D colortex0;
 uniform sampler2D depthtex0;
 #ifdef DISTANT_HORIZONS
