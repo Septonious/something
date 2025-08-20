@@ -50,10 +50,11 @@ void main() {
 	albedo.rgb *= 1.0 - pow32(albedo.a);
 
 	#ifdef WATER_CAUSTICS
-	if (mat == 10001 && lmCoord.y >= 0.99){
+	if (mat == 10001 && lmCoord.y >= 0.01){
 		float caustics = getWaterCaustics(worldPos + cameraPosition);
         albedo.rgb = mix(vec3(1.0), waterColorSqrt, 0.5 - caustics * 0.25);
 		albedo.rgb *= 1.0 + caustics * WATER_CAUSTICS_STRENGTH;
+        albedo.rgb *= lmCoord.y;
 	}
 	#endif
 

@@ -81,17 +81,17 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
     float vlIntensity = 0.0;
 
     #ifdef VL
+    float isOutdoors = eBS * eBS;
     float VoLm = pow(VoLClamped, 2.0 + sunVisibility);
          vlIntensity = sunVisibility * (1.0 - VL_STRENGTH_RATIO) + VoLm * VL_STRENGTH_RATIO;
-         vlIntensity = mix(0.75 - VoLm * 0.5, vlIntensity, eBS);
+         vlIntensity = mix((1.0 - VoLClamped) * (2.0 + sqrt(eBS) * 2.0) * (0.25 + timeBrightnessSqrt * 0.75), vlIntensity, isOutdoors);
          vlIntensity *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY, timeBrightness), sunVisibility);
     #if !defined VC_SHADOWS
          vlIntensity *= max(pow6(1.0 - VoUClamped * (1.0 - timeBrightness) * sunVisibility), float(isEyeInWater == 1));
     #else
          vlIntensity = mix(vlIntensity, eBS * (0.5 + timeBrightnessSqrt * 0.5), float(isEyeInWater == 1));
     #endif
-         vlIntensity *= caveFactor * shadowFade;
-
+         vlIntensity *= shadowFade;
     vec3 nSkyColor = normalize(skyColor + 0.000001) * mix(vec3(1.0), biomeColor, sunVisibility * isSpecificBiome);
     vec3 vlCol = mix(lightCol, nSkyColor, timeBrightness * 0.75);
 
@@ -146,7 +146,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
             if (lWorldPos > maxDist) break;
 
             float currentSampleIntensityLPV = currentDist / maxDist / sampleCount;
-            float currentSampleIntensityVL = pow(currentDist / maxDist, 0.5 + eBS * 0.5) / sampleCount;
+            float currentSampleIntensityVL = currentDist / maxDist / sampleCount;
 
             vec3 rayPos = sampleWorldPos + cameraPosition;
 
@@ -171,7 +171,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
                         }
                     }
                     #endif
-                    vlSample = clamp(shadow1 * shadowCol * shadowCol * length(pow(shadowCol, vec3(1.0 + float(isEyeInWater == 1) * 23.0))) * 0.075 + shadow0 * vlCol * float(isEyeInWater == 0), 0.0, 1.0);
+                    vlSample = clamp(shadow1 * shadowCol * shadowCol * mix(3.0, length(pow(shadowCol, vec3(24.0))) * 0.075, float(isEyeInWater == 1)) + shadow0 * vlCol * float(isEyeInWater == 0), 0.0, 1.0);
 
                 }
 

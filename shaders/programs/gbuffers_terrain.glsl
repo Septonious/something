@@ -49,8 +49,10 @@ uniform vec3 cameraPosition;
 uniform vec4 lightningBoltPosition;
 
 uniform sampler2D texture, noisetex;
-
-uniform sampler2D gaux4;
+#ifdef PBR
+uniform sampler2D specular;
+uniform sampler2D normals;
+#endif
 
 #ifdef VX_SUPPORT
 uniform sampler3D floodfillSampler, floodfillSamplerCopy;
@@ -81,7 +83,7 @@ vec3 eastVec = normalize(gbufferModelView[0].xyz);
 
 #ifdef OVERWORLD
 float eBS = eyeBrightnessSmooth.y / 240.0;
-float caveFactor = mix(clamp((cameraPosition.y - 56.0) / 16.0, float(sign(isEyeInWater)), 1.0), 1.0, eBS);
+float caveFactor = mix(clamp((cameraPosition.y - 56.0) / 16.0, float(sign(isEyeInWater)), 1.0), 1.0, sqrt(eBS));
 float sunVisibility = clamp((dot( sunVec, upVec) + 0.15) * 3.0, 0.0, 1.0);
 float moonVisibility = clamp((dot(-sunVec, upVec) + 0.15) * 3.0, 0.0, 1.0);
 vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
@@ -125,6 +127,18 @@ vec2 dcdy = dFdy(texCoord);
 #include "/lib/pbr/generatedNormals.glsl"
 #endif
 
+#ifdef PBR
+#if defined PARALLAX || defined SELF_SHADOW
+#include "/lib/pbr/parallax.glsl"
+#endif
+
+#include "/lib/pbr/materialGbuffers.glsl"
+#endif
+
+#if defined RAIN_PUDDLES && (defined GENERATED_SPECULAR || defined PBR)
+#include "/lib/pbr/rainPuddles.glsl"
+#endif
+
 // Main //
 void main() {
 	vec4 albedoTexture = texture2D(texture, texCoord);
@@ -140,10 +154,32 @@ void main() {
 	float saplings = float(mat == 10317);
 	float foliage = float(mat >= 10304 && mat <= 10319 || mat >= 10035 && mat <= 10040) * (1.0 - leaves) * (1.0 - saplings);
 	float subsurface = leaves + foliage * 0.6 + saplings * 0.4;
-    float emission = 0.0, smoothness = 0.0, metalness = 0.0, parallaxShadow = 0.0;
+    float emission = 0.0, smoothness = 0.0, metalness = 0.0, porosity = 0.5, parallaxShadow = 0.0;
 
 	#if defined GENERATED_NORMALS || defined PARALLAX || defined PBR || defined RAIN_PUDDLES
 	vec2 newCoord = vTexCoord.st * vTexCoordAM.pq + vTexCoordAM.st;
+	#endif
+
+	#ifdef PBR
+	float surfaceDepth = 1.0;
+	float parallaxFade = clamp((dist - PARALLAX_DISTANCE) / 32.0, 0.0, 1.0);
+	
+	#ifdef PARALLAX
+	newCoord = getParallaxCoord(texCoord, parallaxFade, surfaceDepth);
+	albedo = texture2DGradARB(texture, newCoord, dcdx, dcdy) * vec4(color.rgb, 1.0);
+	#endif
+	#endif
+
+	#ifdef PBR
+	float f0 = 0.0, ao = 1.0;
+
+	mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
+						tangent.y, binormal.y, normal.y,
+						tangent.z, binormal.z, normal.z);
+
+	float viewLength = length(viewPos) * 0.01;
+
+	getMaterials(smoothness, metalness, f0, emission, subsurface, porosity, ao, newNormal, newCoord, dcdx, dcdy, tbnMatrix);
 	#endif
 
 	#ifdef GENERATED_NORMALS
@@ -169,6 +205,53 @@ void main() {
 
 	#if defined GENERATED_EMISSION || defined GENERATED_SPECULAR
 	generateIPBR(albedo, worldPos, viewPos, lightmap, NoU, emission, smoothness, metalness, subsurface);
+	#endif
+
+	#if defined RAIN_PUDDLES && (defined GENERATED_SPECULAR || defined PBR)
+	if (emission < 0.01 && foliage < 0.1) {
+		float puddles = GetPuddles(worldPos, newCoord, lmCoord.y, NoU, wetness);
+
+		ApplyPuddleToMaterial(puddles, albedo, smoothness, metalness, porosity);
+
+		if (puddles > 0.001 && wetness > 0.001) {
+			mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
+								  tangent.y, binormal.y, normal.y,
+								  tangent.z, binormal.z, normal.z);
+
+			vec3 puddleNormal = GetPuddleNormal(worldPos, viewPos, tbnMatrix);
+			newNormal = normalize(
+				mix(newNormal, puddleNormal, puddles * sqrt(1.0 - porosity) * wetness)
+			);
+		}
+	}
+	#endif
+
+	#ifdef PBR
+	vec3 rawAlbedo = albedo.rgb * 0.999 + 0.001;
+	albedo.rgb *= ao * ao;
+	albedo.rgb *= 1.0 - metalness * smoothness * 0.5;
+
+	float doParallax = 0.0;
+
+	#ifdef SELF_SHADOW
+	float pNoL = dot(newNormal, lightVec);
+
+	#ifdef OVERWORLD
+	doParallax = float(lightmap.y > 0.0 && pNoL > 0.0);
+	#endif
+
+	#ifdef END
+	doParallax = float(pNoL > 0.0);
+	#endif
+	
+	if (doParallax > 0.5 && viewLength < 1.0) {
+		parallaxShadow = getParallaxShadow(surfaceDepth, parallaxFade, newCoord, lightVec, tbnMatrix);
+	} else {
+		parallaxShadow = 1.0;
+	}
+	#endif
+
+    //float normalFresnel = pow2(clamp(1.0 + dot(newNormal, normalize(viewPos)), 0.0, 1.0));
 	#endif
 
     vec3 shadow = vec3(0.0);

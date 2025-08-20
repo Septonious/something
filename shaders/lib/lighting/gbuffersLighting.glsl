@@ -19,7 +19,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     float originalNoL = NoL;
     float lViewPos = length(viewPos.xz);
     float lAlbedo = length(albedo.rgb);
-    float ao = color.a * color.a;
+    float vanillaAo = color.a * color.a;
     vec3 worldNormal = normalize(ToWorld(newNormal * 100000000.0));
 
     //Vanilla Directional Lighting
@@ -66,7 +66,6 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     }
     #endif
 
-    blockLighting *= 1.0 - smoothness * 0.5;
     #ifdef OVERWORLD
     blockLighting *= 1.0 - lightmap.y * lightmap.y * 0.5 * sunVisibility;
     #endif
@@ -145,6 +144,10 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     }
 
     NoL = clamp(NoL * 1.01 - 0.01, 0.0, 1.0);
+
+    #if defined PBR && defined PARALLAX
+    shadow *= parallaxShadow;
+    #endif
 
     vec3 realShadow = shadow * NoL;
     vec3 fakeShadow = getFakeShadow(lightmap.y) * originalNoL;
@@ -233,9 +236,9 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     //Night vision
     sceneLighting += nightVision * vec3(0.2, 0.3, 0.2);
 
-    //Vanilla AO
-    float aoMixer = (1.0 - ao) * (1.0 - blockLightMap) * (1.0 - float(emission > 0.0)) * (1.0 - subsurface * 0.5) * (1.0 - originalNoL * lightmap.y);
-    albedo.rgb = mix(albedo.rgb, albedo.rgb * pow(ao, 1.0 + lightmap.y), aoMixer);
+    //Vanilla vanillaAo
+    float aoMixer = (1.0 - vanillaAo) * (1.0 - blockLightMap) * (1.0 - float(emission > 0.0)) * (1.0 - subsurface * 0.5) * (1.0 - originalNoL * lightmap.y);
+    albedo.rgb = mix(albedo.rgb, albedo.rgb * pow(vanillaAo, 1.0 + lightmap.y), aoMixer);
 
     albedo.rgb = pow(albedo.rgb, vec3(2.2));
     albedo.rgb *= sceneLighting + blockLighting + emission + lightningFlash;

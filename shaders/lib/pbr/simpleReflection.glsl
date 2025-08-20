@@ -38,7 +38,7 @@ void getReflection(inout vec4 color, in vec3 viewPos, in vec3 normal, in float f
 
             for (int i = -2; i <= 2; i++) {
                 for (int j = -2; j <= 2; j++) {
-                    vec2 offset = vec2(i, j) * exp2(lod - 1.0) / vec2(viewWidth, viewHeight);
+                    vec2 offset = vec2(i, j) * (0.1 + exp2(lod - 1.0)) / vec2(viewWidth, viewHeight);
                     reflection += texture2DLod(colortex0, reflectPos.xy + offset, max(lod - 1, 0.0));
                 }
             }
@@ -84,5 +84,5 @@ void getReflection(inout vec4 color, in vec3 viewPos, in vec3 normal, in float f
 	smoothness = pow(smoothness, max(1.0, 1.5 - smoothness)); //Prevents crazy strong reflections on rough surfaces
 	#endif
 
-	color.rgb += finalReflection * (0.2 + fresnel * 0.8) * smoothness;
+	color.rgb += finalReflection * fresnel * smoothness;
 }
