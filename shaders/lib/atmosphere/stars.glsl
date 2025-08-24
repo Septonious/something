@@ -26,11 +26,11 @@ void drawStars(inout vec3 color, in vec3 worldPos, in float VoU, in float VoS, i
 		vec2 planeCoord0 = floor(planeCoord * 500.0 * amount) / (500.0 * amount);
 		vec2 planeCoord1 = floor(planeCoord * 1000.0 * amount) / (1000.0 * amount);
 
-		float stars = getNoise(planeCoord0 + 10.0);
+		float stars = getNoise(planeCoord0 + 8.0);
 			  stars*= getNoise(planeCoord1 + 14.0);
-			  stars = clamp(stars - (0.85 - nebulaFactor * 0.1), 0.0, 1.0);
-			  stars *= stars * 64.0;
-			  stars = clamp(stars, 0.0, 1.0);
+			  stars = clamp(stars - (0.825 - nebulaFactor * 0.125), 0.0, 1.0);
+			  stars *= stars * stars * 512.0;
+			  stars = clamp(stars, 0.0, 16.0);
 
 		#ifdef OVERWORLD
 		if (moonVisibility > 0.0) {

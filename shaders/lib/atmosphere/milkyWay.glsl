@@ -4,8 +4,10 @@ void drawMilkyWay(inout vec3 color, in vec3 worldPos, in float VoU, in float cav
 	if (0 < visibility) {
 		vec2 planeCoord = worldPos.zx / (worldPos.y + length(worldPos.zyx));
 			 planeCoord += frameTimeCounter * 0.0001;
-			 planeCoord *= 0.8;
-			 planeCoord.x *= 1.9;
+			 planeCoord *= 0.75;
+			 planeCoord.x *= 2.0;
+			 planeCoord.x -= 0.2;
+			 planeCoord.y -= 0.5;
 		
 		#ifdef DEFERRED
 		vec4 milkyWay = texture2D(depthtex2, planeCoord * 0.5 + 0.6);
