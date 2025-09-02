@@ -64,7 +64,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 //#define LPV_CLOUDY_FOG
 #define LPV_FOG_STRENGTH 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 
-//Planar Clouds
+// Planar Clouds //
 #define PLANAR_CLOUDS
 #define PLANAR_CLOUDS_BRIGHTNESS 1.3 //[0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5]
 #define PLANAR_CLOUDS_OPACITY 0.5 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
@@ -150,6 +150,73 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 // Motion Blur //
 //#define MOTION_BLUR
 #define MOTION_BLUR_STRENGTH 0.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+
+// Depth of Field & Distant Blur //
+//#define DOF
+#define DOF_STRENGTH 3.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+//#define MANUAL_FOCUS
+#define TILT 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+#define SHIFT 0.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+#define DOF_FOCUS 5.00 //[0.00 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00 4.50 5.00 6.00 7.00 8.00 10.00 12.00 16.00 20.00]
+//#define DISTANT_BLUR
+#define DISTANT_BLUR_STRENGTH 2.0 //[1.0 1.5 2.0 2.5 3.0 3.5 4.0]
+#define DISTANT_BLUR_RANGE 4 //[1 2 3 4 5 6 7 8]
+
+// Lens Flare //
+#define LENS_FLARE
+#define LENS_FLARE_STRENGTH 0.7 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+
+// Base lens flare //
+#define BASELENS1
+#define BASELENS2
+#define BASELENS3
+#define BASELENS4
+#define BASELENS5
+#define BASELENS6
+
+// Overlap lens //
+#define OVERLAPLENS1
+#define OVERLAPLENS2
+#define OVERLAPLENS3
+#define OVERLAPLENS4
+#define OVERLAPLENS5
+
+// Point lens //
+#define POINT1
+#define POINT2
+#define POINT3
+#define POINT4
+#define POINT5
+#define POINT6
+#define POINT7
+#define POINT8
+#define POINT9
+#define POINT10
+#define POINT11
+
+// Large rings //
+#define RING1
+#define RING2
+#define RING3
+#define RING4
+#define RING5
+#define RING6
+#define RING7
+#define RING8
+#define RING9
+#define RING10
+#define RING11
+#define RING12
+#define RING13
+#define RING14
+
+// Rainbow rings around the sun //
+//#define RAINBOW1
+//#define RAINBOW2
+//#define RAINBOW3
+
+// Horizontal stripes (anamorphic lens) //
+#define ANAMORPHICLENS
 
 // Antialiasing //
 #define TAA

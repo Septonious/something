@@ -10,6 +10,10 @@ in vec2 texCoord;
 // Uniforms //
 uniform int frameCounter;
 
+#ifdef MOTION_BLUR
+uniform float frameTimeCounter;
+#endif
+
 #if defined FXAA || defined TAA
 uniform float viewWidth, viewHeight;
 uniform float aspectRatio;
@@ -48,22 +52,24 @@ const bool colortex1MipmapEnabled = true;
 
 // Main //
 void main() {
-	vec2 newTexCoord = texCoord;
-
 	#if defined MOTION_BLUR || defined TAA
-	float z1 = texture2D(depthtex1, newTexCoord).r;
+	float z1 = texture2D(depthtex1, texCoord).r;
 	#endif
 
-    vec3 color = texture2DLod(colortex1, newTexCoord, 0).rgb;
+    vec3 color = texture2DLod(colortex1, texCoord, 0).rgb;
+
+	//Fast ApproXimate Anti-Aliasing
 	#ifdef FXAA
 		 color = FXAA311(color);	
 	#endif
 
+	//Motion Blur
 	#ifdef MOTION_BLUR
 		 color = getMotionBlur(color, z1);
 	#endif
 
-	vec4 previousColor = vec4(texture2D(colortex2, newTexCoord).r, 0.0, 0.0, 0.0);
+	//Temporal Anti-Aliasing
+	vec4 previousColor = vec4(texture2D(colortex2, texCoord).r, 0.0, 0.0, 0.0);
 	#ifdef TAA
 	     previousColor = TemporalAA(color, previousColor.r, z1);
 	#endif

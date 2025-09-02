@@ -10,6 +10,10 @@ uniform sampler2D colortex1;
 
 uniform float viewWidth, viewHeight;
 
+#ifdef CHROMATIC_ABERRATION
+uniform float aspectRatio;
+#endif
+
 // Pipeline Options //
 const bool shadowHardwareFiltering = false;
 const int noiseTextureResolution = 512;
@@ -30,12 +34,20 @@ const int colortex4Format = RGB8; //Reflections
 #include "/lib/post/sharpenFilter.glsl"
 #endif
 
+#ifdef CHROMATIC_ABERRATION
+#include "/lib/post/chromaticAberration.glsl"
+#endif
+
 // Main //
 void main() {
     vec3 color = texture2D(colortex1, texCoord).rgb;
 
 	#if MC_VERSION >= 11200
 	sharpenFilter(color, texCoord);
+	#endif
+
+	#ifdef CHROMATIC_ABERRATION
+	getChromaticAberration(colortex1, color, texCoord);
 	#endif
 
     gl_FragColor.rgb = color;
