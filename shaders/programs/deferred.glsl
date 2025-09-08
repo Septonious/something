@@ -72,7 +72,7 @@ uniform sampler2D noisetex;
 uniform sampler2D depthtex2;
 #endif
 
-#if defined VOLUMETRIC_CLOUDS || defined END_CLOUDY_FOG
+#if defined VOLUMETRIC_CLOUDS || defined END_DISK
 uniform sampler2D shadowtex1;
 
 uniform mat4 shadowModelView, shadowProjection;
@@ -128,7 +128,7 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #endif
 #endif
 
-#if defined VOLUMETRIC_CLOUDS || defined END_CLOUDY_FOG
+#if defined VOLUMETRIC_CLOUDS || defined END_DISK
 #include "/lib/atmosphere/spaceConversion.glsl"
 #include "/lib/util/ToShadow.glsl"
 #include "/lib/lighting/lightning.glsl"
@@ -179,7 +179,7 @@ void main() {
 	float cloudDepth = 2.0 * far;
 	#endif
 
-	#if defined VOLUMETRIC_CLOUDS || defined END_CLOUDY_FOG
+	#if defined VOLUMETRIC_CLOUDS || defined END_DISK
 	float blueNoiseDither = texture2D(noisetex, gl_FragCoord.xy / 512.0).b;
 
 	#ifdef TAA
@@ -191,7 +191,7 @@ void main() {
 	computeVolumetricClouds(vc, atmosphereColor, z0, blueNoiseDither, cloudDepth);
 	#endif
 
-	#ifdef END_CLOUDY_FOG
+	#ifdef END_DISK
 	computeEndVolumetricClouds(vc, atmosphereColor, z0, blueNoiseDither, cloudDepth);
 	#endif
 
@@ -227,12 +227,12 @@ void main() {
         #endif
     }
 
-    #ifdef END_STARS
-    drawStars(skyColor, worldPos.xyz, VoU, VoS, 1.0, nebulaFactor, 0.0, 0.85);
-    #endif
-
     #ifdef END_NEBULA
     drawEndNebula(skyColor, worldPos.xyz, VoU, VoS);
+    #endif
+
+    #ifdef END_STARS
+    drawStars(skyColor, worldPos.xyz, VoU, VoS, 1.0, nebulaFactor, 0.0, 0.85);
     #endif
 
     skyColor *= 1.0 - blindFactor;
@@ -264,7 +264,7 @@ void main() {
     #endif
 
 	//Volumetric Clouds
-	#if defined VOLUMETRIC_CLOUDS || defined END_CLOUDY_FOG
+	#if defined VOLUMETRIC_CLOUDS || defined END_DISK
 	vc.rgb = pow(vc.rgb, vec3(1.0 / 2.2));
 
 	#ifdef DISTANT_HORIZONS

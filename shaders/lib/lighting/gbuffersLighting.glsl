@@ -105,6 +105,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     vec3 worldPosM = worldPos;
 
     #ifndef NETHER
+    #ifdef REALTIME_SHADOWS
     if (NoL > 0.0001 && shadowVisibility > 0.0) {
         float lightmapS = lightmap.y * lightmap.y * (3.0 - 2.0 * lightmap.y);
 
@@ -142,6 +143,9 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
         computeShadow(shadow, shadowPos, offset, subsurface, lightmap.y);
     }
+    #else
+    shadowVisibility = 0.0;
+    #endif
 
     NoL = clamp(NoL * 1.01 - 0.01, 0.0, 1.0);
 

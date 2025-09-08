@@ -38,6 +38,7 @@ vec4 getSupernovaAtPos(in vec3 flashPos, in vec3 worldPos) {
 #endif
 
 void drawEndNebula(inout vec3 color, in vec3 worldPos, in float VoU, in float VoS) {
+    #ifdef END_BLACK_HOLE
     //Prepare black hole parameters for warping the nebula
     float hole = pow(pow4(pow32(VoS)), END_BLACK_HOLE_SIZE);
     float gravityLens = hole;
@@ -50,9 +51,13 @@ void drawEndNebula(inout vec3 color, in vec3 worldPos, in float VoU, in float Vo
     float warping = getSpiralWarping(blackHoleCoord);
          blackHoleCoord.x *= 0.75 - abs(VoU) * 0.25;
          blackHoleCoord.y *= 4.0;
+    #endif
 
     //Ender Nebula
-    vec2 nebulaCoord = worldPos.xz / (length(worldPos.y) + length(worldPos.xyz)) + warping * gravityLens;
+    vec2 nebulaCoord = worldPos.xz / (length(worldPos.y) + length(worldPos.xyz));
+    #ifdef END_BLACK_HOLE
+         nebulaCoord += warping * gravityLens;
+    #endif
 
     float nebulaNoise = 0.0;
     float nebulaColorMixer = 0.0;
@@ -77,6 +82,7 @@ void drawEndNebula(inout vec3 color, in vec3 worldPos, in float VoU, in float Vo
     #endif
 
     //Black Hole
+    #ifdef END_BLACK_HOLE
     const vec3 blackHoleColor = vec3(5.6, 2.2, 0.2);
 
     float innerRing = pow2(hole * 3.0);
@@ -92,5 +98,5 @@ void drawEndNebula(inout vec3 color, in vec3 worldPos, in float VoU, in float Vo
     color *= 1.0 - hole;
     color += vec3(innerRing);
     color += mix(blackHoleColor, vec3(2.0), sqrt(torus)) * torus * 5.0 * torusNoise;
-
+    #endif
 }

@@ -1,3 +1,4 @@
+#ifdef REALTIME_SHADOWS
 uniform sampler2D shadowtex0;
 
 #ifdef SHADOW_COLOR
@@ -83,6 +84,7 @@ void computeShadow(inout vec3 shadow, vec3 shadowPos, float offset, float subsur
 
     shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(16.0));
 }
+#endif
 
 vec3 getFakeShadow(float skyLight) {
 	float fakeShadow = 1.0;

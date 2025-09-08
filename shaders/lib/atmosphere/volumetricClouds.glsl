@@ -224,8 +224,8 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 }
 #endif
 
-#ifdef END_CLOUDY_FOG
-#if MC_VERSION >= 12100
+#ifdef END_DISK
+#if MC_VERSION >= 12100 && defined END_FLASHES
 float endFlashPosToPoint(vec3 flashPosition, vec3 worldPos) {
     vec3 flashPos = mat3(gbufferModelViewInverse) * flashPosition;
     vec2 flashCoord = flashPos.xz / (flashPos.y + length(flashPos));
@@ -254,16 +254,16 @@ void getEndCloudSample(vec2 rayPos, vec2 wind, float attenuation, inout float no
 	float perlinNoise = texture2D(noisetex, rayPos.xy + wind * 0.5).r;
 	float noiseBase = perlinNoise * 0.6 + worleyNoise * 0.4;
 
-	float detailZ = floor(attenuation * VF_END_THICKNESS) * 0.05;
+	float detailZ = floor(attenuation * END_DISK_THICKNESS) * 0.05;
 	float noiseDetailA = texture2D(noisetex, rayPos * 0.5 - wind + detailZ).b;
 	float noiseDetailB = texture2D(noisetex, rayPos * 0.5 - wind + detailZ + 0.05).b;
-	float noiseDetail = mix(noiseDetailA, noiseDetailB, fract(attenuation * VF_END_THICKNESS));
+	float noiseDetail = mix(noiseDetailA, noiseDetailB, fract(attenuation * END_DISK_THICKNESS));
 
 	float noiseCoverage = abs(attenuation - 0.125) * (attenuation > 0.125 ? 1.14 : 5.0);
 		  noiseCoverage *= noiseCoverage * 5.0;
 	
 	noise = mix(noiseBase, noiseDetail, 0.025 * int(0 < noiseBase)) * 22.0 - noiseCoverage;
-	noise = max(noise - VF_END_AMOUNT - 1.0 + getProtoplanetaryDisk(rayPos), 0.0);
+	noise = max(noise - END_DISK_AMOUNT - 1.0 + getProtoplanetaryDisk(rayPos), 0.0);
 	noise /= sqrt(noise * noise + 0.25);
 }
 
@@ -292,14 +292,14 @@ void computeEndVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0
 		#endif
 
 		//Setting the ray marcher
-		float cloudTop = VF_END_HEIGHT + VF_END_THICKNESS * 10.0;
-		float lowerPlane = (VF_END_HEIGHT - cameraPosition.y) / nWorldPos.y;
+		float cloudTop = END_DISK_HEIGHT + END_DISK_THICKNESS * 10.0;
+		float lowerPlane = (END_DISK_HEIGHT - cameraPosition.y) / nWorldPos.y;
 		float upperPlane = (cloudTop - cameraPosition.y) / nWorldPos.y;
 		float minDist = max(min(lowerPlane, upperPlane), 0.0);
 		float maxDist = max(lowerPlane, upperPlane);
 
 		float planeDifference = maxDist - minDist;
-		float rayLength = VF_END_THICKNESS * 8.0;
+		float rayLength = END_DISK_THICKNESS * 8.0;
 			  rayLength /= nWorldPos.y * nWorldPos.y * 8.0 + 1.0;
 		vec3 startPos = cameraPosition + minDist * nWorldPos;
 		vec3 sampleStep = nWorldPos * rayLength;
@@ -325,7 +325,7 @@ void computeEndVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0
 			float minimalNoise = 0.25 + dither * 0.25;
 			float sampleTotalLength = minDist + rayLength * dither;
 
-			vec2 wind = vec2(frameTimeCounter * 0.0005, sin(frameTimeCounter * 0.001) * 0.005) * VF_END_HEIGHT * 0.1;
+			vec2 wind = vec2(frameTimeCounter * 0.0005, sin(frameTimeCounter * 0.001) * 0.005) * END_DISK_HEIGHT * 0.1;
 
 			//Ray marcher
 			for (int i = 0; i < sampleCount; i++, rayPos += sampleStep, sampleTotalLength += rayLength) {
@@ -341,7 +341,7 @@ void computeEndVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0
 
 				float noise = 0.0;
 				float rayDistance = length(worldPos.xz) * 0.1;
-				float attenuation = smoothstep(VF_END_HEIGHT, cloudTop, rayPos.y);
+				float attenuation = smoothstep(END_DISK_HEIGHT, cloudTop, rayPos.y);
 
 				getEndCloudSample(rayPos.xz, wind, attenuation, noise);
 
@@ -362,13 +362,13 @@ void computeEndVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0
 
 			//Final color calculations
             vec3 cloudColor = vec3(0.95, 1.0, 0.5) * endLightCol;
-            #if MC_VERSION >= 12100
+            #if MC_VERSION >= 12100 && defined END_FLASHES
             float endFlashPoint = endFlashPosToPoint(endFlashPosition, worldPos);
                  cloudColor = mix(cloudColor, endFlashCol, endFlashPoint * endFlashIntensity * 0.4);
             #endif
 			     cloudColor *= cloudLighting * (1.0 + scattering * 2.0) * 0.175;
 
-			vc = vec4(cloudColor, cloudAlpha * VF_END_OPACITY) * visibility;
+			vc = vec4(cloudColor, cloudAlpha * END_DISK_OPACITY) * visibility;
 		}
 	}
 }

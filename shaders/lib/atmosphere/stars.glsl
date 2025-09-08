@@ -38,9 +38,7 @@ void drawStars(inout vec3 color, in vec3 worldPos, in float VoU, in float VoS, i
 		}
 		color += stars * lightNight * visibility * STAR_BRIGHTNESS;
 		#else
-		vec3 coloredStars = vec3(0.3, 0.3, 0.3) * stars;
-			 coloredStars += vec3(1.0, 0.4, 0.7) * pow32(stars);
-		color += coloredStars * (1.0 - nebulaFactor * 0.85) * visibility * END_STAR_BRIGHTNESS;
+		color = mix(color, color * (3.0 + stars * stars * 3.0) * visibility * STAR_BRIGHTNESS, min(1.0, stars));
 		#endif
 	}
 }
