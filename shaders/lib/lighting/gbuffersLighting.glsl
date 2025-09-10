@@ -66,6 +66,12 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     }
     #endif
 
+    //Dynamic Hand Lighting
+    #ifdef DYNAMIC_HANDLIGHT
+    getHandLightColor(blockLighting, worldPos + relativeEyePosition);
+    #endif
+
+    //Dim blocklight in sunlight
     #ifdef OVERWORLD
     blockLighting *= 1.0 - lightmap.y * lightmap.y * 0.5 * sunVisibility;
     #endif

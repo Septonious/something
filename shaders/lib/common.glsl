@@ -175,7 +175,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 
 // Lens Flare //
 #define LENS_FLARE
-#define LENS_FLARE_STRENGTH 0.7 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define LENS_FLARE_STRENGTH 0.6 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
 // Base lens flare //
 #define BASELENS1
@@ -239,6 +239,10 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define VOXEL_VOLUME_SIZE 192 //[128 192 256 384 512]
 #define FLOODFILL_BRIGHTNESS 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 #define FLOODFILL_RADIUS 1.6 //[0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7]
+
+//Handheld Lighting
+#define DYNAMIC_HANDLIGHT
+#define DYNAMIC_HANDLIGHT_STRENGTH 2.50 //[0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 
 // Tonemap //
 #define TONEMAP_CONTRAST 3.0 //[1.0 1.2 1.4 1.6 1.8 2.0 2.2 2.4 2.6 2.8 3.0 3.2 3.4 3.6 3.8 4.0]

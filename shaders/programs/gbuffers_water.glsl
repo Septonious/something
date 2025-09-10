@@ -112,6 +112,11 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/lighting/cloudShadows.glsl"
 #endif
 
+#ifdef DYNAMIC_HANDLIGHT
+#include "/lib/vx/blocklightColor.glsl"
+#include "/lib/lighting/handlight.glsl"
+#endif
+
 #include "/lib/lighting/gbuffersLighting.glsl"
 #include "/lib/water/waterFog.glsl"
 

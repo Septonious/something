@@ -1,3 +1,5 @@
+uniform int heldItemId, heldItemId2;
+
 uniform vec3 relativeEyePosition;
 
 void getHandLightColor(inout vec3 blockLighting, in vec3 pos) {
@@ -7,7 +9,7 @@ void getHandLightColor(inout vec3 blockLighting, in vec3 pos) {
         vec3 color1 = getBlocklightColor(heldItemId);
         vec3 color2 = getBlocklightColor(heldItemId2);
 
-        vec3 handLightColor = mix(color1, color2, 0.5);
+        vec3 handLightColor = mix(color1, color2, vec3(0.5));
 
         vec3 lighting = handLightColor * pow3(handlight) * DYNAMIC_HANDLIGHT_STRENGTH;
         #ifdef GBUFFERS_HAND

@@ -14,12 +14,6 @@ uniform int isEyeInWater;
 #endif
 
 #ifdef WATER_FOG
-#ifdef DYNAMIC_HANDLIGHT
-uniform int heldItemId, heldItemId2;
-uniform int heldBlockLightValue;
-uniform int heldBlockLightValue2;
-#endif
-
 #if MC_VERSION >= 11900
 uniform float darknessFactor;
 #endif

@@ -62,7 +62,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
 	     nWorldPos /= -nViewPos.z;
 
     float lViewPos = length(viewPos);
-    float VoL = dot(nViewPos, sunVec);
+    float VoL = dot(nViewPos, sunVec) * sunVisibility + dot(nViewPos, -sunVec) * moonVisibility;
     float VoU = dot(nViewPos, upVec);
     float VoLPositive = VoL * 0.5 + 0.5;
     float VoUPositive = VoU * 0.5 + 0.5;
@@ -82,7 +82,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
 
     #ifdef VL
     float isOutdoors = eBS * eBS;
-    float VoLm = pow(VoLClamped, 2.0 + sunVisibility);
+    float VoLm = pow(VoLClamped, 1.25 + sunVisibility * 1.75);
          vlIntensity = sunVisibility * (1.0 - VL_STRENGTH_RATIO) + VoLm * VL_STRENGTH_RATIO;
          vlIntensity = mix((1.0 - VoLClamped) * (2.0 + sqrt(eBS) * 2.0) * (0.25 + timeBrightnessSqrt * 0.75), vlIntensity, isOutdoors);
          vlIntensity *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY, timeBrightness), sunVisibility);
@@ -182,7 +182,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
 
                     float noise = 0.0;
                     getCloudShadow(cloudShadowPos.xz / scale, wind, amount, frequency, density, noise);
-                    vlSample *= noise * shadowFade;
+                    vlSample *= noise;
                 }
                 vlSample *= 1.0 - min((rayPos.y - thickness) * (1.0 / cloudTop), 1.0);
                 #endif

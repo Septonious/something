@@ -34,7 +34,9 @@ void drawStars(inout vec3 color, in vec3 worldPos, in float VoU, in float VoS, i
 
 		#ifdef OVERWORLD
 		if (moonVisibility > 0.0) {
-			color *= 1.0 + texture2D(noisetex, planeCoord * 0.25).r * VoU * pow4(moonVisibility);
+			float nebulaNoise = max(0.0, texture2D(noisetex, planeCoord * 0.25).r - 0.25) * VoU * pow4(moonVisibility);
+			color *= 1.0 + nebulaNoise;
+			stars *= 1.0 + nebulaNoise;
 		}
 		color += stars * lightNight * visibility * STAR_BRIGHTNESS;
 		#else

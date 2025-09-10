@@ -117,6 +117,10 @@ vec2 dcdy = dFdy(texCoord);
 #include "/lib/lighting/cloudShadows.glsl"
 #endif
 
+#ifdef DYNAMIC_HANDLIGHT
+#include "/lib/lighting/handlight.glsl"
+#endif
+
 #include "/lib/lighting/gbuffersLighting.glsl"
 
 #if defined GENERATED_EMISSION || defined GENERATED_SPECULAR
