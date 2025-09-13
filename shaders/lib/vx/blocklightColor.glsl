@@ -22,7 +22,7 @@ vec3 getBlocklightColor(int id) {
 	//Cave Berries
 	if (id == 13) return vec3(CB_R, CB_G, CB_B) * CB_I;
 	//Amethyst
-	if (id == 14) return vec3(METH_lmao_R, METH_lmao_G, METH_lmao_B) * METH_lmao_I;
+	if (id == 14) return vec3(AM_R, AM_G, AM_B) * AM_I;
 	//Magma Block
 	if (id == 21) return vec3(MB_R, MB_G, MB_B) * MB_I;
 
@@ -138,7 +138,7 @@ vec3 getBlocklightColor(int id) {
 	//Mob Spawner
 	if (id == 69) return vec3(0.1, 0.01, 0.15);
 	//End Portal With Eye
-	if (id == 71) return vec3(0.1, 0.9, 0.6) * 0.5;
+	if (id == 71) return vec3(EP_R, EP_G, EP_B) * EP_I;
 	//Zinc Ore
 	if (id == 72) return vec3(0.4);
 	//Creaking Heart (Active)
