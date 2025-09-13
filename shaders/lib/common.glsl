@@ -155,8 +155,8 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define BLOOM
 #define BLOOM_STRENGTH_OVERWORLD 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 #define BLOOM_STRENGTH_NETHER 0.75 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
-#define BLOOM_STRENGTH_END 1.25 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
-#define BLOOM_CONTRAST 3 //[-4 -3 -2 -1 0 1 2 3 4]
+#define BLOOM_STRENGTH_END 1.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+#define BLOOM_CONTRAST 2 //[-4 -3 -2 -1 0 1 2 3 4]
 #define BLOOM_TILE_SIZE 1.0 //[0.0 0.5 1.0 1.5 2.0]
 
 // Motion Blur //
@@ -612,6 +612,10 @@ vec3 pow8(vec3 x) {return x*x*x*x*x*x*x*x;}
 #undef GENERATED_NORMALS
 #undef GENERATED_EMISSION
 #undef GENERATED_SPECULAR
+#endif
+
+#if defined END && !defined END_BLACK_HOLE
+#undef LENS_FLARE
 #endif
 
 #ifdef END_FLASHES

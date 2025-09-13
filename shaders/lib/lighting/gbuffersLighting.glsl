@@ -216,7 +216,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     //Main color mixing
     #ifdef OVERWORLD
     ambientCol *= 0.05 + lightmap.y * lightmap.y * 0.95;
-    ambientCol *= 1.0 - VoL * VoL * 0.5;
+    ambientCol *= 1.0 - VoL * VoL * (0.5 - wetness * 0.5);
     lightCol *= 1.0 + specularHighlight * shadowFade;
 
     float rainFactor = 1.0 - wetness * 0.5;

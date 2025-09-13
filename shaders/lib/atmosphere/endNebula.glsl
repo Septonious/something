@@ -94,9 +94,9 @@ void drawEndNebula(inout vec3 color, in vec3 worldPos, in float VoU, in float Vo
           torus = pow(pow16(torus * torus), END_BLACK_HOLE_SIZE);
     float torusNoise = texture2D(noisetex, vec2(blackHoleCoord.x * 4.0 + frameTimeCounter * 0.05, blackHoleCoord.y)).r;
 
-    color += mix(blackHoleColor, vec3(4.0), hole * hole) * hole * hole * 2.5;
+    color += mix(blackHoleColor, vec3(4.0), hole * hole) * hole * hole * 2.0;
     color *= 1.0 - hole;
     color += vec3(innerRing);
-    color += mix(blackHoleColor, vec3(2.0), sqrt(torus)) * torus * 5.0 * torusNoise;
+    color += mix(blackHoleColor, vec3(2.0), sqrt(torus)) * torus * 4.0 * torusNoise;
     #endif
 }

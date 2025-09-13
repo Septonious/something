@@ -14,7 +14,7 @@ void drawStars(inout vec3 color, in vec3 worldPos, in float VoU, in float VoS, i
 	if (0 < visibility) {
 		vec2 planeCoord = worldPos.xz / (length(worldPos.y) + length(worldPos.xyz));
 			 planeCoord *= size;
-			 #ifdef END_SUPERNOVA
+			 #ifdef END_BLACK_HOLE
 			 float baseRing = pow10(pow32(VoS));
 
 			 planeCoord *= clamp(1.0 - baseRing * 4.0, 0.0, 1.0);
@@ -40,7 +40,7 @@ void drawStars(inout vec3 color, in vec3 worldPos, in float VoU, in float VoS, i
 		}
 		color += stars * lightNight * visibility * STAR_BRIGHTNESS;
 		#else
-		color = mix(color, color * (3.0 + stars * stars * 3.0) * visibility * STAR_BRIGHTNESS, min(1.0, stars));
+		color = mix(color, color * (4.0 + pow4(stars)) * visibility * STAR_BRIGHTNESS, min(1.0, stars));
 		#endif
 	}
 }

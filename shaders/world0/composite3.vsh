@@ -3,4 +3,4 @@
 #define OVERWORLD
 #define VSH
 
-#include "/programs/composite6.glsl"
+#include "/programs/composite3.glsl"

@@ -1,4 +1,4 @@
-#define COMPOSITE_6
+#define COMPOSITE_3
 
 // Settings //
 #include "/lib/common.glsl"

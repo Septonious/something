@@ -89,6 +89,7 @@ void generateIPBR(inout vec4 albedo, in vec3 worldPos, in vec3 viewPos, inout ve
     #include "/lib/pbr/entities/creaking.glsl"
     #include "/lib/pbr/entities/drowned.glsl"
     #include "/lib/pbr/entities/end_crystal.glsl"
+    #include "/lib/pbr/entities/end_dragon.glsl"
     #include "/lib/pbr/entities/experience_bottle.glsl"
     #include "/lib/pbr/entities/experience_orb.glsl"
     #include "/lib/pbr/entities/glow_squid.glsl"

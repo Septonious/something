@@ -187,7 +187,11 @@ void LensFlare(inout vec3 color, vec2 lightPos, float truePos, float multiplier)
 			RingLens(lightPos, 0.18, 0.86, 0.87) * vec3(9.0, 0.00, 0.00) * 0.0
 		) * (falloffIn - falloffOut) + (
 			#ifdef ANAMORPHICLENS
-			AnamorphicLens(lightPos, 1.0, -1.0) * vec3(1.0,1.0,1.0) * 0.75 +
+			#ifdef OVERWORLD
+			AnamorphicLens(lightPos, 1.0, -1.0) * vec3(1.0, 1.0, 1.0) * 0.75 +
+			#else
+			AnamorphicLens(lightPos, 1.0, -1.0) * vec3(3.6, 2.2, 1.2) * 0.5 +
+			#endif
 			#endif
 			#ifdef RAINBOW1
 			RainbowLens(lightPos, 0.525, -1.0, 0.2) * 0.29 +
@@ -202,6 +206,10 @@ void LensFlare(inout vec3 color, vec2 lightPos, float truePos, float multiplier)
 		) * (1.0 - falloffOut);
 
 		lensFlare = LensTint(lensFlare, truePos);
+
+		#ifdef END
+		lensFlare *= vec3(1.0, 0.9, 0.7) * 2.0;
+		#endif
 
 		color = mix(color, vec3(1.0), lensFlare * multiplier * multiplier);
 	}

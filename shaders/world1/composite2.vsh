@@ -3,4 +3,4 @@
 #define END
 #define VSH
 
-#include "/programs/composite6.glsl"
+#include "/programs/composite2.glsl"
