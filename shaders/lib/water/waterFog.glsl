@@ -21,6 +21,7 @@ vec4 getWaterFog(vec3 viewPos) {
 	}
 
 	waterFogColor *= 0.5 + timeBrightness * 0.5;
+    waterFogColor *= 1.0 - wetness * 0.25;
 	waterFogColor *= 0.4 + eBS * 0.6;
 	#endif
 

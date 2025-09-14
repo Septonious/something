@@ -9,15 +9,14 @@
 in vec2 texCoord;
 
 // Uniforms //
-#if defined WATER_FOG || defined REFRACTION
-uniform int isEyeInWater;
-#endif
-
 #ifdef WATER_FOG
+uniform int isEyeInWater;
+
 #if MC_VERSION >= 11900
 uniform float darknessFactor;
 #endif
 
+uniform float frameTimeCounter;
 uniform float blindFactor;
 uniform float timeBrightness, timeAngle, wetness, shadowFade;
 
@@ -28,16 +27,7 @@ uniform vec3 fogColor;
 
 uniform sampler2D colortex0;
 
-#ifdef REFRACTION
-uniform float aspectRatio;
-uniform float frameTimeCounter;
-
-uniform sampler2D colortex3;
-
-uniform mat4 gbufferProjection;
-#endif
-
-#if defined WATER_FOG || defined REFRACTION
+#ifdef WATER_FOG
 uniform sampler2D depthtex0, depthtex1;
 
 uniform mat4 gbufferProjectionInverse;
@@ -65,15 +55,9 @@ float sunVisibility = clamp(dot(sunVec, upVec) + 0.1, 0.0, 0.25) * 4.0;
 #endif
 
 // Includes //
-#if defined WATER_FOG || defined REFRACTION
+#ifdef WATER_FOG
 #include "/lib/util/ToView.glsl"
 
-#ifdef REFRACTION
-#include "/lib/util/encode.glsl"
-#include "/lib/post/chromaticAberration.glsl"
-#endif
-
-#ifdef WATER_FOG
 #ifdef DYNAMIC_HANDLIGHT
 #include "/lib/vx/blocklightColor.glsl"
 #include "/lib/lighting/handlight.glsl"
@@ -81,53 +65,18 @@ float sunVisibility = clamp(dot(sunVec, upVec) + 0.1, 0.0, 0.25) * 4.0;
 
 #include "/lib/water/waterFog.glsl"
 #endif
-#endif
 
 // Main //
 void main() {
-	vec2 newTexCoord = texCoord;
-	vec3 color = texture2D(colortex0, newTexCoord).rgb;
+	vec3 color = texture2D(colortex0, texCoord).rgb;
 
-	#if defined WATER_FOG || defined REFRACTION
+	#ifdef WATER_FOG
 	float z0 = texture2D(depthtex0, texCoord).r;
 	float z1 = texture2D(depthtex1, texCoord).r;
 	
 	vec3 screenPos = vec3(texCoord, z0);
 	vec3 viewPos = ToView(screenPos);
-	#endif
 
-	#ifdef REFRACTION
-	if (z1 > z0) {
-		vec3 distort = texture2D(colortex3, texCoord).rgb;
-
-		if (distort.xy != vec2(0.0)) {
-			float fovScale = gbufferProjection[1][1] / 1.37;
-
-			distort = decodeNormal(distort.xy) * REFRACTION_STRENGTH;
-			distort.xy *= vec2(1.0 / aspectRatio, 1.0) * fovScale / max(length(viewPos.xyz), 8.0);
-
-			vec2 newCoord = clamp(texCoord + distort.xy, 0.0, 1.0);
-
-			float distortMask = texture2D(colortex3, newCoord).b;
-			float water = float(distortMask > 0.79 && distortMask < 0.81);
-			//float glass = float(distortMask > 0.39 && distortMask < 0.41);
-
-			if (water > 0.0 && z0 > 0.56) {
-				z0 = texture2D(depthtex0, newCoord).r;
-				z1 = texture2D(depthtex1, newCoord).r;
-				color.rgb = texture2D(colortex0, newCoord).rgb;
-				if (water > 0.5) {
-					getWaterChromaticAberration(colortex0, color.rgb, newCoord, distort.xy * float(distortMask > 0.0));
-				}
-			}
-
-			screenPos = vec3(newCoord.xy, z0);
-			viewPos = ToView(screenPos);
-		}
-	}
-	#endif
-
-	#ifdef WATER_FOG
 	if (isEyeInWater == 1){
 		vec4 waterFog = getWaterFog(viewPos);
 		color = mix(sqrt(color), sqrt(waterFog.rgb), waterFog.a);

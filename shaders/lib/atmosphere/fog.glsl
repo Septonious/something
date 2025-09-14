@@ -41,12 +41,12 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
 	#ifdef OVERWORLD
     float distanceFactor = 50.0 * (0.5 + timeBrightness * 0.5) + FOG_DISTANCE * (0.75 + caveFactor * 0.25) - wetness * 25.0;
 	float distanceMult = max(256.0 / farPlane, 2.0) * (100.0 / distanceFactor);
-	float altitudeFactor = FOG_HEIGHT - 50.0 + timeBrightness * 25.0 + (wetness + moonVisibility) * 25.0;
+	float altitudeFactor = FOG_HEIGHT - 25.0 + timeBrightness * 25.0 + (wetness + moonVisibility) * 25.0;
 	float noise = texture2D(noisetex, (worldPos.xz + cameraPosition.xz + frameCounter * 0.01) * 0.001).r;
-          noise = clamp((noise - 0.3) * 4.0 + timeBrightness, 0.0, 1.0);
-	float variableAltitude = altitudeFactor + noise * 50.0 * min(cameraPosition.y * 0.01, 1.0);
+          noise = clamp((noise - 0.2) * 4.0 + timeBrightness, 0.0, 1.0);
+	float variableAltitude = altitudeFactor + noise * 25.0 * min(cameraPosition.y * 0.01, 1.0);
 	float altitude = exp2(-max(worldPos.y + cameraPosition.y - variableAltitude, 0.0) / exp2(FOG_HEIGHT_FALLOFF));
-	float density = FOG_DENSITY * (1.0 - timeBrightness * 0.35 + wetness * 0.5) * (0.7 + noise * 0.3);
+	float density = FOG_DENSITY * (1.0 - timeBrightness * 0.25 + wetness * 0.5) * (0.75 + noise * 0.25);
 		  density += isLushCaves * 0.35 + isDesert * 0.25;
 
 	#if MC_VERSION >= 12104
@@ -56,9 +56,9 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
     float fog = 1.0 - exp(-0.005 * lViewPos * distanceMult);
 		  fog = clamp(fog * density * altitude, 0.0, 1.0);
 
-    vec3 nSkyColor = sqrt(normalize(skyColor + 0.000001)) * mix(vec3(1.0), biomeColor, sunVisibility * isSpecificBiome);
+    vec3 nSkyColor = 0.75* sqrt(normalize(skyColor + 0.000001)) * mix(vec3(1.0), biomeColor, sunVisibility * isSpecificBiome);
 	vec3 fogCol = mix(caveMinLightCol * nSkyColor,
-                   mix(atmosphereColor, nSkyColor, sunVisibility * (1.0 - wetness) * (1.0 - fog)),
+                   mix(atmosphereColor, nSkyColor, sunVisibility * min((1.0 - wetness) * (1.0 - fog) + 0.125, 1.0)),
                    caveFactor);
 
 	//Distant Fade

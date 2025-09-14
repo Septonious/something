@@ -9,7 +9,7 @@
 in vec2 texCoord;
 
 // Uniforms //
-#if defined PBR || defined GENERATED_SPECULAR
+#if defined PBR || defined GENERATED_SPECULAR || defined REFRACTION
 uniform int isEyeInWater;
 
 #ifdef TAA
@@ -17,6 +17,7 @@ uniform int frameCounter;
 #endif
 
 uniform float frameTimeCounter;
+uniform float aspectRatio;
 uniform float viewHeight, viewWidth;
 #endif
 
@@ -38,7 +39,7 @@ uniform ivec2 eyeBrightnessSmooth;
 
 uniform sampler2D colortex0;
 
-#if defined PBR || defined GENERATED_SPECULAR
+#if defined PBR || defined GENERATED_SPECULAR || defined REFRACTION
 uniform sampler2D noisetex, colortex3;
 uniform sampler2D depthtex0, depthtex1;
 
@@ -78,7 +79,7 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #endif
 
 //Includes//
-#if defined PBR || defined GENERATED_SPECULAR
+#if defined PBR || defined GENERATED_SPECULAR || defined REFRACTION
 #include "/lib/util/ToScreen.glsl"
 #include "/lib/util/ToView.glsl"
 #include "/lib/util/ToWorld.glsl"
@@ -89,6 +90,10 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/atmosphere/sky.glsl"
 #endif
 
+#ifdef REFRACTION
+#include "/lib/post/chromaticAberration.glsl"
+#endif
+
 #include "/lib/pbr/raytracer.glsl"
 #include "/lib/pbr/simpleReflection.glsl"
 #endif
@@ -96,10 +101,49 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 void main() {
 	vec4 color = texture2D(colortex0, texCoord);
 
-	#if defined PBR || defined GENERATED_SPECULAR
-	vec4 gbuffersData = texture2D(colortex3, texCoord);
+    #if defined PBR || defined GENERATED_SPECULAR || defined REFRACTION
+    vec4 gbuffersData = texture2D(colortex3, texCoord);
 
-    float smoothness = gbuffersData.a;
+	float z0 = texture2D(depthtex0, texCoord).r;
+	float z1 = texture2D(depthtex1, texCoord).r;
+
+	vec3 screenPos = vec3(texCoord, z0);
+	vec3 viewPos = ToView(screenPos);
+    #endif
+
+	#ifdef REFRACTION
+	if (z1 > z0) {
+		vec3 distort = texture2D(colortex3, texCoord).rgb;
+
+		if (distort.xy != vec2(0.0)) {
+			float fovScale = gbufferProjection[1][1] / 1.37;
+
+			distort = decodeNormal(distort.xy) * REFRACTION_STRENGTH;
+			distort.xy *= vec2(1.0 / aspectRatio, 1.0) * fovScale / max(length(viewPos.xyz), 8.0);
+
+			vec2 newCoord = clamp(texCoord + distort.xy, 0.0, 1.0);
+
+			float distortMask = texture2D(colortex3, newCoord).b;
+			float water = float(distortMask > 0.79 && distortMask < 0.81);
+			//float glass = float(distortMask > 0.39 && distortMask < 0.41);
+
+			if (water > 0.0 && z0 > 0.56) {
+				z0 = texture2D(depthtex0, newCoord).r;
+				z1 = texture2D(depthtex1, newCoord).r;
+				color.rgb = texture2D(colortex0, newCoord).rgb;
+				if (water > 0.5) {
+					getWaterChromaticAberration(colortex0, color.rgb, newCoord, distort.xy * float(distortMask > 0.0));
+				}
+			}
+
+			screenPos = vec3(newCoord.xy, z0);
+			viewPos = ToView(screenPos);
+		}
+	}
+	#endif
+
+	#if defined PBR || defined GENERATED_SPECULAR
+	float smoothness = gbuffersData.a;
     #ifdef PBR
           smoothness *= smoothness;
           smoothness /= 2.0 - smoothness;
@@ -107,19 +151,16 @@ void main() {
 
 	float skyLightMap = gbuffersData.b * 2.0;
 
-	float z0 = texture2D(depthtex0, texCoord).r;
-	float z1 = texture2D(depthtex1, texCoord).r;
-
 	if (gbuffersData.a > 0.01 && gbuffersData.a <= 0.95 && z0 > 0.56 && z0 >= z1 && z1 < 1.0) {
 		vec3 normal = decodeNormal(gbuffersData.rg);
-		vec3 viewPos = ToView(vec3(texCoord, z0));
+        vec3 viewPos2 = ToView(vec3(texCoord, z0));
 
-		float fresnel = clamp(1.0 + dot(normal, normalize(viewPos)), 0.0, 1.0);
+		float fresnel = clamp(1.0 + dot(normal, normalize(viewPos2)), 0.0, 1.0);
         #ifdef PBR
               fresnel *= fresnel;
         #endif
 
-		getReflection(color, viewPos, normal, fresnel, smoothness, skyLightMap);
+		getReflection(color, viewPos2, normal, fresnel, smoothness, skyLightMap);
 	}
 	#endif
 
