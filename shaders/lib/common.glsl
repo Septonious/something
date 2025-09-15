@@ -582,8 +582,8 @@ vec3 pow8(vec3 x) {return x*x*x*x*x*x*x*x;}
 #undef RAIN_PUDDLES
 #endif
 
-#ifdef NETHER
-#undef VL
+#ifndef NETHER
+#undef NETHER_SMOKE
 #endif
 
 #ifndef END
@@ -591,6 +591,10 @@ vec3 pow8(vec3 x) {return x*x*x*x*x*x*x*x;}
 #undef END_NEBULA
 #undef END_DISK
 #undef END_FLASHES
+#endif
+
+#ifdef NETHER
+#undef VL
 #endif
 
 #if defined IS_IRIS && !defined MC_OS_MAC
