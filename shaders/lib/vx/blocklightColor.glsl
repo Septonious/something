@@ -4,9 +4,15 @@ vec3 getBlocklightColor(int id) {
 	//Brewing Stand
 	if (id == 4) return vec3(BS_R, BS_G, BS_B) * BS_I;
 	//Torch, Lantern, Campfire, Fire
-	if (id == 5 || id == 15) return pow(vec3(TLCF_R, TLCF_G, TLCF_B), vec3(1.0 - cos(sin(frameTimeCounter * 3.0) * 5.0 + frameTimeCounter) * 0.1)) * TLCF_I;
+	if (id == 5 || id == 15) {
+		vec3 fireAnimation = vec3(1.0 - cos(sin(frameTimeCounter * 3.0) * 5.0 + frameTimeCounter) * 0.1);
+		return pow(vec3(TLCF_R, TLCF_G, TLCF_B), fireAnimation) * TLCF_I;
+	}
 	//Soul Torch, Soul Lantern, Soul Campfire, Soul Fire
-	if (id == 6 || id == 16) return vec3(SOUL_R, SOUL_G, SOUL_B) * SOUL_I;
+	if (id == 6 || id == 16) {
+		vec3 fireAnimation = vec3(1.0 - cos(sin(frameTimeCounter * 2.0) * 4.0 + frameTimeCounter * 1.25) * 0.15);
+		return pow(vec3(SOUL_R, SOUL_G, SOUL_B), fireAnimation) * SOUL_I;
+	}
 	//End Rod
 	if (id == 7) return vec3(ER_R, ER_G, ER_B) * ER_I;
 	//Sea Lantern
@@ -57,7 +63,7 @@ vec3 getBlocklightColor(int id) {
 	#endif
 	#endif
 
-    //Lit Redstone Ore
+    //Lit Redstone Ore & Redstone Torch
     if (id == 29) return vec3(1.00, 0.05, 0.00);
     //Powered Rails & Shot Target
     if (id == 30) return vec3(1.00, 0.05, 0.00) * 0.5;

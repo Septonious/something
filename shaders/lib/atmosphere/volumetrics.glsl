@@ -171,7 +171,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
                         }
                     }
                     #endif
-                    vlSample = clamp(shadow1 * shadowCol * shadowCol * mix(3.0, 0.25 * length(pow(shadowCol, vec3(24.0))), float(isEyeInWater == 1)) + shadow0 * vlCol * float(isEyeInWater == 0), 0.0, 1.0);
+                    vlSample = clamp(shadow1 * shadowCol * shadowCol * mix(3.0, 0.35 * length(pow(shadowCol, vec3(24.0))), float(isEyeInWater == 1)) + shadow0 * vlCol * float(isEyeInWater == 0), 0.0, 1.0);
 
                 }
 
