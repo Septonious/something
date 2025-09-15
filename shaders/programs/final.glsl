@@ -14,6 +14,10 @@ uniform float viewWidth, viewHeight;
 uniform float aspectRatio;
 #endif
 
+#ifdef NETHER
+uniform sampler2D shadowtex0;
+#endif
+
 // Pipeline Options //
 const bool shadowHardwareFiltering = false;
 const int noiseTextureResolution = 512;
@@ -48,6 +52,12 @@ void main() {
 
 	#ifdef CHROMATIC_ABERRATION
 	getChromaticAberration(colortex1, color, texCoord);
+	#endif
+
+	#ifdef NETHER
+	if (texCoord.x < 0.0) {
+		color = texture2D(shadowtex0, texCoord).rgb;
+	}
 	#endif
 
     gl_FragColor.rgb = color;

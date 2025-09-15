@@ -37,6 +37,10 @@ uniform vec3 cameraPosition;
 
 uniform ivec2 eyeBrightnessSmooth;
 
+#ifdef NETHER
+uniform vec3 fogColor;
+#endif
+
 uniform sampler2D colortex0;
 
 #if defined PBR || defined GENERATED_SPECULAR || defined REFRACTION

@@ -168,6 +168,12 @@ vec3 getBlocklightColor(int id) {
     //Chorus
     if (id == 80) return vec3(0.12, 0.1, 0.1);
 
+	//Crimson Fungus
+	if (id == 81) return vec3(1.1, 0.3, 0.1);
+
+	//Warped Fungus
+	if (id == 82) return vec3(0.3, 0.6, 0.9) * 0.5;
+
 	//Generic emitters with different colors
 	//Blocks in this range will emit their respective color
 	//A good way to quickly make modded blocks emit light

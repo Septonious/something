@@ -37,6 +37,10 @@ float centerDepthSmooth = ((DOF_FOCUS - near) * far) / ((far - near) * DOF_FOCUS
 uniform vec3 cameraPosition, sunPosition;
 #endif
 
+#ifdef NETHER
+uniform vec3 fogColor;
+#endif
+
 uniform sampler2D colortex0;
 uniform sampler2D colortex2;
 uniform sampler2D depthtex1;

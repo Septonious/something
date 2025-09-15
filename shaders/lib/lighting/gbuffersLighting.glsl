@@ -95,6 +95,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     float sss = 0.0;
 
+    #if defined OVERWORLD || defined END
     if (subsurface > 0.0) {
         sss = pow16(VoL);
 
@@ -105,6 +106,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
         NoL += subsurface * shadowVisibility * (1.0 + sss);
     }
+    #endif
 
     //Scene Lighting
     float fade = clamp(length(worldPos) * 0.01, 0.0, 1.0);
@@ -231,7 +233,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     vec3 sceneLighting = mix((endLightCol * AMBIENT_END_I + endAmbientCol) * 0.25, endLightCol * (1.0 + specularHighlight), shadow) * 0.25;
     #elif defined NETHER
-    vec3 sceneLighting = pow(netherColSqrt, vec3(0.75)) * 0.035;
+    vec3 sceneLighting = pow(netherColSqrt, vec3(0.75)) * 0.05;
     #endif
 
     //Lightning Flash

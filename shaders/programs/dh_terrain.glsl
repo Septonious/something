@@ -35,6 +35,11 @@ uniform float timeAngle, timeBrightness;
 
 uniform ivec2 eyeBrightnessSmooth;
 uniform vec3 cameraPosition;
+
+#ifdef NETHER
+uniform vec3 fogColor;
+#endif
+
 uniform vec4 lightningBoltPosition;
 
 uniform sampler2D texture, noisetex;

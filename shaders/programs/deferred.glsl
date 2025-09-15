@@ -57,6 +57,10 @@ uniform vec3 endFlashPosition;
 
 uniform vec3 cameraPosition;
 
+#ifdef NETHER
+uniform vec3 fogColor;
+#endif
+
 #ifdef VOLUMETRIC_CLOUDS
 uniform vec4 lightningBoltPosition;
 #endif
@@ -198,6 +202,7 @@ void main() {
 	//Sky
     vec3 skyColor = atmosphereColor;
 
+	#ifndef NETHER
     float occlusion = vc.a;
     float nebulaFactor = 0.0;
 
@@ -234,6 +239,7 @@ void main() {
     #ifdef END_STARS
     drawStars(skyColor, worldPos.xyz, VoU, VoS, 1.0, nebulaFactor, 0.0, 0.85);
     #endif
+	#endif
 
     skyColor *= 1.0 - blindFactor;
     #if MC_VERSION >= 11900

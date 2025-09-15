@@ -142,10 +142,10 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define END_DISK_OPACITY 1.0 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
 // Nether Smoke //
-//#define NETHER_SMOKE
-#define NETHER_SMOKE_STRENGTH 1.5 //[0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 2.1 2.2 2.3 2.4 2.5]
-#define NETHER_SMOKE_FREQUENCY 3.00 //[2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
-#define NETHER_SMOKE_SPEED 6.00 //[1.00 1.50 2.00 2.50 3.00 3.50 4.00 4.50 5.00 5.50 6.00 6.50 7.00 7.50 8.00]
+#define NETHER_SMOKE
+#define NETHER_SMOKE_STRENGTH 1.2 //[0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 2.1 2.2 2.3 2.4 2.5]
+#define NETHER_SMOKE_FREQUENCY 2.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+#define NETHER_SMOKE_SPEED 2.00 //[1.00 1.50 2.00 2.50 3.00 3.50 4.00 4.50 5.00 5.50 6.00 6.50 7.00 7.50 8.00]
 
 // End Flashes //
 #define END_FLASHES
@@ -154,7 +154,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 // Bloom //
 #define BLOOM
 #define BLOOM_STRENGTH_OVERWORLD 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
-#define BLOOM_STRENGTH_NETHER 0.75 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+#define BLOOM_STRENGTH_NETHER 1.25 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 #define BLOOM_STRENGTH_END 1.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 #define BLOOM_CONTRAST 2 //[-4 -3 -2 -1 0 1 2 3 4]
 #define BLOOM_TILE_SIZE 1.0 //[0.0 0.5 1.0 1.5 2.0]

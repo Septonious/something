@@ -36,6 +36,10 @@ uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 skyColor, cameraPosition;
 
+#ifdef NETHER
+uniform vec3 fogColor;
+#endif
+
 uniform sampler2D colortex1;
 uniform sampler2D colortex3;
 
