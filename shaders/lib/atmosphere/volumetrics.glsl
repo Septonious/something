@@ -110,7 +110,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
     vec3 nSkyColor = normalize(skyColor + 0.000001) * mix(vec3(1.0), biomeColor, sunVisibility * isSpecificBiome);
     vec3 vlCol = mix(lightCol, nSkyColor, timeBrightness * 0.75);
 
-    vlIntensity *= VL_STRENGTH;
+    vlIntensity *= VL_STRENGTH * caveFactor;
     #endif
 
     //LPV Fog Variables

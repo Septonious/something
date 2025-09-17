@@ -15,9 +15,11 @@ screen.ATMOSPHERICS=Atmospherics
 
 #----------------------------------------------------------------------------------#
 
-screen.VC_CONFIG=Volumetric Clouds Config
+screen.SHADER_CLOUDS_CONFIG=Shader Clouds Config
 
-option.VC=Volumetric Clouds
+screen.VOLUMETRIC_CLOUDS_CONFIG=Volumetric Clouds Config
+
+option.VOLUMETRIC_CLOUDS=Volumetric Clouds
 option.BLOCKY_CLOUDS=Blocky Clouds
 option.VC_DETAIL=Detail
 option.VC_DENSITY=Density
@@ -28,13 +30,13 @@ option.VC_SPEED=Speed
 option.VC_DISTANCE=Render Distance
 option.VC_OPACITY=Opacity
 option.VC_ATTENUATION=Attenuation
+option.VC_DYNAMIC_WEATHER=Dynamic Weather
+option.VC_DYNAMIC_WEATHER.comment=Enables complex simulation of realistic per-day weather.
 option.VC_SHADOWS=Cloud Shadows
-option.VC_LIGHTRAYS=Cloud Light Rays
-option.VC_LIGHTRAYS.comment=Allows clouds to behave like VL when sunlight is obstructed by blocks.
 
 #----------------------------------------------------------------------------------#
 
-screen.PC_CONFIG=Planar Clouds Config
+screen.PLANAR_CLOUDS_CONFIG=Planar Clouds Config
 
 option.PLANAR_CLOUDS=Planar Clouds
 option.PLANAR_CLOUDS_BRIGHTNESS=Brightness
@@ -45,7 +47,6 @@ option.PLANAR_CLOUDS_OPACITY=Opacity
 screen.VL_CONFIG=Volumetric Light Config
 
 option.VL=Volumetric Light
-option.OVERWORLD_CLOUDY_FOG=Overworld Cloudy Fog
 option.VL_STRENGTH=Intensity
 option.VL_SAMPLES=Samples
 option.VL_STRENGTH_RATIO=Intensity Ratio
@@ -59,6 +60,7 @@ option.VL_NIGHT=Night Intensity
 screen.VF_NETHER_CONFIG=Nether Cloudy Fog Config
 
 option.NETHER_SMOKE=Nether Smoke
+option.NETHER_SMOKE.comment=§e[*]§rThis option requires Light Fog to be turned on.
 option.VF_NETHER_STRENGTH=Intensity
 option.VF_NETHER_SPEED=Speed
 option.VF_NETHER_FREQUENCY=Frequency
@@ -79,6 +81,7 @@ screen.LPV_FOG_CONFIG=Light Fog Config
 
 option.LPV_FOG=Light Fog
 option.LPV_FOG.comment=Allows light sources to contribute to fog illumination
+option.LPV_CLOUDY_FOG=Cloudy Fog
 option.LPV_FOG_STRENGTH=Intensity
 
 #----------------------------------------------------------------------------------#
