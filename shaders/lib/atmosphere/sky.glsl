@@ -2,22 +2,22 @@ vec3 getAtmosphere(vec3 viewPos) {
     vec3 nViewPos = normalize(viewPos);
 
     float VoS = dot(nViewPos, sunVec);
+    float VoM = dot(nViewPos, -sunVec);
+    float VoL = VoS * sunVisibility + VoM * moonVisibility;
     float VoU = dot(nViewPos, upVec);
     float VoSPositive = VoS * 0.5 + 0.5;
     float VoUPositive = VoU * 0.5 + 0.5;
     float VoSClamped = clamp(VoS, 0.0, 1.0);
     float VoUClamped = clamp(VoU, 0.0, 1.0);
 
-    float daySkyDensity = 0.5 + 0.5 * exp(-2.5 * VoUPositive * VoUPositive + 0.5 * timeBrightness);
-    float nightSkyDensity = exp(-0.8 * VoUClamped);
-    float skyDensity = mix(nightSkyDensity, daySkyDensity, timeBrightnessSqrt);
+    float skyDensity = exp(-(1.0 - pow(1.0 - max(VoU, 0.0), 1.5 - VoL * 0.75)) / 1.50);
 
     //Fake light scattering
     float mieScattering = pow16(VoSClamped);
 
     float VoUcm = max(VoUClamped + 0.15, 0.0);
     float colorMixer = pow(VoUcm, 0.4 + timeBrightnessSqrt * 0.15);
-    vec3 scattering1 = mix(vec3(8.8 - timeBrightnessSqrt * 3.8, 1.2, 0.0), vec3(4.25, 5.25, 0.5), colorMixer);
+    vec3 scattering1 = mix(vec3(8.8 - timeBrightnessSqrt * 3.8, 1.2, 0.0), vec3(3.5, 6.3, 0.2), colorMixer);
          scattering1 = mix(scattering1, lightColSqrt * 4.0, VoUPositive * VoUPositive * 0.5);
          scattering1 *= VoUcm * clamp(pow(1.0 - VoUcm, 3.0 - VoSClamped), 0.0, 1.0);
          scattering1 *= (0.6 + sunVisibility * 0.4) + (0.6 - sunVisibility * 0.6) * exp(VoSPositive);

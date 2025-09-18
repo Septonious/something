@@ -249,7 +249,12 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
     sceneLighting += nightVision * vec3(0.2, 0.3, 0.2);
 
     //Vanilla vanillaAo
-    float aoMixer = (1.0 - vanillaAo) * (1.0 - blockLightMap) * (1.0 - float(emission > 0.0)) * (1.0 - subsurface * 0.5) * (1.0 - originalNoL * lightmap.y);
+    float aoMixer = (1.0 - vanillaAo) * (1.0 - blockLightMap) * (1.0 - float(emission > 0.0)) * (1.0 - subsurface * 0.5);
+
+    #if defined OVERWORLD || defined END
+    //aoMixer *= 1.0 - float(length(realShadow) > 0.0);
+    #endif
+
     albedo.rgb = mix(albedo.rgb, albedo.rgb * pow(vanillaAo, 1.0 + lightmap.y), aoMixer);
 
     albedo.rgb = pow(albedo.rgb, vec3(2.2));

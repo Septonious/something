@@ -100,7 +100,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
     float VoLm = pow(VoLClamped, 1.25 + sunVisibility * 1.75);
          vlIntensity = sunVisibility * (1.0 - VL_STRENGTH_RATIO) + VoLm * VL_STRENGTH_RATIO;
          vlIntensity = mix((1.0 - VoLClamped) * (2.0 + sqrt(eBS) * 2.0) * (0.25 + timeBrightnessSqrt * 0.75), vlIntensity, isOutdoors);
-         vlIntensity *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY, timeBrightness), sunVisibility) * (1.0 + wetness);
+         vlIntensity *= mix(VL_NIGHT, mix(VL_MORNING_EVENING, VL_DAY, timeBrightness), sunVisibility);
     #if !defined VC_SHADOWS
          vlIntensity *= max(pow6(1.0 - VoUClamped * (1.0 - timeBrightness) * sunVisibility), float(isEyeInWater == 1));
     #else
