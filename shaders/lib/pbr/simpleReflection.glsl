@@ -53,13 +53,7 @@ void getReflection(inout vec4 color, in vec3 viewPos, in vec3 normal, in float f
         reflection.a *= clamp(lRfragPos - length(viewPos) + 2.5, 0.0, 1.0);
     }
 
-	#ifdef OVERWORLD
-	vec3 falloff = color.rgb;
-	#elif defined NETHER
-	vec3 falloff = netherColSqrt.rgb * 0.25;
-	#elif defined END
-	vec3 falloff = endAmbientColSqrt * 0.25;
-	#endif
+	vec3 falloff = vec3(0.0);
 
 	if (reflection.a < 1.0 && isEyeInWater == 0) {
 		if (skyLightMap > 0.95) {

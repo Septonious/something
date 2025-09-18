@@ -27,8 +27,8 @@ float get3DNoise(vec3 rayPos) {
 
 #ifdef NETHER_SMOKE
 float getNetherFogSample(vec3 fogPos) {
-    fogPos.x *= 0.5 + cos(fogPos.y * 0.5 + frameTimeCounter * 0.5) * 0.0006;
-    fogPos.z *= 0.5 + sin(fogPos.y * 0.3 + frameTimeCounter * 0.4) * 0.0008;
+    fogPos.x *= 0.5 + cos(fogPos.y * 0.08 + frameTimeCounter * 0.3 + fract(fogPos.z * 0.01) * 0.5) * 0.0004;
+    fogPos.z *= 0.5 + sin(fogPos.y * 0.12 + frameTimeCounter * 0.15 + fract(fogPos.x * 0.01) * 0.5) * 0.0002;
 
     float n3da = texture2D(noisetex, fogPos.xz * 0.005 + floor(fogPos.y * 0.1) * 0.1).r;
     float n3db = texture2D(noisetex, fogPos.xz * 0.005 + floor(fogPos.y * 0.1 + 1.0) * 0.1).r;
@@ -247,7 +247,7 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
             #ifdef NETHER_SMOKE
             if (lWorldPos < 128.0) {
                 float currentSampleIntensityNS = (currentDist / maxDist) / sampleCount;
-                float fogSample = getNetherFogSample(rayPos * NETHER_SMOKE_FREQUENCY + wind2 * NETHER_SMOKE_SPEED);
+                float fogSample = getNetherFogSample(rayPos + wind2 * NETHER_SMOKE_SPEED);
                 lpvFogSample += netherCol * fogSample * currentSampleIntensityNS * 64.0 * NETHER_SMOKE_STRENGTH;
             }
             #endif
