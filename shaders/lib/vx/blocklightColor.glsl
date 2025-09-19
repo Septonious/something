@@ -80,7 +80,7 @@ vec3 getBlocklightColor(int id) {
     //Red flowers
     if (id == 35 || id == 309 || id == 310) return normalize(vec3(1.00, 0.05, 0.05)) * 0.20;
     //Pink flowers
-    if (id == 36 || id == 305 || id == 306 || id == 311 || id == 312) return normalize(vec3(0.80, 0.20, 0.60)) * 0.20;
+    if (id == 36 || id == 305 || id == 306 || id == 311 || id == 312) return normalize(vec3(0.80, 0.20, 0.60)) * 0.40;
     //Yellow flowers
     if (id == 37 || id == 307 || id == 308) return normalize(vec3(0.80, 0.50, 0.05)) * 0.20;
     //Blue flowers

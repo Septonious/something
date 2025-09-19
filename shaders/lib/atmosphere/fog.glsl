@@ -39,14 +39,15 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
 
 	//Overworld Fog
 	#ifdef OVERWORLD
-	float noise = texture2D(noisetex, (worldPos.xz + cameraPosition.xz + frameCounter * 0.01) * 0.001).r;
-          noise = clamp((noise - 0.25) * 2.0 + timeBrightness, 0.0, 1.0);
+	vec3 fogPos = worldPos + cameraPosition;
+	float noise = texture2D(noisetex, (fogPos.xz + fogPos.y) * 0.0005 + frameCounter * 0.000025).r;
+          noise *= noise;
     float distanceFactor = 50.0 * (0.5 + timeBrightness * 0.75) + FOG_DISTANCE * (0.75 + caveFactor * 0.25) - wetness * 25.0;
 	float distanceMult = max(256.0 / farPlane, 2.0) * (100.0 / distanceFactor);
-	float altitudeFactor = FOG_HEIGHT - 25.0 + noise * 25.0 + timeBrightness * 15.0 + moonVisibility * 20.0;
+	float altitudeFactor = FOG_HEIGHT + noise * 10.0 + timeBrightness * 35.0 + moonVisibility * 20.0;
 	float altitude = exp2(-max(worldPos.y + cameraPosition.y - altitudeFactor, 0.0) / exp2(FOG_HEIGHT_FALLOFF + moonVisibility + timeBrightness + wetness));
 		  //altitude = mix(1.0, altitude, clamp((cameraPosition.y - altitude) / altitude, 0.0, 1.0));
-	float density = FOG_DENSITY * (0.75 + noise * 0.25 + sunVisibility * (1.0 - timeBrightness) * 0.25 + moonVisibility * 0.25);
+	float density = FOG_DENSITY * (1.0 + sunVisibility * (1.0 - timeBrightness) * 0.75 + moonVisibility * 0.25) * (0.5 + noise);
 		  density += isLushCaves * 0.35 + isDesert * 0.25;
 
 	#if MC_VERSION >= 12104
@@ -58,7 +59,7 @@ void getNormalFog(inout vec3 color, in vec3 atmosphereColor, in vec3 viewPos, in
 
     vec3 nSkyColor = 0.75 * sqrt(normalize(skyColor + 0.000001)) * mix(vec3(1.0), biomeColor, sunVisibility * isSpecificBiome);
 	vec3 fogCol = mix(caveMinLightCol * (1.0 - isCaveBiome) + caveBiomeColor,
-                   mix(atmosphereColor, nSkyColor, sunVisibility * min((1.0 - wetness) * (1.0 - fog) + 0.1, 1.0)),
+                   mix(atmosphereColor, nSkyColor, sunVisibility * min((1.0 - wetness) * (1.0 - fog) + 0.25, 1.0)),
                    caveFactor);
 
 	//Distant Fade

@@ -196,7 +196,7 @@ void main() {
 
                 albedo.rgb += nebula * colormult;
             }
-            vec3 portalSample = pow(texture2D(texture, coord).rgb * portalColors[i-1], vec3(0.75));
+            vec3 portalSample = pow(texture2D(texture, coord * 2.0).rgb * portalColors[i-1], vec3(0.75));
             albedo.rgb += portalSample * length(portalSample) * colormult * 12.0;
         }
     } else {

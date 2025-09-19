@@ -131,7 +131,7 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
 			float sampleTotalLength = minDist + rayLength * dither;
 			float fogDistance = 10.0 / max(abs(float(height) - 72.0), 56.0);
 
-			vec2 wind = vec2(frameTimeCounter * speed * 0.005, sin(frameTimeCounter * speed * 0.1) * 0.01) * speed * 0.1;
+			vec2 wind = vec2(1 * speed * 0.005, sin(1 * speed * 0.1) * 0.01) * speed * 0.1;
 
 			//Ray marcher
 			for (int i = 0; i < sampleCount; i++, rayPos += rayIncrement, sampleTotalLength += rayLength) {
@@ -197,11 +197,18 @@ void computeVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0, f
             #endif
 
 			float VoS = clamp(dot(nViewPos, sunVec), 0.0, 1.0);
-			cloudLighting = cloudLighting * shadowFade + pow8(1.0 - cloudLighting) * pow(VoS, 5.0 - shadowFade * 4.0) * (1.0 - shadowFade) * 0.75;
+
+			float lightingFadeOut1=clamp((worldTime - 12700) / 230, 0.0, 1.0);
+			float lightingFadeIn1=clamp((worldTime - 13500) / 220, 0.0, 1.0);
+			float lightingFadeOut2=clamp((worldTime - 22700) / 220, 0.0, 1.0);
+			float lightingFadeIn2=clamp((worldTime - 23400) / 230, 0.0, 1.0);
+			float cloudLightingFade = 1.0 - (lightingFadeOut1 - lightingFadeIn1 + lightingFadeOut2 - lightingFadeIn2);
+
+			cloudLighting = cloudLighting * cloudLightingFade + pow8(1.0 - cloudLighting) * pow(VoS, 5.0 - shadowFade * 4.0) * (1.0 - cloudLightingFade) * 0.5;
 
 			vec3 nSkyColor = normalize(skyColor + 0.0001);
             vec3 cloudAmbientColor = mix(atmosphereColor * atmosphereColor * 0.5, 
-									 mix(ambientCol, atmosphereColor * nSkyColor * 0.3, 0.2 + timeBrightnessSqrt * 0.3 + isSpecificBiome * 0.4),
+									 mix(ambientCol, atmosphereColor * nSkyColor * 0.5, 0.2 + timeBrightnessSqrt * 0.3 + isSpecificBiome * 0.4),
 									 sunVisibility * (1.0 - wetness));
             vec3 cloudLightColor = mix(lightCol, lightCol * nSkyColor * 2.0, timeBrightnessSqrt * (0.5 - wetness * 0.5));
 				 cloudLightColor *= 0.5 + timeBrightnessSqrt * 0.5 + moonVisibility * 0.5;
@@ -325,7 +332,7 @@ void computeEndVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0
 			float minimalNoise = 0.25 + dither * 0.25;
 			float sampleTotalLength = minDist + rayLength * dither;
 
-			vec2 wind = vec2(frameTimeCounter * 0.0005, sin(frameTimeCounter * 0.001) * 0.005) * END_DISK_HEIGHT * 0.1;
+			vec2 wind = vec2(1 * 0.0005, sin(1 * 0.001) * 0.005) * END_DISK_HEIGHT * 0.1;
 
 			//Ray marcher
 			for (int i = 0; i < sampleCount; i++, rayPos += sampleStep, sampleTotalLength += rayLength) {
@@ -366,7 +373,7 @@ void computeEndVolumetricClouds(inout vec4 vc, in vec3 atmosphereColor, float z0
             float endFlashPoint = endFlashPosToPoint(endFlashPosition, worldPos);
                  cloudColor = mix(cloudColor, endFlashCol, endFlashPoint * endFlashIntensity * 0.4);
             #endif
-			     cloudColor *= cloudLighting * (1.0 + scattering * 2.0) * 0.175;
+			     cloudColor *= cloudLighting * (1.0 + scattering * 2.0) * 0.15;
 
 			vc = vec4(cloudColor, cloudAlpha * END_DISK_OPACITY) * visibility;
 		}

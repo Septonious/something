@@ -16,19 +16,20 @@ vec3 ambientCol = ambientColSqrt * ambientColSqrt;
 
 //Per-biome weather
 //Every biome specified here has a corresponding uniform in the /shaders/shaders.properties file
-uniform float isSnowy, isLushCaves, isDesert, isSwamp, isMushroom, isJungle;
+uniform float isSnowy, isDesert, isCherryGrove, isSwamp, isMushroom, isJungle, isLushCaves, isDeepDark;
 
 //Color for each biome. Format: vec3(biome_color_red, biome_color_green, biome_color_blue) * isBiome
 vec3 biomeColor = vec3(1.105, 0.705, 0.515) * (1.0 + timeBrightness * 0.5) * isDesert +
+                  vec3(1.095, 0.925, 1.025) * isCherryGrove +
                   vec3(0.925, 1.285, 0.785) * isSwamp +
                   vec3(1.115, 0.745, 0.975) * isMushroom +
                   vec3(0.955, 1.085, 0.895) * isJungle;
 
-vec3 caveBiomeColor = vec3(0.425, 0.375, 0.150) * isLushCaves;
+vec3 caveBiomeColor = vec3(0.125, 0.145, 0.035) * isLushCaves + vec3(0.025, 0.095, 0.135) * isDeepDark;
 
 //This variable toggles per-biome weather when a player enters a specific biome
-float isSpecificBiome = isDesert + isSwamp + isMushroom + isJungle;
-float isCaveBiome = isLushCaves;
+float isSpecificBiome = isDesert + isCherryGrove + isSwamp + isMushroom + isJungle;
+float isCaveBiome = isLushCaves + isDeepDark;
 #elif defined NETHER
 vec3 netherCol = sqrt(normalize(fogColor + 0.00000001));
 vec3 netherColSqrt = sqrt(netherCol);

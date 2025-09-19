@@ -188,10 +188,12 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
         vec3 worldSunVec = mat3(gbufferModelViewInverse) * lightVec;
         vec3 cloudShadowPos = worldPos + cameraPosition + (worldSunVec / max(abs(worldSunVec.y), 0.0)) * max(cloudTop - worldPos.y - cameraPosition.y, 0.0);
 
+        //if (length(cloudShadowPos.xz) < VC_DISTANCE) {
         float noise = 0.0;
         getCloudShadow(cloudShadowPos.xz / scale, wind, amount, frequency, density, noise);
 
         cloudShadow = noise * VC_OPACITY;
+        //}
     }
     shadow *= mix(1.0, cloudShadow, shadowFade);
     #endif
@@ -212,6 +214,10 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
               smoothnessF = mix(smoothnessF, 1.0, smoothness);
 
         specularHighlight = clamp(GGX(newNormal, normalize(viewPos), smoothnessF, baseReflectance, 0.04), vec3(0.0), vec3(4.0));
+
+        #ifdef DH_TERRAIN
+        specularHighlight *= 4;
+        #endif
     }
     #endif
 
