@@ -20,8 +20,8 @@ screen.SHADER_CLOUDS_CONFIG=Shader Clouds Config
 screen.VANILLA_CLOUDS_CONFIG=Vanilla Clouds Config
 
 option.VANILLA_CLOUDS=Vanilla Clouds
-option.VANILLA_CLOUDS_FOG=Distant Fade
-option.VANILLA_CLOUDS_OPACITY=Opacity
+option.VANILLA_CLOUD_FOG=Distant Fade
+option.VANILLA_CLOUD_OPACITY=Opacity
 
 #----------------------------------------------------------------------------------#
 
@@ -66,7 +66,7 @@ option.VL_NIGHT=Night Intensity
 
 #----------------------------------------------------------------------------------#
 
-screen.NETHER_SMOKE_CONFIG=Nether Cloudy Fog Config
+screen.NETHER_SMOKE_CONFIG=Nether Smoke Config
 
 option.NETHER_SMOKE=Nether Smoke
 option.NETHER_SMOKE.comment=§e[*]§rThis option requires Light Fog to be turned on.
@@ -76,13 +76,17 @@ option.NETHER_SMOKE_FREQUENCY=Frequency
 
 #----------------------------------------------------------------------------------#
 
-screen.END_DISK_CONFIG=End Cloudy Fog Config
+screen.END_DISK_CONFIG=Ender Disk Config
 
-option.END_DISK=End Cloudy Fog
+option.END_DISK=Ender Protoplanetary Disk
+option.END_DISK.comment=An enormous disk of cosmic clouds rotating around the central End island.
 option.END_DISK_HEIGHT=Height
 option.END_DISK_OPACITY=Opacity
 option.END_DISK_AMOUNT=Amount
 option.END_DISK_THICKNESS=Thickness
+option.END_FLASHES=End Flashes
+option.END_FLASHES.comment=Enables End Flashes from 1.21. Work only on the newest versions of Minecraft!
+option.END_FLASH_BRIGHTNESS=Flash Brightness
 
 #----------------------------------------------------------------------------------#
 
@@ -90,7 +94,8 @@ screen.LPV_FOG_CONFIG=Light Fog Config
 
 option.LPV_FOG=Light Fog
 option.LPV_FOG.comment=Allows light sources to contribute to fog illumination
-option.LPV_CLOUDY_FOG=Cloudy Fog
+option.LPV_CLOUDY_FOG=Cloudy Noise
+option.LPV_CLOUDY_FOG.comment=Applies 3D cloudy noise to light fog.
 option.LPV_FOG_STRENGTH=Intensity
 
 #----------------------------------------------------------------------------------#
@@ -129,8 +134,8 @@ option.AURORA_COLD_BIOME_VISIBILITY=Cold Biome Visibility
 option.AURORA_COLD_BIOME_VISIBILITY.comment=Enables aurora only when player is in a cold biome
 option.AURORA_FULL_MOON_VISIBILITY=Full Moon Visibility
 option.AURORA_FULL_MOON_VISIBILITY.comment=Enables aurora only when the Moon if full
-option.AURORA_ALWAYS_VISIBLE=Constant Visibility
-option.AURORA_ALWAYS_VISIBLE.comment=Makes aurora appear every night.
+option.AURORA_LIGHTING_INFLUENCE=Light Contribution
+option.AURORA_LIGHTING_INFLUENCE.comment=Allows powerful aurora to slightly lit up the clouds and ground.
 option.AURORA_BRIGHTNESS=Aurora Brightness
 
 #----------------------------------------------------------------------------------#
@@ -202,7 +207,7 @@ option.VPS.comment=Enables shadows that become blurrier/sharper depending on the
 option.VPS_BLUR_STRENGTH=VPS Strength
 option.SHADOW_SAMPLE_COUNT=Shadow Samples
 option.SHADOW_COLOR=Colored Shadows
-option.ENTITY_SHADOWS=Entity Shadows
+option.SHADOW_ENTITIES=Entity Shadows
 option.REALTIME_SHADOWS=Realtime Shadows
 
 #=======================================================# Generated PBR #=======================================================#
