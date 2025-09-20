@@ -88,8 +88,11 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/color/lightColor.glsl"
 #include "/lib/pbr/ggx.glsl"
 
-#ifdef VX_SUPPORT
+#if defined VX_SUPPORT || defined DYNAMIC_HANDLIGHT
 #include "/lib/vx/blocklightColor.glsl"
+#endif
+
+#ifdef VX_SUPPORT
 #include "/lib/vx/voxelization.glsl"
 #endif
 
@@ -256,3 +259,5 @@ void main() {
 	gl_Position.xy = TAAJitter(gl_Position.xy, gl_Position.w);
     #endif
 }
+
+#endif

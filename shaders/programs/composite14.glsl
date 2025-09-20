@@ -144,7 +144,11 @@ void main() {
 	float truePos = sign(sunVec.z);
 	      
     float visibleSun = float(texture2D(depthtex1, lightPos + 0.5).r >= 1.0);
-		  visibleSun *= max(1.0 - isEyeInWater, eBS) * (1.0 - max(blindFactor, darknessFactor)) * (1.0 - wetness) * caveFactor;
+		  visibleSun *= max(1.0 - isEyeInWater, eBS) * (1.0 - wetness) * caveFactor;
+
+	#if MC_VERSION >= 11900
+		  visibleSun *= (1.0 - max(blindFactor, darknessFactor));
+	#endif
 	
 	float multiplier = tempVisibleSun * LENS_FLARE_STRENGTH * (length(color) * 0.25 + 0.25);
 

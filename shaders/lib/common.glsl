@@ -635,5 +635,12 @@ vec3 pow8(vec3 x) {return x*x*x*x*x*x*x*x;}
 #ifdef RAIN_PUDDLES
 #endif
 
+#ifdef CHROMATIC_ABERRATION
+#endif
+
 #ifdef GENERATED_SPECULAR_ON_ALL_BLOCKS
+#endif
+
+#ifndef VX_SUPPORT
+#undef LPV_FOG
 #endif

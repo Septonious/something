@@ -85,8 +85,11 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #include "/lib/util/ToShadow.glsl"
 #include "/lib/color/lightColor.glsl"
 
-#ifdef VX_SUPPORT
+#if defined VX_SUPPORT || defined DYNAMIC_HANDLIGHT
 #include "/lib/vx/blocklightColor.glsl"
+#endif
+
+#ifdef VX_SUPPORT
 #include "/lib/vx/voxelization.glsl"
 #endif
 
@@ -159,3 +162,5 @@ void main() {
 
 	gl_Position = ftransform();
 }
+
+#endif

@@ -216,7 +216,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
         specularHighlight = clamp(GGX(newNormal, normalize(viewPos), smoothnessF, baseReflectance, 0.04), vec3(0.0), vec3(4.0));
 
         #ifdef DH_TERRAIN
-        specularHighlight *= 4;
+        specularHighlight *= 4.0;
         #endif
     }
     #endif

@@ -68,6 +68,8 @@ uniform mat4 shadowProjection;
 
 // Global Variables //
 #if defined VL || defined LPV_FOG
+
+const bool colortex7Clear = false;
 #if defined OVERWORLD
 const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 float fractTimeAngle = fract(timeAngle - 0.25);
@@ -124,17 +126,11 @@ void main() {
 
 	vec3 translucent = texture2D(colortex1, texCoord).rgb;
 
-	computeVolumetricLight(volumetrics, translucent, blueNoiseDither);
+	computeVolumetricLight(color, translucent, blueNoiseDither);
 	#endif
 
-	#if defined VL || defined LPV_FOG
-		/* DRAWBUFFERS:01 */
-		gl_FragData[0].rgb = pow(color, vec3(2.2));
-		gl_FragData[1].rgb = sqrt(volumetrics);
-	#else
-		/* DRAWBUFFERS:0 */
-		gl_FragData[0].rgb = pow(color, vec3(2.2));
-	#endif
+	/* DRAWBUFFERS:07 */
+	gl_FragData[0].rgb = pow(color, vec3(2.2));
 }
 
 #endif

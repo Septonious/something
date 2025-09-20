@@ -54,7 +54,7 @@ void main() {
 	getChromaticAberration(colortex1, color, texCoord);
 	#endif
 
-	#ifdef NETHER
+	#if defined NETHER && defined VX_SUPPORT
 	if (texCoord.x < 0.0) {
 		color = texture2D(shadowtex0, texCoord).rgb;
 	}

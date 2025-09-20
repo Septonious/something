@@ -110,8 +110,11 @@ vec2 dcdy = dFdy(texCoord);
 #include "/lib/pbr/ggx.glsl"
 #endif
 
-#ifdef VX_SUPPORT
+#if defined VX_SUPPORT || defined DYNAMIC_HANDLIGHT
 #include "/lib/vx/blocklightColor.glsl"
+#endif
+
+#ifdef VX_SUPPORT
 #include "/lib/vx/voxelization.glsl"
 #endif
 
