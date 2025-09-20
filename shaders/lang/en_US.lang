@@ -13,14 +13,21 @@ option.SOLAS_BY_SEPTONIOUS.comment=Discord: https://discord.gg/4uTAUQR2xu. GitHu
 
 screen.ATMOSPHERICS=Atmospherics
 
+screen.SHADER_CLOUDS_CONFIG=Shader Clouds Config
+
 #----------------------------------------------------------------------------------#
 
-screen.SHADER_CLOUDS_CONFIG=Shader Clouds Config
+screen.VANILLA_CLOUDS_CONFIG=Vanilla Clouds Config
+
+option.VANILLA_CLOUDS=Vanilla Clouds
+option.VANILLA_CLOUDS_FOG=Distant Fade
+option.VANILLA_CLOUDS_OPACITY=Opacity
+
+#----------------------------------------------------------------------------------#
 
 screen.VOLUMETRIC_CLOUDS_CONFIG=Volumetric Clouds Config
 
 option.VOLUMETRIC_CLOUDS=Volumetric Clouds
-option.BLOCKY_CLOUDS=Blocky Clouds
 option.VC_DETAIL=Detail
 option.VC_DENSITY=Density
 option.VC_AMOUNT=Amount
@@ -30,6 +37,8 @@ option.VC_SPEED=Speed
 option.VC_DISTANCE=Render Distance
 option.VC_OPACITY=Opacity
 option.VC_ATTENUATION=Attenuation
+option.VC_SCALE=Scale
+option.VC_SCALE.comment=Lower values make clouds smaller while higher values make them bigger.
 option.VC_DYNAMIC_WEATHER=Dynamic Weather
 option.VC_DYNAMIC_WEATHER.comment=Enables complex simulation of realistic per-day weather.
 option.VC_SHADOWS=Cloud Shadows
@@ -57,23 +66,23 @@ option.VL_NIGHT=Night Intensity
 
 #----------------------------------------------------------------------------------#
 
-screen.VF_NETHER_CONFIG=Nether Cloudy Fog Config
+screen.NETHER_SMOKE_CONFIG=Nether Cloudy Fog Config
 
 option.NETHER_SMOKE=Nether Smoke
 option.NETHER_SMOKE.comment=§e[*]§rThis option requires Light Fog to be turned on.
-option.VF_NETHER_STRENGTH=Intensity
-option.VF_NETHER_SPEED=Speed
-option.VF_NETHER_FREQUENCY=Frequency
+option.NETHER_SMOKE_STRENGTH=Intensity
+option.NETHER_SMOKE_SPEED=Speed
+option.NETHER_SMOKE_FREQUENCY=Frequency
 
 #----------------------------------------------------------------------------------#
 
-screen.VF_END_CONFIG=End Cloudy Fog Config
+screen.END_DISK_CONFIG=End Cloudy Fog Config
 
-option.END_CLOUDY_FOG=End Cloudy Fog
-option.VF_END_HEIGHT=Height
-option.VF_END_OPACITY=Opacity
-option.VF_END_AMOUNT=Amount
-option.VF_END_THICKNESS=Thickness
+option.END_DISK=End Cloudy Fog
+option.END_DISK_HEIGHT=Height
+option.END_DISK_OPACITY=Opacity
+option.END_DISK_AMOUNT=Amount
+option.END_DISK_THICKNESS=Thickness
 
 #----------------------------------------------------------------------------------#
 
@@ -126,13 +135,9 @@ option.AURORA_BRIGHTNESS=Aurora Brightness
 
 #----------------------------------------------------------------------------------#
 
-screen.END_VORTEX=End Black Hole Config
-
-option.END_VORTEX=End Black Hole
-option.END_VORTEX.comment=Toggles the Ender Black Hole
-option.END_VORTEX_SIZE=Vortex Size
-option.END_VORTEX_WHIRL=Vortex Whirling
-option.END_VORTEX_ARMS=Vortex Arms Count
+option.END_BLACK_HOLE=End Black Hole
+option.END_BLACK_HOLE.comment=Toggles the Ender Black Hole
+option.END_BLACK_HOLE_SIZE=Black Hole Radius
 
 #=======================================================# WATER #=======================================================#
 

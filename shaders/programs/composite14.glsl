@@ -20,10 +20,7 @@ uniform float darknessFactor;
 #endif
 
 uniform float aspectRatio;
-
-#ifdef BLOOM
 uniform float viewWidth, viewHeight;
-#endif
 
 #ifdef DOF
 #ifndef MANUAL_FOCUS
@@ -32,6 +29,8 @@ uniform float centerDepthSmooth;
 float centerDepthSmooth = ((DOF_FOCUS - near) * far) / ((far - near) * DOF_FOCUS);
 #endif
 #endif
+
+uniform ivec2 eyeBrightnessSmooth;
 
 #ifdef LENS_FLARE
 uniform vec3 cameraPosition, sunPosition;
@@ -46,8 +45,6 @@ uniform sampler2D colortex2;
 uniform sampler2D depthtex1;
 
 #ifdef BLOOM
-uniform ivec2 eyeBrightnessSmooth;
-
 uniform sampler2D colortex1;
 
 uniform mat4 gbufferProjectionInverse;

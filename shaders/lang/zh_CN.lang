@@ -108,13 +108,9 @@ option.AURORA_FULL_MOON_VISIBILITY.comment=只有当满月的时,才会启用极
 
 #----------------------------------------------------------------------------------#
 
-screen.END_VORTEX=末地黑洞配置
-
-option.END_VORTEX=末地黑洞
-option.END_VORTEX.comment=末地天空中的黑色洞状天体开关.
-option.END_VORTEX_SIZE=涡旋尺寸
-option.END_VORTEX_WHIRL=涡旋旋扭程度
-option.END_VORTEX_ARMS=涡旋齿数
+option.END_BLACK_HOLE=末地黑洞
+option.END_BLACK_HOLE.comment=末地天空中的黑色洞状天体开关.
+option.END_BLACK_HOLE_SIZE=涡旋尺寸
 
 #=======================================================# WATER #=======================================================#
 

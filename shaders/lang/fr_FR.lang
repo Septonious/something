@@ -109,13 +109,9 @@ option.AURORA_FULL_MOON_VISIBILITY.comment=Active les aurores boréales seulemen
 
 #----------------------------------------------------------------------------------#
 
-screen.END_VORTEX=Configuration Trou Noir de l'End
-
-option.END_VORTEX=Trou Noir de l'End
-option.END_VORTEX.comment=Active ou désactive le trou noir de l'End.
-option.END_VORTEX_SIZE=Taille du Vortex
-option.END_VORTEX_WHIRL=Spirale du Vortex
-option.END_VORTEX_ARMS=Nombre de Bras du Vortex
+option.END_BLACK_HOLE=Trou Noir de l'End
+option.END_BLACK_HOLE.comment=Active ou désactive le trou noir de l'End.
+option.END_BLACK_HOLE_SIZE=Taille
 
 #=======================================================# WATER #=======================================================#
 

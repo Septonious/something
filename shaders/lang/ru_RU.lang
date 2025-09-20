@@ -13,12 +13,21 @@ option.SOLAS_BY_SEPTONIOUS.comment=Discord: https://discord.gg/4uTAUQR2xu. GitHu
 
 screen.ATMOSPHERICS=Атмосфера
 
+screen.SHADER_CLOUDS_CONFIG=Настройки Шейдерных Облаков
+
+#----------------------------------------------------------------------------------#
+
+screen.VANILLA_CLOUDS_CONFIG=Настройки Ванильных Облаков
+
+option.VANILLA_CLOUDS=Ванильные Облака
+option.VANILLA_CLOUDS_FOG=Туман Вдали
+option.VANILLA_CLOUDS_OPACITY=Непрозрачность
+
 #----------------------------------------------------------------------------------#
 
 screen.VC_CONFIG=Настройки 3D Облаков
 
-option.VC=3D Облака
-option.BLOCKY_CLOUDS=Квадратные Облака
+option.VOLUMETRIC_CLOUDS=3D Облака
 option.VC_DETAIL=Детальность
 option.VC_DENSITY=Плотность
 option.VC_AMOUNT=Количество
@@ -28,13 +37,15 @@ option.VC_SPEED=Скорость
 option.VC_DISTANCE=Дистанция Рендера
 option.VC_OPACITY=Непрозрачность
 option.VC_ATTENUATION=Толщина
+option.VC_SCALE=Размер
+option.VC_SCALE.comment=Меньшие значения уменьшают облака, большие - увеличивают.
+option.VC_DYNAMIC_WEATHER=Динамическая Погода
+option.VC_DYNAMIC_WEATHER.comment=Включает динамическую симуляцию реалистичной погоды. Облака будут менять свои параметры каждый день.
 option.VC_SHADOWS=Тени от Облаков
-option.VC_LIGHTRAYS=Лучи Света в Облаках
-option.VC_LIGHTRAYS.comment=Добавляет облакам объёмное освещение (солнечные лучи).
 
 #----------------------------------------------------------------------------------#
 
-screen.PC_CONFIG=Настройки 2D Облаков
+screen.PLANAR_CLOUDS_CONFIG=Настройки 2D Облаков
 
 option.PLANAR_CLOUDS=2D Облака
 option.PLANAR_CLOUDS_BRIGHTNESS=Яркость
@@ -45,7 +56,6 @@ option.PLANAR_CLOUDS_OPACITY=Непрозрачность
 screen.VL_CONFIG=Настройки Солнечных Лучей
 
 option.VL=Солнечные Лучи
-option.OVERWORLD_CLOUDY_FOG=3D Туман в Обычном Мире
 option.VL_STRENGTH=Общая Яркость
 option.VL_SAMPLES=Качество
 option.VL_STRENGTH_RATIO=Отношение Яркости
@@ -123,12 +133,8 @@ option.AURORA_BRIGHTNESS=Яркость Сияния
 
 #----------------------------------------------------------------------------------#
 
-screen.END_VORTEX=Настройки Чёрной Дыры
-
-option.END_VORTEX=Чёрная Дыра в Энде
-option.END_VORTEX_SIZE=Радиус
-option.END_VORTEX_WHIRL=Закручивание
-option.END_VORTEX_ARMS=Количество Спиральных Ветвей
+option.END_BLACK_HOLE=Чёрная Дыра в Энде
+option.END_BLACK_HOLE_SIZE=Радиус Чёрной Дыры
 
 #=======================================================# WATER #=======================================================#
 
