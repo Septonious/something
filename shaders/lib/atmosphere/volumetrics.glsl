@@ -115,12 +115,16 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
     vlIntensity *= VL_STRENGTH * caveFactor;
     #endif
 
+    #ifdef NETHER_SMOKE
+    vlIntensity = NETHER_SMOKE_STRENGTH;
+    #endif
+
     //LPV Fog Variables
     float lpvFogIntensity = LPV_FOG_STRENGTH * (10.0 - float(isEyeInWater == 1) * 9.0);
     #ifdef OVERWORLD
-          lpvFogIntensity *= 1.0 - eBS * timeBrightnessSqrt;
+          lpvFogIntensity *= (1.0 - eBS * timeBrightnessSqrt) * (3.0 - caveFactor * 2.0);
     #elif defined NETHER
-          lpvFogIntensity *= 0.5;
+          lpvFogIntensity *= 1.5;
     #elif defined END
           lpvFogIntensity *= 2.0;
     #endif
@@ -246,15 +250,14 @@ void computeVolumetricLight(inout vec3 vl, in vec3 translucent, in float dither)
                     #endif
                 }
             }
+            #endif
 
-            //Nether Cloudy Fog
+            //Nether Smoke
             #ifdef NETHER_SMOKE
             if (lWorldPos < 128.0) {
-                float currentSampleIntensityNS = (currentDist / maxDist) / sampleCount;
                 float fogSample = getNetherFogSample(rayPos * NETHER_SMOKE_FREQUENCY + wind2 * NETHER_SMOKE_SPEED);
-                lpvFogSample += netherCol * fogSample * currentSampleIntensityNS * 64.0 * NETHER_SMOKE_STRENGTH;
+                vlSample += netherCol * fogSample * 32.0;
             }
-            #endif
             #endif
 
             //Translucency Blending

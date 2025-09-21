@@ -129,7 +129,7 @@ void main() {
 	computeVolumetricLight(color, translucent, blueNoiseDither);
 	#endif
 
-	/* DRAWBUFFERS:07 */
+	/* DRAWBUFFERS:0 */
 	gl_FragData[0].rgb = pow(color, vec3(2.2));
 }
 

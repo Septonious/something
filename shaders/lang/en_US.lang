@@ -302,7 +302,7 @@ option.SELF_SHADOW_STRENGTH.comment=Adjusts the intensity of self shadowing.
 
 screen.COLOR=Colors
 
-screen.LIGHTAMBIENT_COLOR=Sunlight & Shadow Color
+screen.LIGHT_COLOR=Sunlight & Shadow Color
 
 screen.LIGHT_SR=Light (Sunrise)
 option.LIGHT_SRR=Red
@@ -334,7 +334,7 @@ option.LIGHT_SSG=Green
 option.LIGHT_SSB=Blue
 option.LIGHT_SSI=Intensity
 
-screen.LIGHT_M=Light (Night)
+screen.LIGHT_N=Light (Night)
 option.LIGHT_NR=Red
 option.LIGHT_NG=Green
 option.LIGHT_NB=Blue
