@@ -68,7 +68,7 @@ void gbuffersLighting(inout vec4 albedo, in vec3 screenPos, in vec3 viewPos, in 
 
     //Dynamic Hand Lighting
     #ifdef DYNAMIC_HANDLIGHT
-    getHandLightColor(blockLighting, worldPos + relativeEyePosition);
+    blockLighting += getHandLightColor(blockLighting, worldPos + relativeEyePosition);
     #endif
 
     //Dim blocklight in sunlight

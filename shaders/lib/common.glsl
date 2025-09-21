@@ -601,6 +601,9 @@ vec3 pow8(vec3 x) {return x*x*x*x*x*x*x*x;}
 #define VX_SUPPORT
 #endif
 
+#undef VX_SUPPORT
+#undef DYNAMIC_HANDLIGHT //REMOVE
+
 #if defined DH_TERRAIN || defined DH_WATER
 #undef DYNAMIC_HANDLIGHT
 #endif

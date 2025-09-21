@@ -30,7 +30,7 @@ vec4 getWaterFog(vec3 viewPos) {
 
     //Dynamic Hand Lighting
     #ifdef DYNAMIC_HANDLIGHT
-    getHandLightColor(waterFogColor, viewPos);
+    waterFogColor += getHandLightColor(waterFogColor, viewPos);
     #endif
 
 	waterFogColor *= 1.0 - blindFactor;

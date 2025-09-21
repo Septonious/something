@@ -11,6 +11,10 @@ in vec2 texCoord;
 #ifdef LENS_FLARE
 uniform int isEyeInWater;
 
+#ifdef OVERWORLD
+uniform float shadowFade;
+#endif
+
 uniform float timeBrightness, timeAngle, wetness;
 uniform float blindFactor;
 
@@ -151,6 +155,10 @@ void main() {
 	#endif
 	
 	float multiplier = tempVisibleSun * LENS_FLARE_STRENGTH * (length(color) * 0.25 + 0.25);
+
+	#ifdef OVERWORLD
+		  multiplier *= shadowFade;
+	#endif
 
 	if (multiplier > 0.001) LensFlare(color, lightPos, truePos, multiplier);
 

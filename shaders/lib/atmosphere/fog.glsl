@@ -134,12 +134,12 @@ void Fog(inout vec3 color, in vec3 viewPos, in vec3 worldPos, in vec3 atmosphere
 
 	if (isEyeInWater < 1) {
         getNormalFog(color, atmosphereColor, viewPos, worldPos, lViewPos, lWorldPos, z0);
-    } else if (1 < isEyeInWater) {
+    } else if (isEyeInWater > 1) {
         getDenseFog(color, lViewPos);
     }
-	if (0 < blindFactor) getBlindFog(color, lViewPos);
+	if (blindFactor > 0.0) getBlindFog(color, lViewPos);
 
 	#if MC_VERSION >= 11900
-	if (0 < darknessFactor) getDarknessFog(color, lViewPos);
+	if (darknessFactor > 0.0) getDarknessFog(color, lViewPos);
 	#endif
 }

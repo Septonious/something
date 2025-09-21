@@ -32,7 +32,7 @@ vec3 Raytrace(sampler2D depthtex, vec3 viewPos, vec3 normal, float dither, float
 			rayIncrement *= refMult;
 		}
         rayIncrement *= stepLength;
-        rayDir += rayIncrement * (0.2 * dither + 0.8);
+        rayDir += rayIncrement * (0.1 * dither + 0.9);
 		viewPos = start + rayDir;
     }
 
